@@ -1,0 +1,82 @@
+[
+  {
+    "host": "",
+    "port": 7030,
+    "username": "",
+    "password": "",
+    "protocol": "http",
+    "source": "webshare"
+  },
+  {
+    "host": "",
+    "port": 6114,
+    "username": "",
+    "password": "",
+    "protocol": "http",
+    "source": "webshare"
+  },
+  {
+    "host": "",
+    "port": 6540,
+    "username": "",
+    "password": "",
+    "protocol": "http",
+    "source": "webshare"
+  },
+  {
+    "host": "",
+    "port": 6543,
+    "username": "",
+    "password": "",
+    "protocol": "http",
+    "source": "webshare"
+  },
+  {
+    "host": "",
+    "port": 6462,
+    "username": "",
+    "password": "",
+    "protocol": "http",
+    "source": "webshare"
+  },
+  {
+    "host": "",
+    "port": 6641,
+    "username": "",
+    "password": "",
+    "protocol": "http",
+    "source": "webshare"
+  },
+  {
+    "host": "",
+    "port": 6095,
+    "username": "",
+    "password": "",
+    "protocol": "http",
+    "source": "webshare"
+  },
+  {
+    "host": "",
+    "port": 6837,
+    "username": "",
+    "password": "",
+    "protocol": "http",
+    "source": "webshare"
+  },
+  {
+    "host": "",
+    "port": 5628,
+    "username": "",
+    "password": "",
+    "protocol": "http",
+    "source": "webshare"
+  },
+  {
+    "host": "",
+    "port": 5830,
+    "username": "",
+    "password": "",
+    "protocol": "http",
+    "source": "webshare"
+  }
+]

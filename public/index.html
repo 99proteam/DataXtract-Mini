@@ -1,0 +1,2603 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain Data Extractor - Campaign System</title>
+    <meta name="description" content="Professional bulk domain data extraction with campaign-based workflow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- Main Application -->
+    <div class="app-container">
+        <!-- App Header (Desktop & Mobile) -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <path
+                                d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                        </svg>
+                    </div>
+                    <span class="logo-text">DataXtract</span>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <!-- Desktop Navigation (Hidden on Mobile) -->
+                <nav class="desktop-nav">
+                    <a href="#" class="nav-item active" data-page="dashboard">Dashboard</a>
+                    <a href="#" class="nav-item" data-page="campaigns">Campaigns</a>
+                    <a href="#" class="nav-item" data-page="marketing">Marketing</a>
+                    <a href="#" class="nav-item" data-page="tools">Visual Tools</a>
+                    <a href="#" class="nav-item" data-page="settings">Settings</a>
+                    <a href="#" class="nav-item" data-page="guide">User Guide</a>
+                </nav>
+
+                <!-- Action Button (Desktop) -->
+                <button class="btn-primary btn-new-campaign desktop-only">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    New Campaign
+                </button>
+
+                <!-- Mobile Menu Toggle -->
+                <button id="mobileMenuToggle" class="mobile-menu-toggle">
+                    <svg class="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12" />
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <line x1="3" y1="18" x2="21" y2="18" />
+                    </svg>
+                    <svg class="icon-close hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Full Screen Mobile Menu Overlay -->
+        <div id="mobileMenuOverlay" class="mobile-menu-overlay">
+            <div class="mobile-menu-content">
+                <button id="mobileMenuClose" class="mobile-menu-close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+
+                <nav class="mobile-nav">
+                    <a href="#" class="mobile-nav-item active" data-page="dashboard">Dashboard</a>
+                    <a href="#" class="mobile-nav-item" data-page="campaigns">Campaigns</a>
+                    <a href="#" class="mobile-nav-item" data-page="marketing">Marketing</a>
+                    <a href="#" class="mobile-nav-item" data-page="tools">Visual Tools</a>
+                    <a href="#" class="mobile-nav-item" data-page="settings">Settings</a>
+                    <a href="#" class="mobile-nav-item" data-page="guide">User Guide</a>
+                </nav>
+
+                <div class="mobile-menu-footer">
+                    <button class="btn-primary w-full btn-new-campaign">
+                        Start New Campaign
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <section class="page active" id="pageDashboard">
+                <header class="page-header">
+                    <h1>Dashboard</h1>
+                    <p class="subtitle">Overview of your extraction campaigns</p>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon campaigns">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statTotalCampaigns">0</span>
+                            <span class="stat-label">Total Campaigns</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon domains">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M2 12h20" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statTotalDomains">0</span>
+                            <span class="stat-label">Domains Processed</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon emails">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <polyline points="22,6 12,13 2,6" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statTotalEmails">0</span>
+                            <span class="stat-label">Emails Found</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon active">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                                <polyline points="17 6 23 6 23 12" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="statActiveCampaigns">0</span>
+                            <span class="stat-label">Active Campaigns</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-section">
+                    <h2>Recent Campaigns</h2>
+                    <div class="campaigns-list" id="recentCampaigns">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                            </svg>
+                            <p>No campaigns yet</p>
+                            <span>Create your first campaign to get started</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- User Guide Page -->
+            <section class="page hidden" id="pageGuide">
+                <header class="page-header">
+                    <h1>User Guide</h1>
+                    <p class="subtitle">Complete documentation for Data Extractor</p>
+                </header>
+
+                <div class="card" style="padding: 32px; max-width: 900px; margin: 0 auto;">
+                    <div class="guide-content">
+                        <div class="guide-section">
+                            <h2>🚀 Getting Started</h2>
+                            <p>Welcome to Data Extractor! This comprehensive tool helps you collect business
+                                leads and
+                                execute multi-channel outreach campaigns. Use the sidebar to navigate
+                                between different
+                                modules.</p>
+                            <div class="guide-tip">
+                                <strong>Tip:</strong> Configure your <strong>Settings</strong> (Proxy, SMTP,
+                                Twilio)
+                                before running large campaigns to ensure smooth operation.
+                            </div>
+                        </div>
+
+                        <div class="guide-section">
+                            <h2>📊 Extraction Tools</h2>
+
+                            <h3>1. Domain Extraction</h3>
+                            <p>Upload a list of websites to extract comprehensive data including contact
+                                info and
+                                technology stack.</p>
+                            <ul>
+                                <li><strong>Data Points:</strong> Emails, Phone Numbers, Social Links, Meta
+                                    Tags, Tech
+                                    Stack.</li>
+                                <li><strong>Deep Crawl:</strong> Navigates internal pages (About, Contact,
+                                    Team) to find
+                                    hidden data.</li>
+                            </ul>
+
+                            <h3>2. Google Maps Scraper</h3>
+                            <p>Generate leads by finding local businesses based on keywords and location.
+                            </p>
+                            <ul>
+                                <li><strong>Keywords:</strong> Enter "Service in Location" (e.g., "Real
+                                    Estate in New
+                                    York").</li>
+                                <li><strong>Data:</strong> Business Name, Address, Phone, Website, Reviews,
+                                    Ratings.
+                                </li>
+                                <li><strong>Email Discovery:</strong> Automatically visits business websites
+                                    to find
+                                    emails.</li>
+                            </ul>
+
+                            <h3>3. LinkedIn Sales Navigator</h3>
+                            <p>Extract professional profiles and job listings.</p>
+                            <ul>
+                                <li><strong>People Search:</strong> Find contacts by job title, company,
+                                    experience
+                                    level.</li>
+                                <li><strong>Session Management:</strong> Securely manage LinkedIn sessions
+                                    for safe
+                                    extraction.</li>
+                            </ul>
+                        </div>
+
+                        <div class="guide-section">
+                            <h2>📢 Marketing & Outreach</h2>
+
+                            <h3>📧 Email Marketing</h3>
+                            <p>Send personalized HTML emails to your leads using your own SMTP server.</p>
+                            <ul>
+                                <li><strong>Personalization:</strong> Use variables like {{name}},
+                                    {{company}} in
+                                    templates.</li>
+                                <li><strong>Tracking:</strong> Real-time monitoring of sent status.</li>
+                            </ul>
+
+                            <h3>📱 SMS Campaigns</h3>
+                            <p>Reach leads directly via SMS using Twilio integration.</p>
+                            <ul>
+                                <li><strong>Bulk Sending:</strong> High-throughput SMS dispatch.</li>
+                                <li><strong>Compliance:</strong> Built-in rate limiting options.</li>
+                            </ul>
+
+                            <h3>💬 WhatsApp Marketing</h3>
+                            <p>Automate WhatsApp communication via WhatsApp Web.</p>
+                            <ul>
+                                <li><strong>Bulk Sender:</strong> Send messages to a list of numbers with
+                                    attachment
+                                    support.</li>
+                                <li><strong>Group Tools:</strong> Auto-join groups and extract member lists.
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="guide-section">
+                            <h2>✅ Verification Tools</h2>
+                            <p>Ensure your data is high quality before reaching out.</p>
+                            <ul>
+                                <li><strong>Email Verification:</strong> Verify validity via ZeroBounce,
+                                    SMTP, or MX
+                                    check.</li>
+                                <li><strong>WhatsApp Check:</strong> Bulk check if phone numbers are
+                                    registered on
+                                    WhatsApp.</li>
+                            </ul>
+                        </div>
+
+                        <div class="guide-section">
+                            <h2>🛠️ Visual Tools</h2>
+                            <h3>Bulk Screenshots</h3>
+                            <p>Capture visual snapshots of websites for verification or portfolio building.
+                            </p>
+                            <ul>
+                                <li><strong>Device Emulation:</strong> Capture as Desktop, Mobile (iPhone),
+                                    or Tablet.
+                                </li>
+                            </ul>
+
+                            <h3>🚦 Fake Traffic Generator</h3>
+                            <p>Generate realistic, automated traffic to any website for testing or SEO purposes.</p>
+                            <ul>
+                                <li><strong>Rotational Proxies:</strong> Uses your configured proxies to mask traffic
+                                    sources.</li>
+                                <li><strong>Human Simulation:</strong> Mimics mouse movements and scrolling behavior.
+                                </li>
+                                <li><strong>Device Mixing:</strong> Randomly switches between Mobile and Desktop user
+                                    agents.</li>
+                                <li><strong>Internal Visits:</strong> Bot will click internal links to reduce bounce
+                                    rate.</li>
+                            </ul>
+
+                            <h3>💾 Code Downloader</h3>
+                            <p>Download the complete source code of a website for offline analysis or backup.</p>
+                            <ul>
+                                <li><strong>Render JavaScript:</strong> Uses a real browser to capture content rendered
+                                    by React/Vue/Angular.</li>
+                                <li><strong>Single File:</strong> Saves the HTML structure ready for inspection.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Campaigns Page -->
+            <section class="page hidden" id="pageCampaigns">
+                <header class="page-header">
+                    <h1>Campaigns</h1>
+                    <p class="subtitle">Manage your data extraction tasks</p>
+                </header>
+
+                <div class="alert alert-warning"
+                    style="margin-bottom: 24px; border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.1); padding: 16px; border-radius: 8px;">
+                    <div style="display: flex; gap: 12px; align-items: start;">
+                        <span style="font-size: 1.2rem;">⚠️</span>
+                        <div>
+                            <strong style="display: block; margin-bottom: 4px; color: #f59e0b;">Performance
+                                Notice</strong>
+                            <span style="color: var(--text-secondary); font-size: 0.95rem;">Please run <strong>only one
+                                    campaign at a time</strong>. Running multiple tasks simultaneously may impact
+                                extraction speed, accuracy, and result in IP blocks.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="card-header" style="justify-content: space-between;">
+                        <h3>Active Campaigns</h3>
+                        <!-- New Campaign button hidden -->
+                    </div>
+                    <div class="campaigns-list full" id="allCampaigns">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                            </svg>
+                            <p>No campaigns yet</p>
+                            <span>Create your first campaign to get started</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Campaign Details Page -->
+            <section class="page hidden" id="pageCampaignDetails">
+                <header class="page-header">
+                    <button class="btn-back" id="btnBackToCampaigns">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="19" y1="12" x2="5" y2="12" />
+                            <polyline points="12 19 5 12 12 5" />
+                        </svg>
+                        Back
+                    </button>
+                    <h1 id="campaignDetailName">Campaign Name</h1>
+                </header>
+
+                <div class="alert alert-info"
+                    style="margin-bottom: 16px; border-left: 4px solid #3b82f6; background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 8px;">
+                    <strong>ℹ️ Note:</strong> If status says "Completed" but data isn't visible immediately, please
+                    <strong>Go Back</strong> and open the campaign again to refresh the results.
+                </div>
+
+                <div class="campaign-detail-content">
+                    <div class="campaign-info-bar">
+                        <div class="info-item">
+                            <span class="label">Status:</span>
+                            <span class="value status" id="campaignDetailStatus">Pending</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="value" id="campaignDetailKeyword">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Progress:</span>
+                            <span class="value" id="campaignDetailProgress">0 / 0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Items Found:</span>
+                            <span class="value" id="campaignDetailFound">0</span>
+                        </div>
+                        <div class="campaign-actions">
+                            <button class="btn-action start" id="btnStartCampaign">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="5 3 19 12 5 21 5 3" />
+                                </svg>
+                                Start
+                            </button>
+                            <button class="btn-action pause hidden" id="btnPauseCampaign">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="6" y="4" width="4" height="16" />
+                                    <rect x="14" y="4" width="4" height="16" />
+                                </svg>
+                                Pause
+                            </button>
+                            <!-- Removed Verify, Schedule, Enrich buttons as per user request -->
+                            <button class="btn-action export" id="btnExportResults">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                                Export
+                            </button>
+                            <button class="btn-action delete" id="btnDeleteCampaign"
+                                style="background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); margin-left:8px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path
+                                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                    </path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="progress-section">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="campaignProgressBar"></div>
+                        </div>
+                        <div class="progress-log" id="progressLog"
+                            style="height: 200px; overflow-y: auto; background: #0f172a; color: #4ade80; font-family: 'Courier New', monospace; padding: 12px; border-radius: 8px; border: 1px solid #1e293b; font-size: 0.85rem; margin-top: 10px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);">
+                        </div>
+                    </div>
+
+                    <div class="results-section">
+                        <h2>Extracted Data</h2>
+                        <div class="results-tabs">
+                            <button class="tab-btn active" data-tab="all">All</button>
+                            <button class="tab-btn" data-tab="emails">Emails</button>
+                            <button class="tab-btn" data-tab="phones">Phones</button>
+                            <button class="tab-btn" data-tab="technology">Technology</button>
+                            <button class="tab-btn" data-tab="social">Social</button>
+                            <button class="tab-btn" data-tab="media">Media</button>
+                        </div>
+                        <!-- Verification Actions -->
+                        <div class="verification-actions"
+                            style="display:flex; gap:12px; margin:16px 0; flex-wrap:wrap;">
+                            <button onclick="bulkVerifyEmails()" class="btn-secondary"
+                                style="display:flex; align-items:center; gap:8px; padding:10px 16px; border-radius:8px;">
+                                ✅ Verify All Emails
+                            </button>
+                            <button onclick="bulkCheckWhatsApp()" class="btn-secondary"
+                                style="display:flex; align-items:center; gap:8px; padding:10px 16px; border-radius:8px;">
+                                💬 Check All WhatsApp
+                            </button>
+                            <button onclick="bulkEnrichEmail()" class="btn-secondary"
+                                style="display:flex; align-items:center; gap:8px; padding:10px 16px; border-radius:8px;">
+                                📧 Find Missing Emails
+                            </button>
+                            <button onclick="bulkEnrichScore()" class="btn-secondary"
+                                style="display:flex; align-items:center; gap:8px; padding:10px 16px; border-radius:8px;">
+                                📊 Calculate Lead Scores
+                            </button>
+                        </div>
+
+                        <!-- Scoring Explanation -->
+                        <details
+                            style="margin-bottom: 16px; background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.1); border-radius: 8px; padding: 12px;">
+                            <summary style="cursor: pointer; font-weight: 600; color: var(--accent-primary);">ℹ️ How are
+                                Lead Scores calculated?</summary>
+                            <div style="margin-top: 12px; font-size: 0.9rem; color: var(--text-secondary);">
+                                <p style="margin-bottom: 8px;">We grade each lead from 0-100 based on data completeness:
+                                </p>
+                                <ul
+                                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; padding-left: 20px;">
+                                    <li>📞 Phone Number: <strong>+20 points</strong></li>
+                                    <li>🌐 Website: <strong>+20 points</strong></li>
+                                    <li>📧 Email Address: <strong>+15 points</strong></li>
+                                    <li>⭐ Excellent Rating (4.5+): <strong>+15 points</strong></li>
+                                    <li>💬 High Reviews (100+): <strong>+10 points</strong></li>
+                                    <li>✅ Email Verified: <strong>+5 points</strong></li>
+                                    <li>📱 WhatsApp Available: <strong>+5 points</strong></li>
+                                </ul>
+                                <div
+                                    style="background: var(--bg-card); padding: 10px; border-radius: 6px; border: 1px dashed var(--border-color);">
+                                    <strong>Example:</strong> A business with a Phone, Website, and Email gets:
+                                    <br>20 + 20 + 15 = <strong>55 points</strong> (Grade C).
+                                </div>
+                            </div>
+                        </details>
+                        <div class="results-table-container">
+                            <table class="results-table" id="resultsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Domain</th>
+                                        <th>Emails</th>
+                                        <th>Phones</th>
+                                        <th>Technology</th>
+                                        <th>Social Links</th>
+                                        <th>Title</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resultsTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <!-- Settings Page (moved inside main-content) -->
+            <section class="page hidden" id="pageSettings">
+                <header class="page-header">
+                    <h1>⚙️ Settings</h1>
+                    <p class="subtitle">Configure Proxy, SMTP, and AI settings</p>
+                </header>
+
+                <div class="settings-container" style="max-width: 100%;">
+                    <!-- Settings Tabs -->
+                    <div class="settings-tabs"
+                        style="display: flex; gap: 8px; margin-bottom: 16px; background: var(--bg-tertiary); padding: 6px; border-radius: var(--radius-md); flex-wrap: wrap;">
+                        <button class="tab-btn active" onclick="switchSettingsTab('proxy')" style="flex:1;">🌐
+                            Proxy</button>
+                        <button class="tab-btn" onclick="switchSettingsTab('smtp')" style="flex:1;">📧
+                            SMTP</button>
+                        <button class="tab-btn" onclick="switchSettingsTab('twilio')" style="flex:1;">📱
+                            Twilio</button>
+                        <button class="tab-btn" onclick="switchSettingsTab('apikeys')" style="flex:1;">🔑
+                            API
+                            Keys</button>
+
+                    </div>
+
+                    <!-- Proxy Settings -->
+                    <div id="settingsTabProxy" class="settings-tab-content active"
+                        style="background: var(--bg-card); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1)); padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem;">
+                            <strong>ℹ️ Proxies</strong> route requests through different IPs to avoid
+                            blocks.
+                            Configure your proxy provider below or add custom proxies on the "Proxies" page.
+                        </div>
+                        <label style="display: flex; align-items: center; gap: 10px; padding: 10px 0; cursor: pointer;">
+                            <input type="checkbox" id="settingsProxyEnabled"
+                                style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                            <span>Enable Proxy Rotation</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; padding: 10px 0; cursor: pointer;">
+                            <input type="checkbox" id="settingsProxyRotateError" checked
+                                style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                            <span>Auto-rotate on Error</span>
+                        </label>
+
+
+                        <!-- Webshare Proxy (API Key Auth) -->
+                        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                                <img src="https://www.webshare.io/favicon.ico" style="width: 20px; height: 20px;"
+                                    alt="Webshare">
+                                <span style="font-weight: 600;">Webshare Proxy</span>
+                                <span id="proxyConnectionStatus"
+                                    style="margin-left: auto; font-size: 0.8rem; padding: 4px 10px; border-radius: 20px; background: var(--bg-tertiary);">⚪
+                                    Not Connected</span>
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <label
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Webshare
+                                    API Key</label>
+                                <input type="password" id="settingsWebshareApiKey"
+                                    placeholder="Enter your Webshare API key"
+                                    style="width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                                <small style="color: var(--text-muted); font-size: 0.75rem;">Get from <a
+                                        href="https://proxy.webshare.io/register" target="_blank"
+                                        style="color: var(--accent-primary);">webshare.io</a> → Dashboard →
+                                    API</small>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <button onclick="testWebshareConnection()"
+                                    style="padding: 10px 20px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer;">
+                                    🧪 Test Connection
+                                </button>
+                                <button onclick="fetchWebshareProxies()"
+                                    style="padding: 10px 20px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border-radius: 6px; cursor: pointer;">
+                                    📥 Fetch Proxies
+                                </button>
+                            </div>
+                            <div id="proxyFetchResult"
+                                style="margin-top: 12px; padding: 10px; background: var(--bg-tertiary); border-radius: 6px; display: none;">
+                                <span id="proxyCount">0 proxies loaded</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SMTP Settings -->
+                    <div id="settingsTabSmtp" class="settings-tab-content hidden"
+                        style="background: var(--bg-card); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(6,182,212,0.1)); padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem;">
+                            <strong>ℹ️ SMTP</strong> enables deep email verification by checking if
+                            addresses exist on
+                            mail
+                            servers.
+                        </div>
+                        <label
+                            style="display: flex; align-items: center; gap: 10px; padding: 8px 0; cursor: pointer; margin-bottom: 12px;">
+                            <input type="checkbox" id="settingsSmtpEnabled"
+                                style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                            <span>Enable SMTP Verification</span>
+                        </label>
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
+                            <div>
+                                <label
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Host</label>
+                                <input type="text" id="settingsSmtpHost" placeholder="smtp.gmail.com"
+                                    style="width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                            </div>
+                            <div>
+                                <label
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Port</label>
+                                <input type="number" id="settingsSmtpPort" value="587"
+                                    style="width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                            <div>
+                                <label
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Username</label>
+                                <input type="text" id="settingsSmtpUser" placeholder="your@email.com"
+                                    style="width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                            </div>
+                            <div>
+                                <label
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Password</label>
+                                <input type="password" id="settingsSmtpPass" placeholder="••••••••"
+                                    style="width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                            </div>
+                        </div>
+                        <button id="btnTestSmtp"
+                            style="padding: 8px 16px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer;">🧪
+                            Test Connection</button>
+                    </div>
+
+                    <!-- Twilio Settings -->
+                    <div id="settingsTabTwilio" class="settings-tab-content hidden"
+                        style="background: var(--bg-card); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(16,185,129,0.1)); padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem;">
+                            <strong>ℹ️ Twilio</strong> enables SMS campaigns to reach leads directly on
+                            their phones.
+                            Get credentials from <a href="https://console.twilio.com" target="_blank"
+                                style="color: var(--accent-primary);">Twilio Console</a>.
+                        </div>
+                        <label
+                            style="display: flex; align-items: center; gap: 10px; padding: 8px 0; cursor: pointer; margin-bottom: 12px;">
+                            <input type="checkbox" id="settingsTwilioEnabled"
+                                style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                            <span>Enable SMS Campaigns</span>
+                        </label>
+                        <div style="margin-bottom: 12px;">
+                            <label
+                                style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Account
+                                SID</label>
+                            <input type="text" id="settingsTwilioSid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                style="width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <label
+                                style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Auth
+                                Token</label>
+                            <input type="password" id="settingsTwilioToken" placeholder="••••••••"
+                                style="width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <label
+                                style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">From
+                                Phone Number</label>
+                            <input type="text" id="settingsTwilioPhone" placeholder="+1234567890"
+                                style="width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                        </div>
+                        <button id="btnTestTwilio"
+                            style="padding: 8px 16px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer;">🧪
+                            Test Connection</button>
+                    </div>
+
+
+
+                    <!-- API Keys Settings -->
+                    <div id="settingsTabApikeys" class="settings-tab-content hidden"
+                        style="background: var(--bg-card); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(255,193,7,0.15), rgba(255,152,0,0.1)); padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem;">
+                            <strong>ℹ️ API Keys</strong> for email verification and lead enrichment
+                            services.
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <label
+                                style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">ZeroBounce
+                                API Key</label>
+                            <input type="password" id="settingsApiZerobounce" placeholder="Enter ZeroBounce API key"
+                                style="width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                            <small style="color: var(--text-muted); font-size: 0.75rem;">Get from <a
+                                    href="https://www.zerobounce.net/members/apikey/" target="_blank"
+                                    style="color: var(--accent-primary);">zerobounce.net</a> - Used for
+                                accurate email
+                                verification</small>
+                        </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div style="margin-top: 16px; text-align: right;">
+                        <button id="btnSaveSettings"
+                            style="padding: 12px 28px; background: var(--accent-gradient); color: white; font-weight: 600; border-radius: 8px; cursor: pointer; box-shadow: var(--accent-glow);">💾
+                            Save Settings</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Marketing Page -->
+            <section class="page hidden" id="pageMarketing">
+                <header class="page-header">
+                    <h1>🚀 Marketing</h1>
+                    <p class="subtitle">Send SMS and Email campaigns to your leads</p>
+                </header>
+
+                <div class="marketing-container" style="max-width: 100%;">
+                    <!-- Campaign Type Tabs -->
+                    <div class="marketing-tabs"
+                        style="display: flex; gap: 8px; margin-bottom: 24px; background: var(--bg-tertiary); padding: 6px; border-radius: var(--radius-md); flex-wrap: wrap;">
+                        <button class="tab-btn active" onclick="switchMarketingTab('sms')" style="flex:1;">📱 SMS
+                            Campaign</button>
+                        <button class="tab-btn" onclick="switchMarketingTab('email')" style="flex:1;">📧
+                            Email
+                            Campaign</button>
+                        <button class="tab-btn" onclick="switchMarketingTab('whatsapp')" style="flex:1;">💬
+                            WhatsApp
+                            Web</button>
+                        <button class="tab-btn" onclick="switchMarketingTab('verify')" style="flex:1;">✅
+                            Verify
+                            Leads</button>
+                        <button class="tab-btn" onclick="switchMarketingTab('linkedin')" style="flex:1;">💼
+                            LinkedIn</button>
+                    </div>
+
+                    <!-- SMS Campaign Tab -->
+                    <div id="marketingTabSms" class="marketing-tab-content"
+                        style="background: var(--bg-card); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(16,185,129,0.05)); padding: 16px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;">📱
+                                SMS Campaign
+                            </h3>
+                            <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Send SMS to
+                                phone numbers
+                                from your extracted data</p>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">Recipients
+                                <span class="info-icon"
+                                    title="Upload Excel/CSV with columns for variables. Include country code (e.g., +91, +1).">ⓘ</span></label>
+                            <div id="smsFileUpload" style="margin-top: 12px;">
+                                <label
+                                    style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 20px; border: 2px dashed var(--accent-primary); border-radius: 8px; cursor: pointer; text-align: center; background: rgba(99,102,241,0.05); transition: all 0.2s;">
+                                    <input type="file" id="smsPhoneFile" accept=".txt,.csv,.xlsx,.xls" hidden
+                                        onchange="parseSmsFile(this)">
+                                    📁 Click to upload recipients (.txt, .csv, .xlsx)
+                                </label>
+                                <div id="smsFileInfo"
+                                    style="margin-top: 8px; color: var(--text-muted); font-size: 0.85rem;">
+                                </div>
+                            </div>
+                            <div id="smsRecipientCount"
+                                style="margin-top: 8px; color: var(--text-muted); font-size: 0.85rem;">
+                                📊 0 recipients loaded
+                            </div>
+                            <!-- Sample File Format -->
+                            <details
+                                style="margin-top: 12px; background: var(--bg-tertiary); border-radius: 8px; padding: 12px;">
+                                <summary style="cursor: pointer; font-weight: 600; color: var(--accent-primary);">
+                                    📋
+                                    Sample File Format</summary>
+                                <div style="margin-top: 10px; font-size: 0.85rem;">
+                                    <p style="margin: 0 0 8px 0; color: var(--text-muted);">
+                                        <strong>Important:</strong> Include country code with phone numbers
+                                        (e.g., +91,
+                                        +1, +44)
+                                    </p>
+                                    <p style="margin: 0 0 8px 0; color: var(--text-muted);">
+                                        <strong>For variables:</strong> Use Excel/CSV with these column
+                                        headers:
+                                    </p>
+                                    <div
+                                        style="background: var(--bg-card); padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.8rem; overflow-x: auto;">
+                                        <div style="color: #22c55e;">phone,name,company,city,website</div>
+                                        <div>+919876543210,John Doe,ABC Corp,Mumbai,abc.com</div>
+                                        <div>+14155551234,Jane Smith,XYZ Inc,New York,xyz.com</div>
+                                        <div>+447911123456,Bob Wilson,UK Ltd,London,ukltd.co.uk</div>
+                                    </div>
+                                    <p style="margin: 10px 0 0 0; color: var(--text-muted); font-size: 0.8rem;">
+                                        <strong>Simple format:</strong> One phone number per line (with
+                                        country code)
+                                    </p>
+                                    <button onclick="downloadSampleFile('sms')"
+                                        style="margin-top: 10px; padding: 8px 16px; background: var(--accent-primary); color: white; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                        📥 Download Sample File
+                                    </button>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- Sender ID -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">Sender ID /
+                                From
+                                Number <span class="info-icon"
+                                    title="The name or number shown as sender. Some countries restrict custom names.">ⓘ</span></label>
+                            <input type="text" id="smsSenderId"
+                                placeholder="Your business name or phone number (e.g., MyBusiness)"
+                                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-tertiary);">
+                            <small style="color: var(--text-muted);">Alphanumeric sender ID (check carrier
+                                support) or
+                                phone number</small>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">Message
+                                Template <span class="info-icon"
+                                    title="Use variables like {{name}}, {{phone}}, {{company}} to personalize. SMS is 160 chars per segment.">ⓘ</span></label>
+                            <textarea id="smsMessageTemplate" rows="4"
+                                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-tertiary); resize: vertical;"
+                                placeholder="Hi {{name}}, we found your business on Google Maps and wanted to reach out..."
+                                oninput="updateSmsCharCount()"></textarea>
+                            <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                                <small style="color: var(--text-muted);">Variables: {{name}}, {{phone}},
+                                    {{company}},
+                                    {{city}}</small>
+                                <small id="smsCharCount" style="color: var(--text-muted);">0/160 chars (1
+                                    segment)</small>
+                            </div>
+                        </div>
+
+                        <!-- Personalization Variables -->
+                        <div
+                            style="margin-bottom: 20px; padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">📝 Quick
+                                Insert
+                                Variables</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                <button type="button" onclick="insertSmsVariable('{{name}}')"
+                                    style="padding: 6px 12px; background: var(--accent-primary); color: white; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">{{name}}</button>
+                                <button type="button" onclick="insertSmsVariable('{{phone}}')"
+                                    style="padding: 6px 12px; background: var(--accent-primary); color: white; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">{{phone}}</button>
+                                <button type="button" onclick="insertSmsVariable('{{company}}')"
+                                    style="padding: 6px 12px; background: var(--accent-primary); color: white; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">{{company}}</button>
+                                <button type="button" onclick="insertSmsVariable('{{city}}')"
+                                    style="padding: 6px 12px; background: var(--accent-primary); color: white; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">{{city}}</button>
+                                <button type="button" onclick="insertSmsVariable('{{website}}')"
+                                    style="padding: 6px 12px; background: var(--accent-primary); color: white; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">{{website}}</button>
+                            </div>
+                        </div>
+
+                        <!-- Rate Limiting -->
+                        <div
+                            style="margin-bottom: 20px; padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">⏱️ Rate
+                                Limiting</label>
+                            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                                <span>Send</span>
+                                <input type="number" id="smsRateLimit" value="10" min="1" max="100"
+                                    style="width: 70px; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); text-align: center;">
+                                <span>messages per</span>
+                                <select id="smsRatePeriod"
+                                    style="padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card);">
+                                    <option value="second">second</option>
+                                    <option value="minute" selected>minute</option>
+                                    <option value="hour">hour</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <button id="btnTestSms"
+                                style="padding: 12px 24px; background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); font-weight: 600; border-radius: 10px; cursor: pointer; flex: 1;">
+                                🧪 Send Test SMS
+                            </button>
+                            <button id="btnSendSms" onclick="sendSmsCampaign()"
+                                style="padding: 14px 28px; background: linear-gradient(135deg, #22c55e, #16a34a); color: white; font-weight: 600; border-radius: 10px; cursor: pointer; flex: 2;">
+                                📤 Send SMS Campaign
+                            </button>
+                        </div>
+
+                        <!-- SMS Campaign Results -->
+                        <div id="smsCampaignResults" class="hidden"
+                            style="margin-top: 16px; padding: 16px; background: var(--bg-tertiary); border-radius: 10px;">
+                            <h4 style="margin: 0 0 12px 0;">📊 Campaign Results</h4>
+                            <div style="display: flex; gap: 16px; margin-bottom: 12px;">
+                                <div
+                                    style="flex: 1; padding: 12px; background: rgba(34,197,94,0.1); border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #22c55e;"
+                                        id="smsSentCount">0</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-muted);">Sent</div>
+                                </div>
+                                <div
+                                    style="flex: 1; padding: 12px; background: rgba(239,68,68,0.1); border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #ef4444;"
+                                        id="smsFailedCount">0</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-muted);">Failed</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button onclick="exportSmsCampaignResults('sent')"
+                                    style="padding: 10px 20px; background: #22c55e; color: white; border-radius: 6px; cursor: pointer;">
+                                    📥 Export Sent Numbers
+                                </button>
+                                <button onclick="exportSmsCampaignResults('failed')"
+                                    style="padding: 10px 20px; background: #ef4444; color: white; border-radius: 6px; cursor: pointer;">
+                                    📥 Export Failed Numbers
+                                </button>
+                                <button onclick="exportSmsCampaignResults('all')"
+                                    style="padding: 10px 20px; background: var(--accent-primary); color: white; border-radius: 6px; cursor: pointer;">
+                                    📥 Export Full Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email Campaign Tab -->
+                    <div id="marketingTabEmail" class="marketing-tab-content hidden"
+                        style="background: var(--bg-card); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(99,102,241,0.05)); padding: 16px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;">📧
+                                Email
+                                Campaign</h3>
+                            <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Send emails
+                                to addresses
+                                from your extracted data</p>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">Recipients
+                                <span class="info-icon"
+                                    title="Upload Excel/CSV with columns for variables like email, name, company.">ⓘ</span></label>
+                            <div id="emailFileUpload" style="margin-top: 12px;">
+                                <label
+                                    style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 20px; border: 2px dashed #3b82f6; border-radius: 8px; cursor: pointer; text-align: center; background: rgba(59,130,246,0.05); transition: all 0.2s;">
+                                    <input type="file" id="emailAddressFile" accept=".txt,.csv,.xlsx,.xls" hidden
+                                        onchange="parseEmailFile(this)">
+                                    📁 Click to upload recipients (.txt, .csv, .xlsx)
+                                </label>
+                                <div id="emailFileInfo"
+                                    style="margin-top: 8px; color: var(--text-muted); font-size: 0.85rem;">
+                                </div>
+                            </div>
+                            <div id="emailRecipientCount"
+                                style="margin-top: 8px; color: var(--text-muted); font-size: 0.85rem;">
+                                📊 0 recipients loaded
+                            </div>
+                            <!-- Sample File Format -->
+                            <details
+                                style="margin-top: 12px; background: var(--bg-tertiary); border-radius: 8px; padding: 12px;">
+                                <summary style="cursor: pointer; font-weight: 600; color: #3b82f6;">📋
+                                    Sample File
+                                    Format</summary>
+                                <div style="margin-top: 10px; font-size: 0.85rem;">
+                                    <p style="margin: 0 0 8px 0; color: var(--text-muted);">
+                                        <strong>For variables:</strong> Use Excel/CSV with these column
+                                        headers:
+                                    </p>
+                                    <div
+                                        style="background: var(--bg-card); padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.8rem; overflow-x: auto;">
+                                        <div style="color: #3b82f6;">email,name,company,city,website</div>
+                                        <div>john@example.com,John Doe,ABC Corp,Mumbai,abc.com</div>
+                                        <div>jane@company.com,Jane Smith,XYZ Inc,New York,xyz.com</div>
+                                        <div>bob@business.co.uk,Bob Wilson,UK Ltd,London,ukltd.co.uk</div>
+                                    </div>
+                                    <p style="margin: 10px 0 0 0; color: var(--text-muted); font-size: 0.8rem;">
+                                        <strong>Simple format:</strong> One email address per line
+                                    </p>
+                                    <button onclick="downloadSampleFile('email')"
+                                        style="margin-top: 10px; padding: 8px 16px; background: #3b82f6; color: white; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                        📥 Download Sample File
+                                    </button>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- From Name & Email -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                            <div>
+                                <label style="font-weight: 600; display: block; margin-bottom: 8px;">From
+                                    Name <span class="info-icon"
+                                        title="The name that appears as the sender in the recipient's inbox.">ⓘ</span></label>
+                                <input type="text" id="emailFromName" placeholder="Your Name or Business"
+                                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-tertiary);">
+                            </div>
+                            <div>
+                                <label style="font-weight: 600; display: block; margin-bottom: 8px;">Reply-To
+                                    Email
+                                    <span class="info-icon"
+                                        title="Optional. Replies to your email will go to this address instead of the SMTP user.">ⓘ</span></label>
+                                <input type="email" id="emailReplyTo" placeholder="reply@yourdomain.com (optional)"
+                                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-tertiary);">
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 16px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">Subject
+                                Line <span class="info-icon"
+                                    title="Use variables like {{name}}, {{company}} to personalize. Keep it under 60 characters for best open rates.">ⓘ</span></label>
+                            <input type="text" id="emailSubject" placeholder="Hi {{name}}, we have an offer for you!"
+                                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-tertiary);">
+                            <small style="color: var(--text-muted);">Variables: {{name}}, {{email}},
+                                {{company}},
+                                {{city}}</small>
+                        </div>
+
+                        <!-- Email Templates -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">📋 Email
+                                Template <span class="info-icon"
+                                    title="Select a pre-built template or write custom HTML below.">ⓘ</span></label>
+                            <select id="emailTemplateSelect" onchange="loadEmailTemplate()"
+                                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-tertiary);">
+                                <option value="">-- Select a template or write custom --</option>
+                                <option value="intro">Business Introduction</option>
+                                <option value="followup">Follow-up Email</option>
+                                <option value="offer">Special Offer</option>
+                                <option value="partnership">Partnership Proposal</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <label style="font-weight: 600;">Email Body (HTML)</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="button" onclick="toggleEmailPreview()"
+                                        style="padding: 4px 10px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
+                                        👁️ Preview
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea id="emailBodyTemplate" rows="10"
+                                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-tertiary); resize: vertical; font-family: monospace;"
+                                placeholder="<h1>Hello {{name}}</h1>
+<p>We noticed your business and wanted to connect...</p>
+<p>Best regards,<br>Your Name</p>"></textarea>
+                        </div>
+
+                        <!-- Email Preview -->
+                        <div id="emailPreviewPane" class="hidden"
+                            style="margin-bottom: 20px; padding: 16px; background: white; border-radius: 8px; color: #333; max-height: 300px; overflow: auto;">
+                            <div id="emailPreviewContent"></div>
+                        </div>
+
+                        <!-- Personalization Variables -->
+                        <div
+                            style="margin-bottom: 20px; padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">📝 Quick
+                                Insert
+                                Variables</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                <button type="button" onclick="insertEmailVariable('{{name}}')"
+                                    style="padding: 6px 12px; background: var(--accent-primary); color: white; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">{{name}}</button>
+                                <button type="button" onclick="insertEmailVariable('{{email}}')"
+                                    style="padding: 6px 12px; background: var(--accent-primary); color: white; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">{{email}}</button>
+                                <button type="button" onclick="insertEmailVariable('{{company}}')"
+                                    style="padding: 6px 12px; background: var(--accent-primary); color: white; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">{{company}}</button>
+                                <button type="button" onclick="insertEmailVariable('{{city}}')"
+                                    style="padding: 6px 12px; background: var(--accent-primary); color: white; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">{{city}}</button>
+                                <button type="button" onclick="insertEmailVariable('{{website}}')"
+                                    style="padding: 6px 12px; background: var(--accent-primary); color: white; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">{{website}}</button>
+                                <button type="button" onclick="insertEmailVariable('{{phone}}')"
+                                    style="padding: 6px 12px; background: var(--accent-primary); color: white; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">{{phone}}</button>
+                            </div>
+                        </div>
+
+                        <!-- Rate Limiting -->
+                        <div
+                            style="margin-bottom: 20px; padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">⏱️ Rate
+                                Limiting</label>
+                            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                                <span>Send</span>
+                                <input type="number" id="emailRateLimit" value="50" min="1" max="500"
+                                    style="width: 70px; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); text-align: center;">
+                                <span>emails per</span>
+                                <select id="emailRatePeriod"
+                                    style="padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card);">
+                                    <option value="minute">minute</option>
+                                    <option value="hour" selected>hour</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <button id="btnTestEmail"
+                                style="padding: 12px 24px; background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); font-weight: 600; border-radius: 10px; cursor: pointer; flex: 1;">
+                                🧪 Send Test Email
+                            </button>
+                            <button id="btnSendEmail"
+                                style="padding: 14px 28px; background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; font-weight: 600; border-radius: 10px; cursor: pointer; flex: 2;">
+                                📤 Send Email Campaign
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- WhatsApp Web Tab -->
+                    <div id="marketingTabWhatsapp" class="marketing-tab-content hidden"
+                        style="background: var(--bg-card); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(37,211,102,0.15), rgba(18,140,126,0.1)); padding: 16px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;">💬
+                                WhatsApp Web
+                                Bulk Sender</h3>
+                            <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Send WhatsApp
+                                messages
+                                via
+                                browser automation with multiple account rotation</p>
+                        </div>
+
+                        <!-- Sessions Manager -->
+                        <div
+                            style="margin-bottom: 20px; padding: 16px; background: var(--bg-tertiary); border-radius: 10px;">
+                            <h4 style="margin: 0 0 12px 0;">📱 WhatsApp Sessions</h4>
+                            <div id="whatsappSessionsList"
+                                style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                                <div
+                                    style="padding: 10px 16px; background: var(--bg-card); border-radius: 8px; border: 1px dashed var(--border-color);">
+                                    <span style="color: var(--text-muted);">No sessions yet. Add one
+                                        below.</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="newSessionName" placeholder="Session name (e.g., account1)"
+                                    style="flex: 1; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card);">
+                                <button onclick="addWhatsAppSession()"
+                                    style="padding: 10px 20px; background: #25D366; color: white; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                    ➕ Add Session
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Session Selector for Sending -->
+                        <div
+                            style="margin-bottom: 20px; padding: 16px; background: var(--bg-tertiary); border-radius: 10px; border: 2px solid #25D366;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">🎯 Select Session to
+                                Use</label>
+                            <select id="waSessionSelector"
+                                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); font-size: 1rem;">
+                                <option value="">-- Select an active session --</option>
+                            </select>
+                            <small style="color: var(--text-muted); display: block; margin-top: 8px;">Only active
+                                (connected) sessions will appear here</small>
+                        </div>
+
+                        <!-- QR Code Display -->
+                        <div id="whatsappQRSection" class="hidden"
+                            style="margin-bottom: 20px; padding: 20px; background: var(--bg-tertiary); border-radius: 10px; text-align: center;">
+                            <h4>Scan QR Code with WhatsApp</h4>
+                            <img id="whatsappQRImage" src="" alt="QR Code"
+                                style="max-width: 250px; border-radius: 10px; margin: 16px 0;">
+                            <p style="color: var(--text-muted); font-size: 0.85rem;">Open WhatsApp on your
+                                phone → Menu
+                                → Linked Devices → Link a Device</p>
+                        </div>
+
+                        <!-- Recipients Upload -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">Recipients
+                                <span class="info-icon"
+                                    title="Upload Excel/CSV with columns for variables. Include country code WITHOUT + (e.g., 919876543210).">ⓘ</span></label>
+                            <div id="waFileUpload" style="margin-top: 12px;">
+                                <label
+                                    style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 20px; border: 2px dashed #25D366; border-radius: 8px; cursor: pointer; text-align: center; background: rgba(37,211,102,0.05); transition: all 0.2s;">
+                                    <input type="file" id="waPhoneFile" accept=".txt,.csv,.xlsx,.xls" hidden
+                                        onchange="parseWhatsAppFile(this)">
+                                    📁 Click to upload recipients (.txt, .csv, .xlsx)
+                                </label>
+                                <div id="waFileInfo"
+                                    style="margin-top: 8px; color: var(--text-muted); font-size: 0.85rem;">
+                                </div>
+                            </div>
+                            <div id="waRecipientCount"
+                                style="margin-top: 8px; color: var(--text-muted); font-size: 0.85rem;">
+                                📊 0 recipients loaded
+                            </div>
+                            <!-- Sample File Format -->
+                            <details
+                                style="margin-top: 12px; background: var(--bg-tertiary); border-radius: 8px; padding: 12px;">
+                                <summary style="cursor: pointer; font-weight: 600; color: #25D366;">📋
+                                    Sample File
+                                    Format</summary>
+                                <div style="margin-top: 10px; font-size: 0.85rem;">
+                                    <p style="margin: 0 0 8px 0; color: var(--text-muted);">
+                                        <strong>Important:</strong> Include country code WITHOUT + sign
+                                        (e.g., 91 for
+                                        India, 1 for USA)
+                                    </p>
+                                    <p style="margin: 0 0 8px 0; color: var(--text-muted);">
+                                        <strong>For variables:</strong> Use Excel/CSV with these column
+                                        headers:
+                                    </p>
+                                    <div
+                                        style="background: var(--bg-card); padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.8rem; overflow-x: auto;">
+                                        <div style="color: #25D366;">phone,name,company,city,website</div>
+                                        <div>919876543210,John Doe,ABC Corp,Mumbai,abc.com</div>
+                                        <div>14155551234,Jane Smith,XYZ Inc,New York,xyz.com</div>
+                                        <div>447911123456,Bob Wilson,UK Ltd,London,ukltd.co.uk</div>
+                                    </div>
+                                    <p style="margin: 10px 0 0 0; color: var(--text-muted); font-size: 0.8rem;">
+                                        <strong>Simple format:</strong> One phone number per line (with
+                                        country code, no
+                                        +)
+                                    </p>
+                                    <button onclick="downloadSampleFile('whatsapp')"
+                                        style="margin-top: 10px; padding: 8px 16px; background: #25D366; color: white; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                        📥 Download Sample File
+                                    </button>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- Message Template -->
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">Message
+                                Template <span class="info-icon"
+                                    title="Use {{name}}, {{phone}}, {{company}} for personalization. WhatsApp may block if sending identical messages.">ⓘ</span></label>
+                            <textarea id="waMessageTemplate" rows="4"
+                                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-tertiary); resize: vertical;"
+                                placeholder="Hi {{name}}, we found your business and wanted to reach out about our services..."></textarea>
+                            <small style="color: var(--text-muted);">Use {{name}}, {{phone}}, {{company}} as
+                                placeholders</small>
+                        </div>
+
+                        <!-- Delay Settings -->
+                        <div style="margin-bottom: 20px; display: flex; gap: 16px; align-items: center;">
+                            <label style="font-weight: 600;">Delay between messages:</label>
+                            <input type="number" id="waMessageDelay" value="5" min="3" max="60"
+                                style="width: 80px; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-tertiary); text-align: center;">
+                            <span style="color: var(--text-muted);">seconds</span>
+                            <label style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                                <input type="checkbox" id="waRotateSessions" checked>
+                                Rotate between sessions
+                            </label>
+                        </div>
+
+                        <!-- Send Button -->
+                        <button id="btnSendWhatsApp" onclick="sendBulkWhatsApp()"
+                            style="padding: 14px 28px; background: linear-gradient(135deg, #25D366, #128C7E); color: white; font-weight: 600; border-radius: 10px; cursor: pointer; width: 100%;">
+                            💬 Send WhatsApp Messages
+                        </button>
+
+                        <!-- Progress Display -->
+                        <div id="waProgress" class="hidden"
+                            style="margin-top: 16px; padding: 16px; background: var(--bg-tertiary); border-radius: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span>Progress:</span>
+                                <span id="waProgressText">0 / 0</span>
+                            </div>
+                            <div style="height: 8px; background: var(--bg-card); border-radius: 4px; overflow: hidden;">
+                                <div id="waProgressBar"
+                                    style="width: 0%; height: 100%; background: #25D366; transition: width 0.3s;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- WhatsApp Campaign Results -->
+                        <div id="waCampaignResults" class="hidden"
+                            style="margin-top: 16px; padding: 16px; background: var(--bg-tertiary); border-radius: 10px;">
+                            <h4 style="margin: 0 0 12px 0;">📊 Campaign Results</h4>
+                            <div style="display: flex; gap: 16px; margin-bottom: 12px;">
+                                <div
+                                    style="flex: 1; padding: 12px; background: rgba(37,211,102,0.1); border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #25D366;" id="waSentCount">
+                                        0</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-muted);">Sent</div>
+                                </div>
+                                <div
+                                    style="flex: 1; padding: 12px; background: rgba(239,68,68,0.1); border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #ef4444;"
+                                        id="waFailedCount">0</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-muted);">Failed</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button onclick="exportWhatsAppCampaignResults('sent')"
+                                    style="padding: 10px 20px; background: #25D366; color: white; border-radius: 6px; cursor: pointer;">
+                                    📥 Export Sent Numbers
+                                </button>
+                                <button onclick="exportWhatsAppCampaignResults('failed')"
+                                    style="padding: 10px 20px; background: #ef4444; color: white; border-radius: 6px; cursor: pointer;">
+                                    📥 Export Failed Numbers
+                                </button>
+                                <button onclick="exportWhatsAppCampaignResults('all')"
+                                    style="padding: 10px 20px; background: var(--accent-primary); color: white; border-radius: 6px; cursor: pointer;">
+                                    📥 Export Full Report
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Group Tools Section -->
+                        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
+                            <h4 style="margin: 0 0 16px 0;">👥 Group Tools</h4>
+
+                            <!-- Bulk Group Joiner -->
+                            <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 10px;">
+                                <label style="font-weight: 600; display: block; margin-bottom: 8px;">Bulk
+                                    Group
+                                    Joiner</label>
+                                <select id="waJoinSession"
+                                    style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); margin-bottom: 10px;">
+                                    <option value="">Select session...</option>
+                                </select>
+                                <textarea id="waInviteLinks" rows="4"
+                                    placeholder="Paste WhatsApp group invite links (one per line)&#10;https://chat.whatsapp.com/XXXXXX&#10;https://chat.whatsapp.com/YYYYYY"
+                                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); resize: vertical; margin-bottom: 10px;"></textarea>
+                                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                                    <label>Delay between joins:</label>
+                                    <input type="number" id="waJoinDelay" value="3" min="1" max="30"
+                                        style="width: 60px; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); text-align: center;">
+                                    <span style="color: var(--text-muted);">seconds</span>
+                                </div>
+                                <button onclick="bulkJoinGroups()"
+                                    style="padding: 12px 24px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; font-weight: 600; border-radius: 8px; cursor: pointer; width: 100%;">
+                                    🚀 Join All Groups
+                                </button>
+                                <div id="waJoinProgress" class="hidden"
+                                    style="margin-top: 12px; padding: 12px; background: var(--bg-card); border-radius: 8px;">
+                                    <span id="waJoinProgressText">0 / 0 joined</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Verification Tab -->
+                    <div id="marketingTabVerify" class="marketing-tab-content hidden"
+                        style="background: var(--bg-card); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                        <h3 style="margin: 0 0 20px 0;">✅ Email & WhatsApp Verification</h3>
+
+                        <!-- Email Verification Section -->
+                        <div
+                            style="padding: 20px; background: var(--bg-tertiary); border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 16px 0;">📧 Email Verification</h4>
+                            <div style="margin-bottom: 12px;">
+                                <label
+                                    style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Upload
+                                    emails (.txt or .csv, one per line)</label>
+                                <input type="file" id="verifyEmailFile" accept=".txt,.csv"
+                                    style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px;">
+                            </div>
+                            <div id="verifyEmailInfo"
+                                style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <label
+                                    style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Verification
+                                    Method</label>
+                                <select id="emailVerifyMethod"
+                                    style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px;">
+                                    <option value="zerobounce">ZeroBounce API (Most Accurate)</option>
+                                    <option value="smtp">SMTP Check (Uses Your SMTP)</option>
+                                    <option value="mx">MX Record Check (Free/Basic)</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button onclick="verifyEmails()"
+                                    style="padding: 12px 24px; background: #3b82f6; color: white; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                                    ✅ Verify Emails
+                                </button>
+                                <button onclick="exportVerifiedEmails('valid')"
+                                    style="padding: 12px 24px; background: #22c55e; color: white; border-radius: 6px; cursor: pointer;">
+                                    📥 Export Valid
+                                </button>
+                                <button onclick="exportVerifiedEmails('invalid')"
+                                    style="padding: 12px 24px; background: #ef4444; color: white; border-radius: 6px; cursor: pointer;">
+                                    📥 Export Invalid
+                                </button>
+                            </div>
+                            <div id="verifyEmailProgress" class="hidden"
+                                style="margin-top: 12px; padding: 12px; background: var(--bg-card); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span id="verifyEmailStatus">Verifying...</span>
+                                    <span id="verifyEmailCount">0 / 0</span>
+                                </div>
+                            </div>
+                            <div id="verifyEmailResults" class="hidden"
+                                style="margin-top: 12px; padding: 12px; background: var(--bg-card); border-radius: 8px;">
+                                <span style="color: #22c55e;">✅ Valid: <span id="validEmailCount">0</span></span> |
+                                <span style="color: #ef4444;">❌ Invalid: <span id="invalidEmailCount">0</span></span>
+                            </div>
+                        </div>
+
+                        <!-- WhatsApp Verification Section -->
+                        <div style="padding: 20px; background: var(--bg-tertiary); border-radius: 10px;">
+                            <h4 style="margin: 0 0 16px 0;">💬 WhatsApp Number Verification</h4>
+                            <div style="margin-bottom: 12px;">
+                                <label
+                                    style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Upload
+                                    phone numbers (.txt, one per line)</label>
+                                <input type="file" id="verifyWhatsAppFile" accept=".txt,.csv"
+                                    style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px;">
+                            </div>
+                            <div id="verifyWhatsAppInfo"
+                                style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <label
+                                    style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">WhatsApp
+                                    Session</label>
+                                <select id="verifyWhatsAppSession"
+                                    style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px;">
+                                    <option value="">Select session...</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button onclick="verifyWhatsAppNumbers()"
+                                    style="padding: 12px 24px; background: #25D366; color: white; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                                    ✅ Verify Numbers
+                                </button>
+                                <button onclick="exportVerifiedWhatsApp('valid')"
+                                    style="padding: 12px 24px; background: #22c55e; color: white; border-radius: 6px; cursor: pointer;">
+                                    📥 Export Valid
+                                </button>
+                                <button onclick="exportVerifiedWhatsApp('invalid')"
+                                    style="padding: 12px 24px; background: #ef4444; color: white; border-radius: 6px; cursor: pointer;">
+                                    📥 Export Invalid
+                                </button>
+                            </div>
+                            <div id="verifyWhatsAppProgress" class="hidden"
+                                style="margin-top: 12px; padding: 12px; background: var(--bg-card); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span id="verifyWhatsAppStatus">Verifying...</span>
+                                    <span id="verifyWhatsAppCount">0 / 0</span>
+                                </div>
+                            </div>
+                            <div id="verifyWhatsAppResults" class="hidden"
+                                style="margin-top: 12px; padding: 12px; background: var(--bg-card); border-radius: 8px;">
+                                <span style="color: #22c55e;">✅ Has WhatsApp: <span
+                                        id="hasWhatsAppCount">0</span></span> |
+                                <span style="color: #ef4444;">❌ No WhatsApp: <span id="noWhatsAppCount">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LinkedIn Tab -->
+                    <div id="marketingTabLinkedin" class="marketing-tab-content hidden"
+                        style="background: var(--bg-card); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(0,119,181,0.15), rgba(0,102,160,0.1)); padding: 16px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;">💼
+                                LinkedIn
+                                Sales
+                                Navigator</h3>
+                            <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Extract
+                                profiles and
+                                search for leads on LinkedIn</p>
+                        </div>
+
+                        <!-- LinkedIn Session Management -->
+                        <div
+                            style="padding: 20px; background: var(--bg-tertiary); border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 16px 0;">🔐 LinkedIn Session</h4>
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: end;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <label
+                                        style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Session
+                                        Name</label>
+                                    <input type="text" id="linkedinSessionName" placeholder="my-linkedin"
+                                        style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px;">
+                                </div>
+                                <button onclick="initLinkedInSession()"
+                                    style="padding: 10px 20px; background: #0077b5; color: white; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                    🚀 Start Session
+                                </button>
+                                <button onclick="forceLinkedInLogin()"
+                                    style="padding: 10px 20px; background: #22c55e; color: white; border-radius: 6px; cursor: pointer; font-weight: 600;"
+                                    title="Mark as logged in after you log in manually">
+                                    ✅ Confirm Logged In
+                                </button>
+                                <button onclick="closeLinkedInSession()"
+                                    style="padding: 10px 20px; background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;">
+                                    ❌ Close
+                                </button>
+                            </div>
+                            <div
+                                style="margin-top: 8px; padding: 10px; background: rgba(59,130,246,0.1); border-radius: 6px; font-size: 0.8rem; color: var(--text-muted);">
+                                💡 <strong>How to use:</strong> 1) Start Session → 2) Log in manually → 3)
+                                Click
+                                "Confirm Logged In"
+                            </div>
+                            <div id="linkedinSessionStatus"
+                                style="margin-top: 12px; color: var(--text-muted); font-size: 0.85rem;">
+                                ⚪ No session active
+                            </div>
+                        </div>
+
+                        <!-- LinkedIn People Search -->
+                        <div
+                            style="padding: 20px; background: var(--bg-tertiary); border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 16px 0;">🔍 Search People</h4>
+                            <div
+                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                                <div>
+                                    <label
+                                        style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Keywords</label>
+                                    <input type="text" id="linkedinSearchKeywords"
+                                        placeholder="CEO, Marketing Manager..."
+                                        style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px;">
+                                </div>
+                                <div>
+                                    <label
+                                        style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Company</label>
+                                    <input type="text" id="linkedinSearchCompany" placeholder="Google, Microsoft..."
+                                        style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px;">
+                                </div>
+                                <div>
+                                    <label
+                                        style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Job
+                                        Title</label>
+                                    <input type="text" id="linkedinSearchTitle" placeholder="Director, VP..."
+                                        style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px;">
+                                </div>
+                                <div>
+                                    <label
+                                        style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Max
+                                        Results</label>
+                                    <select id="linkedinSearchLimit"
+                                        style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px;">
+                                        <option value="10">10</option>
+                                        <option value="25" selected>25</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="searchLinkedInPeople()"
+                                style="padding: 12px 24px; background: linear-gradient(135deg, #0077b5, #0066a0); color: white; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                                🔍 Search People
+                            </button>
+                        </div>
+
+                        <!-- LinkedIn Job Search -->
+                        <div
+                            style="padding: 20px; background: var(--bg-tertiary); border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 16px 0;">💼 Search Jobs</h4>
+                            <div
+                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                                <div>
+                                    <label
+                                        style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Job
+                                        Title/Keywords</label>
+                                    <input type="text" id="linkedinJobKeywords"
+                                        placeholder="Software Engineer, Marketing..."
+                                        style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px;">
+                                </div>
+                                <div>
+                                    <label
+                                        style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Location</label>
+                                    <input type="text" id="linkedinJobLocation" placeholder="New York, Remote..."
+                                        style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px;">
+                                </div>
+                                <div>
+                                    <label
+                                        style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Job
+                                        Type</label>
+                                    <select id="linkedinJobType"
+                                        style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px;">
+                                        <option value="">Any</option>
+                                        <option value="F">Full-time</option>
+                                        <option value="P">Part-time</option>
+                                        <option value="C">Contract</option>
+                                        <option value="T">Temporary</option>
+                                        <option value="I">Internship</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Experience</label>
+                                    <select id="linkedinJobExperience"
+                                        style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px;">
+                                        <option value="">Any Level</option>
+                                        <option value="1">Entry Level</option>
+                                        <option value="2">Associate</option>
+                                        <option value="3">Mid-Senior</option>
+                                        <option value="4">Director</option>
+                                        <option value="5">Executive</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="searchLinkedInJobs()"
+                                style="padding: 12px 24px; background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                                💼 Search Jobs
+                            </button>
+                        </div>
+
+                        <!-- LinkedIn Job Results -->
+                        <div id="linkedinJobResultsContainer" class="hidden"
+                            style="padding: 20px; background: var(--bg-tertiary); border-radius: 10px; margin-bottom: 20px;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h4 style="margin: 0;">💼 Jobs Found (<span id="linkedinJobResultCount">0</span>)</h4>
+                                <button onclick="exportLinkedInJobs()"
+                                    style="padding: 8px 16px; background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                    💾 Export CSV
+                                </button>
+                            </div>
+                            <div id="linkedinJobResultsList" style="max-height: 400px; overflow-y: auto;">
+                                <!-- Job results will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- LinkedIn Results -->
+                        <div id="linkedinResultsContainer" class="hidden"
+                            style="padding: 20px; background: var(--bg-tertiary); border-radius: 10px;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h4 style="margin: 0;">📋 Results (<span id="linkedinResultCount">0</span>)
+                                </h4>
+                                <div style="display: flex; gap: 10px;">
+                                    <button onclick="extractSelectedProfiles()"
+                                        style="padding: 8px 16px; background: #22c55e; color: white; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                        📥 Extract Selected
+                                    </button>
+                                    <button onclick="exportLinkedInResults()"
+                                        style="padding: 8px 16px; background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                        💾 Export CSV
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="linkedinResultsList" style="max-height: 400px; overflow-y: auto;">
+                                <!-- Results will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Tools / Bulk Screenshots Page -->
+            <section class="page hidden" id="pageTools">
+                <header class="page-header" style="display: none;">
+                    <h1>Bulk Screenshots</h1>
+                    <p class="subtitle">Capture visual copies of websites in bulk</p>
+                </header>
+
+                <div class="marketing-tabs"
+                    style="display: flex; gap: 12px; margin-bottom: 24px; background: rgba(30, 30, 40, 0.6); padding: 8px; border-radius: 16px; flex-wrap: wrap; border: 1px solid var(--border-color); backdrop-filter: blur(10px);">
+                    <button class="marketing-tab active" onclick="switchToolTab('screenshots')"
+                        style="flex: 1; min-width: 140px; justify-content: center; color: #fff;">
+                        📸 Bulk Screenshots
+                    </button>
+                    <button class="marketing-tab" onclick="switchToolTab('traffic')"
+                        style="flex: 1; min-width: 140px; justify-content: center; color: #fff;">
+                        🚦 Fake Traffic
+                    </button>
+                    <button class="marketing-tab" onclick="switchToolTab('downloader')"
+                        style="flex: 1; min-width: 140px; justify-content: center; color: #fff;">
+                        💾 Code Downloader
+                    </button>
+                </div>
+
+                <!-- 1. Bulk Screenshots (Existing) -->
+                <div id="toolScreenshots" class="tool-section">
+                    <h2 style="margin-bottom: 20px; font-weight: 600;">Extract bulk screenshots of websites</h2>
+                    <div class="card" style="padding: 24px; margin-bottom: 24px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                            <div>
+                                <label style="font-weight: 600; display: block; margin-bottom: 12px;">📁 Upload Domains
+                                    List</label>
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; border: 2px dashed var(--border-color); border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.2s;"
+                                    class="upload-zone" id="screenshotDropZone">
+                                    <input type="file" id="screenshotFile" accept=".txt,.csv" hidden>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        style="width: 48px; height: 48px; margin-bottom: 12px; color: var(--accent-primary);">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                    <span style="font-size: 1.1rem; font-weight: 500;">Click to upload list</span>
+                                    <span style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">.txt or
+                                        .csv
+                                        (one domain per line)</span>
+                                    <div id="screenshotFileInfo"
+                                        style="margin-top: 12px; font-weight: 600; color: var(--accent-primary);">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <label style="font-weight: 600; display: block; margin-bottom: 8px;">🌐 Browser
+                                        Type</label>
+                                    <select id="screenshotBrowser"
+                                        style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-tertiary); margin-bottom: 16px;">
+                                        <option value="chrome">Google Chrome (Desktop)</option>
+                                        <option value="firefox">Mozilla Firefox</option>
+                                        <option value="safari">Apple Safari</option>
+                                        <option value="edge">Microsoft Edge</option>
+                                    </select>
+
+                                    <label style="font-weight: 600; display: block; margin-bottom: 8px;">📱 Device
+                                        Emulation</label>
+                                    <div id="deviceSelection"
+                                        style="display: flex; flex-direction: column; gap: 8px; background: var(--bg-tertiary); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" name="screenshotDevice" value="desktop" checked> 🖥️
+                                            Desktop (1920x1080)
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" name="screenshotDevice" value="laptop"> 💻 Laptop
+                                            (1366x768)
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" name="screenshotDevice" value="tablet"> 📱 Tablet
+                                            (iPad
+                                            Pro)
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                            <input type="checkbox" name="screenshotDevice" value="mobile"> 📱 Mobile
+                                            (iPhone
+                                            14)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <button id="btnStartScreenshots"
+                                    style="width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; border-radius: 12px; font-weight: 600; font-size: 1.1rem; cursor: pointer; border: none; margin-top: 24px;">
+                                    📸 Start Capturing
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Progress Section -->
+                        <div id="screenshotProgressSection" class="hidden">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="font-weight: 600;">Processing...</span>
+                                <span id="screenshotProgressText">0 / 0</span>
+                            </div>
+                            <div
+                                style="width: 100%; height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden; margin-bottom: 24px;">
+                                <div id="screenshotProgressBar"
+                                    style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); transition: width 0.3s ease;">
+                                </div>
+                            </div>
+
+                            <div
+                                style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px; font-family: monospace; font-size: 0.9rem; margin-bottom: 24px;">
+                                Images will be saved to: <span id="screenshotSavePath"
+                                    style="color: var(--accent-primary);">...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Grid -->
+                    <div id="screenshotResultsGrid"
+                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
+                        <!-- Items will be injected here -->
+                    </div>
+                </div>
+
+                <!-- 2. Fake Traffic Generator -->
+                <div id="toolTraffic" class="tool-section hidden">
+                    <div class="card" style="padding: 24px; margin-bottom: 24px;">
+                        <h3 style="margin-bottom: 16px;">Generate Organic Traffic</h3>
+                        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px;">
+                            <div>
+                                <label style="font-weight: 600; display: block; margin-bottom: 12px;">Target URLs (One
+                                    per line)</label>
+                                <textarea id="trafficUrls" rows="10"
+                                    style="width: 100%; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: monospace; font-size: 0.9rem; resize: vertical;"
+                                    placeholder="https://example.com&#10;https://mysite.com/blog"></textarea>
+                            </div>
+                            <div>
+                                <div
+                                    style="background: var(--bg-tertiary); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                                    <label style="font-weight: 600; display: block; margin-bottom: 12px;">⚙️
+                                        Configuration</label>
+
+                                    <label class="checkbox-label" style="margin-bottom: 12px;">
+                                        <input type="checkbox" id="trafficUseProxies" checked>
+                                        <span>Use Rotational Proxies</span>
+                                    </label>
+
+                                    <label style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Device
+                                        Type</label>
+                                    <select id="trafficDevice"
+                                        style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 16px;">
+                                        <option value="desktop">Desktop</option>
+                                        <option value="mobile">Mobile</option>
+                                        <option value="mix">Mix (Random)</option>
+                                    </select>
+
+                                    <label class="checkbox-label" style="margin-bottom: 12px;">
+                                        <input type="checkbox" id="trafficHuman" checked>
+                                        <span>Simulate Human Mouse Movements</span>
+                                    </label>
+
+                                    <label style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Internal Pages
+                                        to Visit (0-5)</label>
+                                    <input type="number" id="trafficInternalVisits" value="0" min="0" max="5"
+                                        style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 16px;">
+
+                                    <label style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Visits per
+                                        URL</label>
+                                    <input type="number" id="trafficVisitCount" value="1" min="1"
+                                        style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 16px;">
+
+                                    <label style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Visit Duration
+                                        (Seconds)</label>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <input type="number" id="trafficMinTime" value="30" min="5"
+                                            style="width: 80px; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <span>to</span>
+                                        <input type="number" id="trafficMaxTime" value="60" min="5"
+                                            style="width: 80px; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                    </div>
+                                </div>
+
+                                <button id="btnStartTraffic" onclick="startTrafficGen()"
+                                    style="width: 100%; padding: 16px; background: linear-gradient(135deg, #10b981, #059669); color: white; border-radius: 12px; font-weight: 600; font-size: 1.1rem; cursor: pointer; border: none; margin-bottom: 12px;">
+                                    🚀 Start Traffic Bot
+                                </button>
+                                <button onclick="exportTrafficLogs()"
+                                    style="width: 100%; padding: 12px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 12px; font-weight: 500; cursor: pointer;">
+                                    📥 Export Logs (CSV)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Traffic Console -->
+                        <div id="trafficConsole"
+                            style="margin-top: 24px; background: #1e1e1e; color: #10b981; padding: 16px; border-radius: 12px; font-family: monospace; height: 300px; overflow-y: auto; display: none;">
+                            <div
+                                style="margin-bottom: 8px; color: #fff; border-bottom: 1px solid #333; padding-bottom: 8px;">
+                                Traffic Generator Logs</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Source Code Downloader -->
+                <div id="toolDownloader" class="tool-section hidden">
+                    <div class="card" style="padding: 24px; margin-bottom: 24px;">
+                        <h3 style="margin-bottom: 16px;">Download Website Source Code</h3>
+                        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px;">
+                            <div>
+                                <label style="font-weight: 600; display: block; margin-bottom: 12px;">Target URLs (One
+                                    per line)</label>
+                                <textarea id="downloadUrls" rows="10"
+                                    style="width: 100%; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: monospace; font-size: 0.9rem; resize: vertical;"
+                                    placeholder="https://example.com&#10;https://competitor.com"></textarea>
+                            </div>
+                            <div>
+                                <div
+                                    style="background: var(--bg-tertiary); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                                    <label style="font-weight: 600; display: block; margin-bottom: 12px;">⚙️
+                                        Options</label>
+
+                                    <label class="checkbox-label" style="margin-bottom: 12px;"
+                                        title="Renders the page with a browser before saving. Useful for React/Vue/Angular sites.">
+                                        <input type="checkbox" id="renderJs" checked>
+                                        <span>Render JavaScript (Slower)</span>
+                                    </label>
+                                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                                        If unchecked, only the initial HTML response will be downloaded (faster).
+                                    </p>
+                                </div>
+
+                                <button id="btnStartDownload" onclick="startDownloader()"
+                                    style="width: 100%; padding: 16px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border-radius: 12px; font-weight: 600; font-size: 1.1rem; cursor: pointer; border: none;">
+                                    💾 Download Code
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Download Console -->
+                        <div id="downloadConsole"
+                            style="margin-top: 24px; background: #1e1e1e; color: #3b82f6; padding: 16px; border-radius: 12px; font-family: monospace; height: 300px; overflow-y: auto; display: none;">
+                            <div
+                                style="margin-bottom: 8px; color: #fff; border-bottom: 1px solid #333; padding-bottom: 8px;">
+                                Downloader Logs</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- New Campaign Modal -->
+    <div class="modal-overlay" id="modalNewCampaign">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Create New Campaign</h2>
+                <button class="modal-close" id="btnCloseModal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="wizard-progress">
+                <div class="wizard-step active" data-step="1">
+                    <span class="step-dot">1</span>
+                    <span class="step-label">Type & Basics</span>
+                </div>
+                <div class="wizard-step" data-step="2">
+                    <span class="step-dot">2</span>
+                    <span class="step-label">Source Data</span>
+                </div>
+                <div class="wizard-step" data-step="3">
+                    <span class="step-dot">3</span>
+                    <span class="step-label">Configure</span>
+                </div>
+                <div class="wizard-step" data-step="4">
+                    <span class="step-dot">4</span>
+                    <span class="step-label">Review</span>
+                </div>
+            </div>
+
+            <form id="formNewCampaign">
+                <!-- Step 1: Type & Basics -->
+                <div class="wizard-content active" data-step="1">
+                    <div class="form-group">
+                        <label>Campaign Type</label>
+                        <div class="mode-selector type-selector">
+                            <label class="mode-option selected">
+                                <input type="radio" name="campaignType" value="domain" checked>
+                                <div class="mode-card">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <globe cx="12" cy="12" r="10" />
+                                        <path
+                                            d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                                    </svg>
+                                    <h4>Domain Extraction</h4>
+                                    <p>Extract data from list of websites</p>
+                                </div>
+                            </label>
+                            <label class="mode-option">
+                                <input type="radio" name="campaignType" value="maps">
+                                <div class="mode-card">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                        <circle cx="12" cy="10" r="3" />
+                                    </svg>
+                                    <h4>Google Maps</h4>
+                                    <p>Find local businesses by keywords</p>
+                                </div>
+                            </label>
+
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="campaignName">Campaign Name</label>
+                        <input type="text" id="campaignName" placeholder="e.g., Tech Companies Q4 2024" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Extraction Mode</label>
+                        <div class="mode-selector">
+                            <label class="mode-option selected">
+                                <input type="radio" name="mode" value="live" checked>
+                                <div class="mode-card">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="12 6 12 12 16 14" />
+                                    </svg>
+                                    <h4>Live Mode</h4>
+                                    <p>Watch extraction in real-time</p>
+                                </div>
+                            </label>
+                            <label class="mode-option">
+                                <input type="radio" name="mode" value="background">
+                                <div class="mode-card">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                                        <line x1="8" y1="21" x2="16" y2="21" />
+                                        <line x1="12" y1="17" x2="12" y2="21" />
+                                    </svg>
+                                    <h4>Background</h4>
+                                    <p>Run silently in background</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Source Data -->
+                <div class="wizard-content" data-step="2">
+                    <!-- Domain Upload View -->
+                    <div id="domainUploadView">
+                        <div class="upload-zone" id="uploadZone">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17 8 12 3 7 8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                            </svg>
+                            <h3>Upload Domain List</h3>
+                            <p>Drag and drop your .txt file here or click to browse</p>
+                            <span class="file-info">One domain per line (e.g., example.com)</span>
+                            <input type="file" id="domainsFile" accept=".txt" hidden>
+                        </div>
+                        <div class="uploaded-file hidden" id="uploadedFile">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                            </svg>
+                            <div class="file-details">
+                                <span class="file-name" id="fileName"></span>
+                                <span class="domain-count" id="domainCount"></span>
+                            </div>
+                            <button type="button" class="btn-remove-file" id="btnRemoveFile">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Maps Keywords View -->
+                    <div id="mapsKeywordsView" class="hidden">
+
+                        <!-- Keywords Input -->
+                        <div id="keywordsInputSection" class="form-group">
+                            <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                                <span style="font-size:1.2em;">🔍</span> Search Keywords
+                                <small style="color:var(--text-muted)">(One per line)</small>
+                            </label>
+                            <textarea id="keywordsInput" rows="8" style="background:linear-gradient(135deg, rgba(99,102,241,0.05), rgba(139,92,246,0.05)); 
+                                border:2px solid var(--accent-primary); border-radius:12px;
+                                padding:16px; font-size:0.95rem; line-height:1.6; resize:vertical;"
+                                placeholder="🍕 Restaurants in New York&#10;🏋️ Gyms in London&#10;🔧 Plumbers in Toronto&#10;☕ Coffee shops in Mumbai"></textarea>
+                            <small class="hint" style="display:flex; align-items:center; gap:4px; margin-top:8px;">
+                                💡 Enter location-based keywords for best results
+                            </small>
+                        </div>
+
+
+
+                        <div class="upload-zone small" id="keywordsUploadZone"
+                            style="margin-top:12px; padding:16px; border-radius:12px;">
+                            <p style="margin:0; display:flex; align-items:center; gap:8px;">📁 Or upload a .txt file
+                            </p>
+                            <input type="file" id="keywordsFile" accept=".txt" hidden>
+                        </div>
+                    </div>
+
+                    <!-- Social Media Input View -->
+                    <div id="socialInputView" class="hidden">
+                        <div class="form-group">
+                            <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                                <span style="font-size:1.2em;">📱</span> Social Media Links
+                                <small style="color:var(--text-muted)">(One per line)</small>
+                            </label>
+                            <select id="socialPlatform"
+                                style="margin-bottom:12px; padding:10px; border-radius:8px; border:1px solid var(--border-color);">
+                                <option value="twitter_posts">Twitter/X Posts</option>
+                                <option value="instagram_posts">Instagram Posts</option>
+                                <option value="facebook_posts">Facebook Posts</option>
+                                <option value="youtube_comments">YouTube Comments</option>
+                            </select>
+                            <textarea id="socialLinksInput" rows="6" style="background:linear-gradient(135deg, rgba(59,130,246,0.05), rgba(99,102,241,0.05)); 
+                                border:2px solid #3b82f6; border-radius:12px;
+                                padding:16px; font-size:0.95rem; line-height:1.6; resize:vertical;"
+                                placeholder="https://twitter.com/username&#10;https://instagram.com/profile&#10;https://youtube.com/watch?v=..."></textarea>
+
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:flex-start; margin-top:10px;">
+                                <label class="checkbox-label"
+                                    style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" id="extractSocialComments" style="width:16px; height:16px;">
+                                    <span>Extract user comments (Instagram/Facebook)</span>
+                                </label>
+                                <small class="hint" style="color:var(--text-muted)">
+                                    💡 Works with public profiles/posts
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <!-- Step 3: Configure -->
+                <div class="wizard-content" data-step="3">
+                    <!-- Domain Extraction Config -->
+                    <div id="domainConfigView" class="hidden">
+                        <div class="filter-section">
+                            <div class="filter-group">
+                                <label class="filter-toggle">
+                                    <input type="checkbox" id="filterEmails" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">
+                                        <strong>Emails</strong>
+                                        <small>Extract email addresses</small>
+                                    </span>
+                                </label>
+                                <div class="filter-options">
+                                    <label>Limit:</label>
+                                    <select id="emailLimit">
+                                        <option value="1">1 per domain</option>
+                                        <option value="5" selected>5 per domain</option>
+                                        <option value="10">10 per domain</option>
+                                        <option value="all">All emails</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-toggle">
+                                    <input type="checkbox" id="filterPhones" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">
+                                        <strong>Phone Numbers</strong>
+                                        <small>Extract phone numbers</small>
+                                    </span>
+                                </label>
+                                <div class="filter-options">
+                                    <label>Limit:</label>
+                                    <select id="phoneLimit">
+                                        <option value="1">1 per domain</option>
+                                        <option value="5" selected>5 per domain</option>
+                                        <option value="all">All phones</option>
+                                    </select>
+                                </div>
+                                <div class="filter-options" style="margin-top: 8px;">
+                                    <label class="checkbox-label" title="Check if phone numbers have WhatsApp (slower)">
+                                        <input type="checkbox" id="checkWhatsApp">
+                                        <span>💬 Check for WhatsApp</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-toggle">
+                                    <input type="checkbox" id="filterTechnology" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">
+                                        <strong>Technology</strong>
+                                        <small>Detect CMS, frameworks, analytics</small>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-toggle">
+                                    <input type="checkbox" id="filterSocial" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">
+                                        <strong>Social Links</strong>
+                                        <small>Facebook, Twitter, LinkedIn, etc.</small>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-toggle">
+                                    <input type="checkbox" id="filterMetadata" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span class="toggle-label">
+                                        <strong>Metadata</strong>
+                                        <small>Title, description, address</small>
+                                    </span>
+                                </label>
+                            </div>
+
+
+                        </div>
+
+                        <div class="crawl-settings-section">
+                            <h4>Crawling & Security</h4>
+                            <div class="setting-row">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="enableDeepCrawl">
+                                    <span>Enable Deep Crawling <span class="info-icon"
+                                            title="Follow internal links to find more contact information on About, Contact pages.">ⓘ</span></span>
+                                </label>
+                            </div>
+                            <div id="deepCrawlOptions" class="hidden">
+                                <div class="setting-row">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="useSitemap" checked>
+                                        <span>Use Sitemap.xml for discovery</span>
+                                    </label>
+                                </div>
+                                <div class="setting-row">
+                                    <label>Max pages per domain:</label>
+                                    <select id="maxPages">
+                                        <option value="3">3 pages</option>
+                                        <option value="5" selected>5 pages</option>
+                                        <option value="10">10 pages (slower)</option>
+                                        <option value="20">20 pages (deep)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="setting-row">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="respectRobots" checked>
+                                    <span>Respect robots.txt</span>
+                                </label>
+                            </div>
+                            <div class="setting-row">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="enableUserAgentRotation" checked>
+                                    <span>🔄 Enable User Agent Rotation</span>
+                                </label>
+                                <small
+                                    style="display: block; margin-left: 24px; margin-top: 4px; color: var(--text-muted);">
+                                    Rotate between 24+ browser user agents to avoid blocking
+                                </small>
+                            </div>
+
+                            <div class="setting-row">
+                                <label>Request Delay:</label>
+                                <select id="requestDelay">
+                                    <option value="1000">Fast (1s)</option>
+                                    <option value="2000" selected>Normal (2s)</option>
+                                    <option value="5000">Safe (5s)</option>
+                                    <option value="10000">Ultra Safe (10s)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Maps Extraction Config -->
+                    <div id="mapsConfigView" class="hidden">
+                        <div class="filter-section">
+                            <div class="form-group">
+                                <label>Max Results per Keyword <span class="info-icon"
+                                        title="How many businesses to extract per keyword. Use 'Unlimited' for all available results but beware of longer run times.">ⓘ</span></label>
+                                <select id="mapsMaxResults" onchange="toggleCustomResults()">
+                                    <option value="10">10 results</option>
+                                    <option value="20" selected>20 results</option>
+                                    <option value="50">50 results</option>
+                                    <option value="100">100 results</option>
+                                    <option value="200">200 results</option>
+                                    <option value="500">500 results</option>
+                                    <option value="-1">♾️ Unlimited (all pages)</option>
+                                    <option value="custom">✏️ Custom number...</option>
+                                </select>
+                                <input type="number" id="mapsCustomResults" class="hidden" min="1" max="10000"
+                                    placeholder="Enter number..." style="margin-top:8px;">
+                                <small class="hint" id="unlimitedHint" class="hidden">Unlimited will scrape all
+                                    available results until no more pages</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="getBusinessDetails" checked>
+                                    <span>Extract Detailed Info (Phone, Website, Hours) <span class="info-icon"
+                                            title="Opens each business to get full details. Slower but provides phone numbers, website, hours, and reviews.">ⓘ</span></span>
+                                    <small class="hint">Slower but more complete data</small>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="crawl-settings-section">
+                            <h4>Security</h4>
+                            <div class="setting-row">
+                                <label>Delay between actions: <span class="info-icon"
+                                        title="Wait time between each extraction. Longer delays reduce the chance of being blocked by Google.">ⓘ</span></label>
+                                <select id="mapsDelay">
+                                    <option value="4000" selected>Safe (4s)</option>
+                                    <option value="8000">Extra Safe (8s)</option>
+                                </select>
+                            </div>
+                            <div class="setting-row">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="mapsUARotation" checked>
+                                    <span>Enable User Agent Rotation <span class="info-icon"
+                                            title="Rotates browser identity for each request. Helps prevent blocking by making traffic look like different users.">ⓘ</span></span>
+                                </label>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+                <!-- Step 4: Review -->
+                <div class="wizard-content" data-step="4">
+                    <div class="review-summary">
+                        <div class="review-item">
+                            <span class="review-label">Campaign Name:</span>
+                            <span class="review-value" id="reviewName"></span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label">Type:</span>
+                            <span class="review-value" id="reviewType">Domain Extraction</span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label">Mode:</span>
+                            <span class="review-value" id="reviewMode"></span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label" id="reviewSourceLabel">Domains:</span>
+                            <span class="review-value" id="reviewSourceCount"></span>
+                        </div>
+                        <div class="review-item" id="reviewFiltersRow">
+                            <span class="review-label">Data to Extract:</span>
+                            <div class="review-tags" id="reviewFilters"></div>
+                        </div>
+                        <div class="review-item" id="reviewSettingsRow">
+                            <span class="review-label">Settings:</span>
+                            <span class="review-value" id="reviewSettings"></span>
+                        </div>
+                    </div>
+
+                    <div class="review-note">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="16" x2="12" y2="12" />
+                            <line x1="12" y1="8" x2="12.01" y2="8" />
+                        </svg>
+                        <p>Ready to create your campaign! Click "Create Campaign" to save and optionally
+                            start
+                            extraction immediately.</p>
+                    </div>
+                </div>
+            </form>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="btnPrevStep" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                    Previous
+                </button>
+                <button type="button" class="btn-primary" id="btnNextStep">
+                    Next
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </button>
+                <button type="button" class="btn-success hidden" id="btnCreateCampaign">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Create Campaign
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal-overlay" id="modalExport">
+        <div class="modal small">
+            <div class="modal-header">
+                <h2>Export Results</h2>
+                <button class="modal-close" id="btnCloseExportModal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="export-options">
+                <button class="export-option" data-format="csv">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                    <span>CSV</span>
+                    <small>For spreadsheets</small>
+                </button>
+                <button class="export-option" data-format="json">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                    </svg>
+                    <span>JSON</span>
+                    <small>For developers</small>
+                </button>
+                <button class="export-option" data-format="excel">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <rect x="8" y="12" width="8" height="6" />
+                    </svg>
+                    <span>Excel</span>
+                    <small>Multi-sheet workbook</small>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Proxies Page -->
+    <div id="pageProxies" class="page hidden">
+        <div class="header-actions">
+            <h1>Proxy Management</h1>
+            <button class="btn-primary" id="btnAddProxy">Add Proxies</button>
+        </div>
+
+        <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Total Proxies</div>
+                    <div class="stat-value" id="statTotalProxies">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Active</div>
+                    <div class="stat-value" style="color: var(--success);" id="statActiveProxies">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-label">Dead</div>
+                    <div class="stat-value" style="color: var(--error);" id="statDeadProxies">0</div>
+                </div>
+            </div>
+        </div>
+
+        <table class="data-table" id="proxiesTable">
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Protocol</th>
+                    <th>Host:Port</th>
+                    <th>Username</th>
+                    <th>Last Checked</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="proxiesTableBody">
+                <!-- Loaded dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Schedules Page -->
+    <div id="pageSchedules" class="page hidden">
+        <div class="header-actions">
+            <h1>Scheduled Jobs</h1>
+        </div>
+        <table class="data-table" id="schedulesTable">
+            <thead>
+                <tr>
+                    <th>Campaign</th>
+                    <th>Frequency</th>
+                    <th>Cron</th>
+                    <th>Next Run</th>
+                    <th>Last Run</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="schedulesTableBody">
+                <!-- Loaded dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Proxy Modal -->
+    <div class="modal-overlay" id="modalAddProxy">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Add Proxies</h2>
+                <button class="modal-close" id="btnCloseProxyModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Proxy List (One per line)</label>
+                    <textarea id="proxyInput" class="form-control" style="height: 200px" placeholder="Formats:
+protocol://user:pass@host:port
+host:port:user:pass
+host:port"></textarea>
+                    <span class="help-text">Supported protocols: http, https, socks4, socks5. Default is
+                        http.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="btnSaveProxies">Import Proxies</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Modal -->
+    <div class="modal-overlay" id="modalSchedule">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Schedule Campaign</h2>
+                <button class="modal-close" id="btnCloseScheduleModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Frequency</label>
+                    <select id="scheduleFrequency" class="form-control">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="custom">Custom (Cron)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="scheduleTimeGroup">
+                    <label>Time of Day</label>
+                    <input type="time" id="scheduleTime" class="form-control" value="09:00">
+                </div>
+
+                <div class="form-group hidden" id="scheduleCronGroup">
+                    <label>Cron Expression</label>
+                    <input type="text" id="scheduleCron" class="form-control" placeholder="* * * * *">
+                    <span class="help-text">Min Hour Day Month Weekday</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Auto-Export Results</label>
+                    <select id="scheduleAutoExport" class="form-control">
+                        <option value="none">None</option>
+                        <option value="csv">CSV</option>
+                        <option value="json">JSON</option>
+                        <option value="excel">Excel</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="btnSaveSchedule">Save Schedule</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- AI Enrichment Modal -->
+    <div class="modal-overlay" id="modalAI">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>AI Data Enrichment 🧠</h2>
+                <button class="modal-close" id="btnCloseAIModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchAITab('run')">Run Task</button>
+                    <button class="tab-btn" onclick="switchAITab('settings')">Configure Keys</button>
+                </div>
+
+                <!-- Run Tab -->
+                <div id="aiTabRun" class="tab-content active">
+                    <div class="form-group">
+                        <label>Task Preset</label>
+                        <select id="aiPreset" class="form-control">
+                            <option value="custom">Custom Prompt</option>
+                            <option value="score">Lead Scoring (0-10)</option>
+                            <option value="summary">Summarize Business</option>
+                            <option value="tech">Extract Technologies</option>
+                            <option value="emails">Find Contact Names</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prompt</label>
+                        <textarea id="aiPrompt" class="form-control" style="height: 120px"
+                            placeholder="Analyze this data and..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Limit Items (0 for all)</label>
+                        <input type="number" id="aiLimit" class="form-control" value="0">
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="aiTabSettings" class="tab-content hidden">
+                    <p class="section-title">Gemini AI Settings</p>
+                    <div class="form-group">
+                        <label>Gemini API Key</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="password" id="aiApiKey" class="form-control" placeholder="AIzp..."
+                                style="flex: 1;">
+                            <button class="btn-secondary" onclick="togglePasswordVisibility('aiApiKey')"
+                                style="padding: 8px 12px;">👁️</button>
+                        </div>
+                        <small style="color: var(--text-muted); display: block; margin-top: 4px;">
+                            Get your free key from <a href="https://makersuite.google.com/app/apikey" target="_blank"
+                                style="color: var(--accent-primary);">Google AI Studio</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary hidden" id="btnSaveAISettings">Save Settings</button>
+                <button class="btn-primary" id="btnRunAI">Start Enrichment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>

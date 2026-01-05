@@ -1,0 +1,43 @@
+{
+  "name": "data-extractor-pro",
+  "version": "1.0.0",
+  "description": "Professional Data Extraction Platform - Google Maps Scraper, Email Marketing, SMS Campaigns, and Multi-Channel Outreach by BundleWP",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "google-maps-scraper",
+    "data-extractor",
+    "email-marketing",
+    "sms-campaign",
+    "whatsapp-bulk",
+    "lead-generation",
+    "business-directory"
+  ],
+  "author": "DataXtract <support@bundlewp.com>",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "homepage": "https://bundlewp.com",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.13.2",
+    "better-sqlite3": "^9.2.2",
+    "cheerio": "^1.0.0-rc.12",
+    "express": "^4.18.2",
+    "https-proxy-agent": "^7.0.6",
+    "json2csv": "^6.0.0-alpha.2",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.12",
+    "openai": "^6.15.0",
+    "puppeteer": "^21.6.1",
+    "twilio": "^5.11.1",
+    "uuid": "^9.0.1",
+    "ws": "^8.14.2",
+    "xlsx": "^0.18.5"
+  }
+}

@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+
+# Database
+*.db
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Chrome/Puppeteer data
+chrome-data/
+puppeteer_data/
+
+# Temp files
+tmp/
+temp/
+
+# Uploads and exports (user data)
+uploads/
+exports/
+
+# ZIP files
+*.zip
+
+# Vercel
+.vercel
