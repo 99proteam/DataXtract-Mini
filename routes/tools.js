@@ -13,9 +13,8 @@ const { toolsOps } = require('../config/database');
 const { proxyOps } = require('../config/database');
 const { withBrowserExecutable } = require('../services/browserExecutable');
 
-// Pkg-compatible base directory
-const isPkg = typeof process.pkg !== 'undefined';
-const baseDir = isPkg ? path.dirname(process.execPath) : path.join(__dirname, '..');
+// Project data directory
+const baseDir = path.join(__dirname, '..');
 
 // Helper to delay
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -41,7 +40,7 @@ const getRandomUA = (type = 'desktop') => {
 
 /**
  * POST /api/tools/traffic
- * Generate fake traffic to URLs
+ * Run authorized traffic tests against URLs
  */
 router.post('/traffic', async (req, res) => {
     const { urls, config } = req.body;

@@ -1,14 +1,14 @@
 {
   "name": "data-extractor-pro",
   "version": "1.0.0",
-  "description": "Professional Data Extraction Platform - Google Maps Scraper, Email Marketing, SMS Campaigns, and Multi-Channel Outreach by BundleWP",
+  "description": "Self-hosted toolkit for Google Maps and domain extraction, lead verification, browser tools, and permission-based outreach",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
     "deploy": "npm install && npm start",
     "test": "node --test tests/frontend-integrity.test.js tests/browser-executable.test.js",
-    "build-exe": "pkg ."
+    "capture:readme": "node scripts/capture-readme-screenshot.js"
   },
   "keywords": [
     "google-maps-scraper",
@@ -49,22 +49,5 @@
     "uuid": "^9.0.1",
     "ws": "^8.14.2",
     "xlsx": "^0.18.5"
-  },
-  "devDependencies": {
-    "pkg": "^5.8.1"
-  },
-  "bin": "server.js",
-  "pkg": {
-    "assets": [
-      "public/**/*",
-      "node_modules/axios/package.json"
-    ],
-    "scripts": [
-      "node_modules/axios/**/*.js"
-    ],
-    "targets": [
-      "node18-win-x64"
-    ],
-    "outputPath": "dist"
   }
 }

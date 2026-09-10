@@ -8,9 +8,8 @@ const fs = require('fs');
 const path = require('path');
 const { withBrowserExecutable } = require('./browserExecutable');
 
-// Session storage (pkg compatible)
-const isPkg = typeof process.pkg !== 'undefined';
-const baseDir = isPkg ? path.dirname(process.execPath) : path.join(__dirname, '..');
+// Local session storage
+const baseDir = path.join(__dirname, '..');
 const SESSIONS_DIR = path.join(baseDir, 'data', 'linkedin-sessions');
 const activeSessions = new Map();
 

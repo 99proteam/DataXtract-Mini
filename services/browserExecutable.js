@@ -1,8 +1,8 @@
 /**
  * Resolve a usable Chrome-family browser for Puppeteer.
  *
- * The application may run from source, from a packaged executable, or on a
- * machine where Puppeteer's downloaded Chromium is unavailable or broken.
+ * The application may run on a machine where Puppeteer's downloaded Chromium
+ * is unavailable or broken, so installed Chrome-family browsers are supported.
  */
 const fs = require('fs');
 const path = require('path');
@@ -12,14 +12,10 @@ function existingPath(candidates) {
 }
 
 function getBrowserExecutablePath() {
-    const executableDir = path.dirname(process.execPath);
     const projectDir = path.join(__dirname, '..');
     const candidates = [
         process.env.PUPPETEER_EXECUTABLE_PATH,
         process.env.CHROME_PATH,
-        path.join(executableDir, 'chrome-win64', 'chrome.exe'),
-        path.join(executableDir, 'chrome-win', 'chrome.exe'),
-        path.join(executableDir, 'chromium', 'chrome.exe'),
         path.join(projectDir, 'chrome-win64', 'chrome.exe'),
         path.join(projectDir, 'chrome-win', 'chrome.exe'),
         path.join(projectDir, 'chromium', 'chrome.exe'),

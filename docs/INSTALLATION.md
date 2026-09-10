@@ -89,7 +89,7 @@ pm2 startup
 
 ### Proxy Setup
 - Navigate to **Settings > Proxies**.
-- Add your proxies (Webshare or Custom) to enable features like **Fake Traffic** and **Anti-Blocking** extraction.
+- Add your proxies (Webshare or Custom) to enable features like **Website Traffic Testing** and **Anti-Blocking** extraction.
 
 ### Third-Party Keys (Optional)
 - **OpenAI/Gemini**: For AI analysis options.

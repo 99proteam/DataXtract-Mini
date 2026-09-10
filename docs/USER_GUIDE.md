@@ -22,7 +22,7 @@ http://localhost:3007
 | **Smart Filters** | Configure what to extract and limits |
 | **Source Tracking** | Track which page each data was found on |
 | **Export Options** | CSV, JSON, Excel formats |
-| **Visual Tools** | Fake Traffic, Code Downloader, Bulk Screenshots |
+| **Visual Tools** | Website Traffic Tester, Code Downloader, Bulk Screenshots |
 
 ## Data Types Extracted
 
@@ -93,7 +93,7 @@ Review your settings and click **"Create Campaign"**.
 
 ## Visual Tools & Extras
 
-### 🚦 Fake Traffic Generator
+### 🚦 Website Traffic Tester
 Located in the **Visual Tools** tab.
 - **Purpose**: Simulate organic traffic to websites.
 - **Features**:

@@ -3,9 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Ensure data directory exists
-// Ensure data directory exists
-const isPkg = typeof process.pkg !== 'undefined';
-const baseDir = isPkg ? path.dirname(process.execPath) : path.join(__dirname, '..');
+const baseDir = path.join(__dirname, '..');
 
 // Debug Log Helper
 const logError = (err) => {

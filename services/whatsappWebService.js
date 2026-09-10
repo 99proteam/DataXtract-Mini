@@ -9,9 +9,8 @@ const fs = require('fs');
 const path = require('path');
 const { withBrowserExecutable } = require('./browserExecutable');
 
-// Session storage directory (pkg compatible)
-const isPkg = typeof process.pkg !== 'undefined';
-const baseDir = isPkg ? path.dirname(process.execPath) : path.join(__dirname, '..');
+// Local session storage directory
+const baseDir = path.join(__dirname, '..');
 const SESSIONS_DIR = path.join(baseDir, 'data', 'whatsapp-sessions');
 
 // Ensure sessions directory exists

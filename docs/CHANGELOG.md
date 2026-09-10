@@ -1,10 +1,10 @@
-# Data Extractor Pro - Changelog
+# DataXtract Mini - Changelog
 
 All notable changes to this project will be documented in this file.
 
 ---
 
-## [1.0.0] - 2025-01-01
+## [1.0.0] - 2026-09-11
 
 ### Added
 - **Google Maps Extractor** - Extract business data with phone, email, website, hours, reviews
@@ -22,6 +22,10 @@ All notable changes to this project will be documented in this file.
 - **Export Formats** - CSV, JSON, Excel export options
 - **Real-time Updates** - WebSocket-based progress tracking
 - **Premium UI** - Dark theme with glassmorphism design
+- **One-command setup** - Install and start with `npm run deploy`
+- **Repository automation** - Continuous integration and tagged source releases
+- **Contributor resources** - Issue forms, pull-request template, roadmap, security policy, and contribution guide
+- **Responsible-use guidance** - Clear expectations for extraction, testing, and outreach
 
 ### Features
 - Multi-channel marketing (SMS, Email, WhatsApp)
@@ -39,4 +43,4 @@ For support, please contact: support@bundlewp.com
 
 ---
 
-© 2025 BundleWP. All rights reserved.
+© 2026 BundleWP. All rights reserved.

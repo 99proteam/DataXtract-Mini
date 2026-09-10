@@ -1,8 +1,43 @@
 # DataXtract Mini
 
-A local data-extraction and outreach application from [BundleWP](https://bundlewp.com). It includes Google Maps and domain extraction, lead verification, screenshots, code download, traffic testing, and authenticated outreach tools.
+<p align="center">
+  <img src="docs/images/dataxtract-mini-social-preview.jpg" alt="DataXtract Mini - local data extraction and outreach toolkit" width="100%">
+</p>
 
-Repository: **https://github.com/99proteam/DataXtract-Mini**
+<p align="center">
+  <a href="https://github.com/99proteam/DataXtract-Mini/actions/workflows/ci.yml"><img src="https://github.com/99proteam/DataXtract-Mini/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="https://github.com/99proteam/DataXtract-Mini/releases"><img src="https://img.shields.io/github/v/release/99proteam/DataXtract-Mini?display_name=tag" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white" alt="Node.js 18 or newer">
+  <img src="https://img.shields.io/badge/self--hosted-local-635bff" alt="Self-hosted and local">
+</p>
+
+**DataXtract Mini** is a self-hosted Node.js toolkit for turning public web and map data into structured, exportable leads. It combines Google Maps and domain extraction, lead verification, bulk screenshots, code download, authorized traffic testing, and authenticated outreach integrations in one local dashboard.
+
+- Runs locally on Windows, macOS, and Linux
+- Installs and starts with one command
+- Exports structured results without requiring a hosted account
+- Keeps application data and integration settings on your computer
+
+> If DataXtract Mini saves you time, consider [starring the repository](https://github.com/99proteam/DataXtract-Mini) so more developers can discover it.
+
+## Feature highlights
+
+| Area | Capabilities |
+|---|---|
+| Lead discovery | Google Maps searches, domain crawling, contact and social-link extraction |
+| Lead quality | MX checks, optional ZeroBounce validation, WhatsApp number checks, lead scoring |
+| Research | Technology detection, metadata, media, LinkedIn extraction, rendered-page support |
+| Visual tools | Bulk screenshots, static/rendered source download, authorized traffic testing |
+| Outreach | SMTP email, Twilio SMS, WhatsApp Web, scheduling, personalization |
+| Operations | CSV/JSON/Excel export, proxy rotation, browser detection, local SQLite storage |
+
+## Preview
+
+<p align="center">
+  <img src="docs/images/dashboard.png" alt="DataXtract Mini dashboard" width="100%">
+</p>
+
+The dashboard provides a single place to start extraction jobs, review activity, configure integrations, and open the included user guide.
 
 ## Requirements
 
@@ -12,7 +47,7 @@ Repository: **https://github.com/99proteam/DataXtract-Mini**
 - Google Chrome or Microsoft Edge
 - 4 GB RAM recommended
 
-## Install and run
+## Quick start
 
 ### Option A: Downloaded or transferred folder
 
@@ -138,9 +173,9 @@ LinkedIn may show verification challenges. Complete them manually and use reason
 3. Select static HTML or rendered JavaScript mode.
 4. Start the download and collect the generated HTML files.
 
-### Traffic testing
+### Website traffic testing
 
-1. Open **Tools → Fake Traffic**.
+1. Open **Visual Tools → Website Traffic Tester**.
 2. Enter URLs you own or are authorized to test.
 3. Choose visit count, device, duration, human simulation, and optional proxies.
 4. Start the job and review the activity log.
@@ -153,7 +188,6 @@ LinkedIn may show verification challenges. Complete them manually and use reason
 | `npm start` | Start an already-installed copy |
 | `npm run dev` | Start the development server |
 | `npm test` | Run automated integrity tests |
-| `npm run build-exe` | Build the Windows executable package |
 
 ## Troubleshooting
 
@@ -164,7 +198,39 @@ LinkedIn may show verification challenges. Complete them manually and use reason
 - **Proxy connection failed:** disable/remove dead proxies; Maps and domain extraction also retry directly.
 - **Database locked:** close external database viewers while a campaign is writing data.
 
-More documentation: [Installation](docs/INSTALLATION.md), [User Guide](docs/USER_GUIDE.md), [Changelog](docs/CHANGELOG.md), and [License](LICENSE.md).
+More documentation: [Installation](docs/INSTALLATION.md), [User Guide](docs/USER_GUIDE.md), [Changelog](docs/CHANGELOG.md), and [License](LICENSE).
+
+## Architecture
+
+```text
+Browser dashboard
+      |
+Express API routes
+      |
+Extraction, verification, outreach, and browser services
+      |
+Local SQLite database + local settings
+```
+
+The application is intentionally self-hosted. Optional providers such as Twilio, SMTP, ZeroBounce, OpenAI, Gemini, Webshare, WhatsApp, and LinkedIn are only contacted when their related features are configured and used.
+
+## Responsible use
+
+DataXtract Mini is intended for legitimate research, data portability, testing, and permission-based outreach.
+
+- Only collect information you are legally permitted to access and process.
+- Respect website terms, robots directives, rate limits, privacy laws, and platform rules.
+- Send email, SMS, WhatsApp, or LinkedIn messages only when you have the required consent or another valid legal basis.
+- Use the traffic tester only on websites you own or are explicitly authorized to test.
+- Never use the project for credential theft, access-control bypass, harassment, spam, deceptive engagement, or service disruption.
+
+You are responsible for how you configure and operate the software. See [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
+
+## Contributing
+
+Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), browse the [open issues](https://github.com/99proteam/DataXtract-Mini/issues), or choose an issue marked [`good first issue`](https://github.com/99proteam/DataXtract-Mini/labels/good%20first%20issue).
+
+For support questions and feature ideas, use [GitHub Discussions](https://github.com/99proteam/DataXtract-Mini/discussions). The planned direction is documented in the [roadmap](docs/ROADMAP.md).
 
 ## Premium products from BundleWP
 
@@ -186,6 +252,7 @@ Explore the complete catalog at **[bundlewp.com/shop](https://bundlewp.com/shop/
 
 - Website: https://bundlewp.com
 - Email: support@bundlewp.com
-- License: see [LICENSE.md](LICENSE.md)
+- Open-source license detected by GitHub: [MIT License](LICENSE)
+- Commercial BundleWP products may use separate licensing terms.
 
 © 2026 BundleWP. All rights reserved.

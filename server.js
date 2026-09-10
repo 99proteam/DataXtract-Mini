@@ -6,7 +6,7 @@ const multer = require('multer');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 
-// Polyfill File for Node 18.5 (pkg environment)
+// Polyfill File for older Node 18 releases
 if (typeof global.File === 'undefined') {
     const { Blob } = require('buffer');
     global.File = class File extends Blob {
@@ -38,9 +38,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Create uploads and exports directories
-// Create uploads and exports directories
-const isPkg = typeof process.pkg !== 'undefined';
-const baseDir = isPkg ? path.dirname(process.execPath) : __dirname;
+const baseDir = __dirname;
 
 const uploadsDir = path.join(baseDir, 'uploads');
 const exportsDir = path.join(baseDir, 'exports');
