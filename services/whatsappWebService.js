@@ -7,9 +7,12 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
+const { withBrowserExecutable } = require('./browserExecutable');
 
-// Session storage directory
-const SESSIONS_DIR = path.join(__dirname, '..', 'data', 'whatsapp-sessions');
+// Session storage directory (pkg compatible)
+const isPkg = typeof process.pkg !== 'undefined';
+const baseDir = isPkg ? path.dirname(process.execPath) : path.join(__dirname, '..');
+const SESSIONS_DIR = path.join(baseDir, 'data', 'whatsapp-sessions');
 
 // Ensure sessions directory exists
 if (!fs.existsSync(SESSIONS_DIR)) {
@@ -68,7 +71,7 @@ async function initSession(sessionName, onQRCode) {
         console.log(`[WhatsApp] Initializing session "${sessionName}"${hasExistingSession ? ' (existing data found)' : ''}...`);
 
         // Launch browser with persistent session
-        const browser = await puppeteer.launch({
+        const browser = await puppeteer.launch(withBrowserExecutable({
             headless: false, // Show browser for QR scan
             userDataDir: sessionPath,
             args: [
@@ -78,7 +81,7 @@ async function initSession(sessionName, onQRCode) {
                 '--disable-accelerated-2d-canvas',
                 '--disable-gpu'
             ]
-        });
+        }));
 
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 800 });
@@ -89,6 +92,14 @@ async function initSession(sessionName, onQRCode) {
         // Wait for either QR code or logged in state
         let loggedIn = false;
         let qrCode = null;
+        const loginSelectors = [
+            '[data-testid="chat-list"]',
+            '[data-testid="chatlist"]',
+            '#pane-side',
+            '[data-testid="conversation-panel-wrapper"]',
+            '[aria-label="Chat list"]',
+            '.two > div'
+        ];
 
         // Use longer timeout if existing session (WhatsApp loads saved session)
         const loginTimeout = hasExistingSession ? 30000 : 10000;
@@ -98,15 +109,6 @@ async function initSession(sessionName, onQRCode) {
             console.log(`[WhatsApp] Waiting for login (${loginTimeout / 1000}s timeout)...`);
 
             // Try multiple selectors that indicate logged-in state
-            const loginSelectors = [
-                '[data-testid="chat-list"]',
-                '[data-testid="chatlist"]',
-                '#pane-side',
-                '[data-testid="conversation-panel-wrapper"]',
-                '[aria-label="Chat list"]',
-                '.two > div'  // Main app container with side panel
-            ];
-
             await page.waitForFunction(
                 (selectors) => selectors.some(s => document.querySelector(s)),
                 { timeout: loginTimeout },
@@ -118,10 +120,11 @@ async function initSession(sessionName, onQRCode) {
             // Not logged in, try to get QR code
             console.log(`[WhatsApp] Not logged in, looking for QR code...`);
             try {
-                await page.waitForSelector('canvas[aria-label="Scan me!"]', { timeout: 15000 });
+                const qrSelector = 'canvas[aria-label*="Scan"], canvas[aria-label*="QR"], [data-ref] canvas, [data-ref]';
+                await page.waitForSelector(qrSelector, { timeout: 15000 });
 
                 // Capture QR code as image
-                const qrCanvas = await page.$('canvas[aria-label="Scan me!"]');
+                const qrCanvas = await page.$(qrSelector);
                 if (qrCanvas) {
                     qrCode = await qrCanvas.screenshot({ encoding: 'base64' });
                     qrCode = `data:image/png;base64,${qrCode}`;
@@ -129,12 +132,6 @@ async function initSession(sessionName, onQRCode) {
 
                     if (onQRCode) onQRCode(qrCode);
                 }
-
-                // Wait for login after QR scan (up to 2 minutes)
-                console.log(`[WhatsApp] Waiting for QR scan (2 min timeout)...`);
-                await page.waitForSelector('[data-testid="chat-list"]', { timeout: 120000 });
-                loggedIn = true;
-                console.log(`[WhatsApp] Session "${sessionName}" logged in after QR scan!`);
             } catch (qrError) {
                 console.error(`[WhatsApp] QR/login error for "${sessionName}":`, qrError.message);
             }
@@ -150,11 +147,30 @@ async function initSession(sessionName, onQRCode) {
 
         console.log(`[WhatsApp] Session "${sessionName}" stored. loggedIn: ${loggedIn}`);
 
+        // Do not keep the HTTP request open while the user scans the QR code.
+        // Update the in-memory session as soon as WhatsApp finishes logging in.
+        if (!loggedIn && qrCode) {
+            page.waitForFunction(
+                (selectors) => selectors.some(selector => document.querySelector(selector)),
+                { timeout: 120000 },
+                loginSelectors
+            ).then(() => {
+                const session = activeSessions.get(sessionName);
+                if (session?.page === page) {
+                    session.loggedIn = true;
+                    session.lastUsed = Date.now();
+                    console.log(`[WhatsApp] Session "${sessionName}" logged in after QR scan!`);
+                }
+            }).catch(error => {
+                console.log(`[WhatsApp] QR scan wait ended for "${sessionName}": ${error.message}`);
+            });
+        }
+
         return {
             success: true,
             loggedIn,
             qrCode,
-            message: loggedIn ? 'Logged in successfully' : 'Waiting for QR scan or login failed'
+            message: loggedIn ? 'Logged in successfully' : (qrCode ? 'QR code ready. Scan it to log in.' : 'Login or QR code not detected')
         };
 
     } catch (error) {

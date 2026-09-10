@@ -6,6 +6,7 @@
 const puppeteer = require('puppeteer');
 const security = require('./security');
 const userAgentRotator = require('./userAgentRotator');
+const { withBrowserExecutable } = require('./browserExecutable');
 
 /**
  * Load a URL and return the page HTML for preview
@@ -17,11 +18,11 @@ async function loadPage(url, options = {}) {
     let browser = null;
 
     try {
-        browser = await puppeteer.launch({
+        browser = await puppeteer.launch(withBrowserExecutable({
             headless: 'new',
             defaultViewport: { width: 1920, height: 1080 },
             args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
+        }));
 
         const page = await browser.newPage();
 
@@ -86,11 +87,11 @@ async function extractData(url, fields, options = {}) {
     let browser = null;
 
     try {
-        browser = await puppeteer.launch({
+        browser = await puppeteer.launch(withBrowserExecutable({
             headless: options.headless !== false ? 'new' : false,
             defaultViewport: { width: 1920, height: 1080 },
             args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
+        }));
 
         const page = await browser.newPage();
 
@@ -213,11 +214,11 @@ async function extractWithPagination(url, fields, nextSelector, maxPages = 10, o
     const allData = [];
 
     try {
-        browser = await puppeteer.launch({
+        browser = await puppeteer.launch(withBrowserExecutable({
             headless: 'new',
             defaultViewport: { width: 1920, height: 1080 },
             args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
+        }));
 
         const page = await browser.newPage();
 
@@ -309,10 +310,10 @@ async function getElementSelector(url, x, y) {
     let browser = null;
 
     try {
-        browser = await puppeteer.launch({
+        browser = await puppeteer.launch(withBrowserExecutable({
             headless: 'new',
             defaultViewport: { width: 1920, height: 1080 }
-        });
+        }));
 
         const page = await browser.newPage();
         await page.goto(url, { waitUntil: 'networkidle2' });

@@ -23,6 +23,11 @@ router.post('/send-sms', async (req, res) => {
             return res.status(400).json({ error: 'Message required' });
         }
 
+        const configurationError = smsService.getConfigurationError();
+        if (configurationError) {
+            return res.status(400).json({ success: false, error: configurationError });
+        }
+
         // Format recipients as needed
         const formattedRecipients = recipients.map(r => ({
             phone: typeof r === 'string' ? r : r.phone,
@@ -94,6 +99,11 @@ router.post('/send-email', async (req, res) => {
 
         if (!subject || !html) {
             return res.status(400).json({ error: 'Subject and HTML content required' });
+        }
+
+        const configurationError = emailMarketingService.getConfigurationError();
+        if (configurationError) {
+            return res.status(400).json({ success: false, error: configurationError });
         }
 
         // Format recipients

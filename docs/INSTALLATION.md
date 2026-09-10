@@ -5,46 +5,44 @@
 - **OS**: Windows, macOS, or Linux
 - **Node.js**: Version 18.x or higher (Recommended: 20.x LTS)
 - **RAM**: Minimum 4GB (8GB recommended for heavy concurrency)
-- **Browser**: Google Chrome installed (Puppeteer uses it directly or downloads Chromium)
+- **Browser**: Google Chrome or Microsoft Edge installed
 
 ---
 
 ## 💻 Localhost Installation (Windows/Mac/Linux)
 
 ### 1. Extract Files
-Extract the `Data Extractor Pro` folder to your desired location.
+Extract the `DataXtract Mini` folder to your desired location.
 - **Example Windows Path**: `C:\Users\YourName\Documents\Data Extractor`
 - **Example Mac/Linux Path**: `/home/user/data-extractor`
 
-### 2. Install Dependencies
+### 2. Install and Start
 Open your terminal or command prompt, navigate to the project folder, and run:
 
 ```bash
 cd "path/to/Data Extractor"
-npm install
+npm run deploy
 ```
 
 > **Note**: If you see errors related to `puppeteer`, try: `npm install puppeteer --save`
 
-### 3. Configure Environment
-1. Find the file named `.env.example` in the root directory.
-2. Rename it to `.env`.
-3. Open `.env` in a text editor (Notepad, VS Code) and update settings if needed (API keys, etc.).
+### 3. Configure Integrations
+Open **Settings** in the application and add the SMTP, Twilio, proxy, ZeroBounce, or AI credentials required for the tools you use.
 
-### 4. Start the Application
-Run the start command:
+### 4. Later Starts
+After the first installation, start the application with:
 
 ```bash
 npm start
 ```
-*Or for development mode with auto-restart:*
+Or use the development command:
 ```bash
 npm run dev
 ```
 
 ### 5. Access the App
 Open your web browser and go to:
-**http://localhost:3000**
+**http://localhost:3007**
 
 ---
 
@@ -97,7 +95,7 @@ pm2 startup
 - **OpenAI/Gemini**: For AI analysis options.
 - **Twilio**: For SMS campaigns.
 - **SMTP**: For Email campaigns.
-Add these in the `.env` file or Settings page.
+Add these on the Settings page.
 
 ---
 
@@ -106,8 +104,8 @@ Add these in the `.env` file or Settings page.
 ### "Puppeteer failed to launch"
 Usually missing system dependencies. ensure you ran Step 3 in the VPS guide. On Windows, ensure Chrome is not blocked by antivirus.
 
-### "Port 3000 already in use"
-Edit `.env` and change `PORT=3000` to `PORT=3001` or another free port.
+### "Port 3007 already in use"
+Stop the other application using port 3007, or set a different `PORT` environment variable before starting DataXtract Mini.
 
 ### "SQLite database is locked"
 Ensure you don't have the database file open in another viewer while writing heavy data.

@@ -6,6 +6,18 @@ const multer = require('multer');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 
+// Polyfill File for Node 18.5 (pkg environment)
+if (typeof global.File === 'undefined') {
+    const { Blob } = require('buffer');
+    global.File = class File extends Blob {
+        constructor(fileBits, fileName, options) {
+            super(fileBits, options);
+            this.name = fileName;
+            this.lastModified = options?.lastModified || Date.now();
+        }
+    };
+}
+
 // Import modules
 const db = require('./config/database');
 const campaignRoutes = require('./routes/campaigns');
@@ -26,8 +38,31 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Create uploads and exports directories
-const uploadsDir = path.join(__dirname, 'uploads');
-const exportsDir = path.join(__dirname, 'exports');
+// Create uploads and exports directories
+const isPkg = typeof process.pkg !== 'undefined';
+const baseDir = isPkg ? path.dirname(process.execPath) : __dirname;
+
+const uploadsDir = path.join(baseDir, 'uploads');
+const exportsDir = path.join(baseDir, 'exports');
+
+const logFile = path.join(baseDir, 'app-debug.log');
+function logToFile(msg) {
+    fs.appendFileSync(logFile, `[${new Date().toISOString()}] ${msg}\n`);
+}
+
+// Global Error Handlers
+process.on('uncaughtException', (err) => {
+    logToFile(`FATAL ERROR: ${err.message}\n${err.stack}`);
+    console.error('FATAL ERROR:', err);
+    process.exit(1);
+});
+process.on('unhandledRejection', (reason, promise) => {
+    logToFile(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
+    console.error('Unhandled Rejection:', reason);
+});
+
+logToFile('Application starting...');
+
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 if (!fs.existsSync(exportsDir)) fs.mkdirSync(exportsDir, { recursive: true });
 

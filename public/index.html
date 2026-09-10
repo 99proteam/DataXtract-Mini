@@ -524,13 +524,13 @@
                     <!-- Settings Tabs -->
                     <div class="settings-tabs"
                         style="display: flex; gap: 8px; margin-bottom: 16px; background: var(--bg-tertiary); padding: 6px; border-radius: var(--radius-md); flex-wrap: wrap;">
-                        <button class="tab-btn active" onclick="switchSettingsTab('proxy')" style="flex:1;">🌐
+                        <button class="tab-btn active" onclick="switchSettingsTab('proxy', this)" style="flex:1;">🌐
                             Proxy</button>
-                        <button class="tab-btn" onclick="switchSettingsTab('smtp')" style="flex:1;">📧
+                        <button class="tab-btn" onclick="switchSettingsTab('smtp', this)" style="flex:1;">📧
                             SMTP</button>
-                        <button class="tab-btn" onclick="switchSettingsTab('twilio')" style="flex:1;">📱
+                        <button class="tab-btn" onclick="switchSettingsTab('twilio', this)" style="flex:1;">📱
                             Twilio</button>
-                        <button class="tab-btn" onclick="switchSettingsTab('apikeys')" style="flex:1;">🔑
+                        <button class="tab-btn" onclick="switchSettingsTab('apikeys', this)" style="flex:1;">🔑
                             API
                             Keys</button>
 
@@ -731,18 +731,18 @@
                     <!-- Campaign Type Tabs -->
                     <div class="marketing-tabs"
                         style="display: flex; gap: 8px; margin-bottom: 24px; background: var(--bg-tertiary); padding: 6px; border-radius: var(--radius-md); flex-wrap: wrap;">
-                        <button class="tab-btn active" onclick="switchMarketingTab('sms')" style="flex:1;">📱 SMS
+                        <button class="tab-btn active" onclick="switchMarketingTab('sms', this)" style="flex:1;">📱 SMS
                             Campaign</button>
-                        <button class="tab-btn" onclick="switchMarketingTab('email')" style="flex:1;">📧
+                        <button class="tab-btn" onclick="switchMarketingTab('email', this)" style="flex:1;">📧
                             Email
                             Campaign</button>
-                        <button class="tab-btn" onclick="switchMarketingTab('whatsapp')" style="flex:1;">💬
+                        <button class="tab-btn" onclick="switchMarketingTab('whatsapp', this)" style="flex:1;">💬
                             WhatsApp
                             Web</button>
-                        <button class="tab-btn" onclick="switchMarketingTab('verify')" style="flex:1;">✅
+                        <button class="tab-btn" onclick="switchMarketingTab('verify', this)" style="flex:1;">✅
                             Verify
                             Leads</button>
-                        <button class="tab-btn" onclick="switchMarketingTab('linkedin')" style="flex:1;">💼
+                        <button class="tab-btn" onclick="switchMarketingTab('linkedin', this)" style="flex:1;">💼
                             LinkedIn</button>
                     </div>
 
@@ -888,7 +888,7 @@
                                 style="padding: 12px 24px; background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); font-weight: 600; border-radius: 10px; cursor: pointer; flex: 1;">
                                 🧪 Send Test SMS
                             </button>
-                            <button id="btnSendSms" onclick="sendSmsCampaign()"
+                            <button id="btnSendSms"
                                 style="padding: 14px 28px; background: linear-gradient(135deg, #22c55e, #16a34a); color: white; font-weight: 600; border-radius: 10px; cursor: pointer; flex: 2;">
                                 📤 Send SMS Campaign
                             </button>

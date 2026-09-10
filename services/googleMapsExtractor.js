@@ -7,6 +7,11 @@ const puppeteer = require('puppeteer');
 const security = require('./security');
 const proxyManager = require('./proxyManager');
 const userAgentRotator = require('./userAgentRotator');
+const { withBrowserExecutable, getBrowserExecutablePath } = require('./browserExecutable');
+
+function isProxyConnectionError(error) {
+    return /ERR_PROXY|ERR_TUNNEL|proxy connection/i.test(error?.message || '');
+}
 
 /**
  * Google Maps Business Data Structure
@@ -32,6 +37,7 @@ const userAgentRotator = require('./userAgentRotator');
  */
 async function searchGoogleMaps(keyword, options = {}) {
     let browser = null;
+    let proxy = null;
     const businesses = [];
 
     const log = (msg) => {
@@ -43,13 +49,16 @@ async function searchGoogleMaps(keyword, options = {}) {
         log(`Starting extraction for "${keyword}"...`);
 
         // Proxy setup
-        const proxy = proxyManager.getNextProxy();
+        proxy = options.useProxies === false ? null : proxyManager.getNextProxy();
         const proxyArgs = proxyManager.formatForPuppeteer(proxy);
         const proxyAuth = proxyManager.getAuth(proxy);
 
         if (proxy) {
             log(`Using proxy: ${proxy.host}:${proxy.port}`);
         }
+
+        const executablePath = getBrowserExecutablePath();
+        if (executablePath) log(`Using browser: ${executablePath}`);
 
         const launchOptions = {
             headless: options.headless || 'new',
@@ -66,7 +75,7 @@ async function searchGoogleMaps(keyword, options = {}) {
         };
 
         log(`Starting browser (Headless: ${launchOptions.headless})...`);
-        browser = await puppeteer.launch(launchOptions);
+        browser = await puppeteer.launch(withBrowserExecutable(launchOptions));
         const page = await browser.newPage();
 
         // Apply rotating user agent
@@ -85,7 +94,7 @@ async function searchGoogleMaps(keyword, options = {}) {
         // For unlimited (-1), use many scroll attempts; otherwise calculate based on ~15 results per scroll
         const scrollAttempts = maxResults < 0 ? 100 : Math.max(5, Math.ceil(maxResults / 15) + 3);
         // Apply security measures
-        await security.configurePage(page, securityConfig);
+        await security.configurePage(page, { ...securityConfig, userAgent: false });
 
         // Check if keyword is a direct URL
         const isDirectUrl = keyword.startsWith('http');
@@ -226,7 +235,7 @@ async function searchGoogleMaps(keyword, options = {}) {
                 log(`Scrolling results (${i + 1}/${maxScrolls})... Current: ${businesses.length}`);
 
                 // Robust Scroll
-                const scrollResult = await page.evaluate(async () => {
+                const scrollResult = await page.evaluate(() => {
                     const feed = document.querySelector('[role="feed"]');
                     if (!feed) return { success: false, height: 0, newHeight: 0 };
 
@@ -339,7 +348,16 @@ async function searchGoogleMaps(keyword, options = {}) {
 
     } catch (error) {
         console.error('Google Maps search error:', error.message);
+        if (proxy && isProxyConnectionError(error)) {
+            log(`⚠️ Proxy ${proxy.host}:${proxy.port} is unavailable. Retrying directly...`);
+            if (browser) {
+                try { await browser.close(); } catch (e) { }
+                browser = null;
+            }
+            return await searchGoogleMaps(keyword, { ...options, useProxies: false });
+        }
         log(`❌ Error: ${error.message}`);
+        throw error;
     } finally {
         if (browser) {
             log('Closing browser...');

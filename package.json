@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "deploy": "npm install && npm start",
+    "test": "node --test tests/frontend-integrity.test.js tests/browser-executable.test.js",
+    "build-exe": "pkg ."
   },
   "keywords": [
     "google-maps-scraper",
@@ -19,12 +22,19 @@
   "author": "DataXtract <support@bundlewp.com>",
   "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://bundlewp.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/99proteam/DataXtract-Mini.git"
+  },
+  "bugs": {
+    "url": "https://github.com/99proteam/DataXtract-Mini/issues"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "axios": "^1.13.2",
+    "axios": "^0.27.2",
     "better-sqlite3": "^9.2.2",
     "cheerio": "^1.0.0-rc.12",
     "express": "^4.18.2",
@@ -39,5 +49,22 @@
     "uuid": "^9.0.1",
     "ws": "^8.14.2",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  },
+  "bin": "server.js",
+  "pkg": {
+    "assets": [
+      "public/**/*",
+      "node_modules/axios/package.json"
+    ],
+    "scripts": [
+      "node_modules/axios/**/*.js"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "dist"
   }
 }

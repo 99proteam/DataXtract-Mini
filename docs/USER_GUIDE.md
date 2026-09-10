@@ -1,18 +1,15 @@
-# Data Extractor Pro - User Guide
+# DataXtract Mini - User Guide
 
 A professional Node.js application for extracting comprehensive data from bulk domains with a campaign-based workflow.
 
 ## Quick Start
 
 ```bash
-# 1. Install dependencies
-npm install
+# 1. Install dependencies and start the server
+npm run deploy
 
-# 2. Start the server
-npm start
-
-# 3. Open in browser
-http://localhost:3000
+# 2. Open in browser
+http://localhost:3007
 ```
 
 ## Features

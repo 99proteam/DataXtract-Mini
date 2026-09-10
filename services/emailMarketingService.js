@@ -21,6 +21,14 @@ function loadSettings() {
     return null;
 }
 
+function getConfigurationError() {
+    const settings = loadSettings();
+    if (!settings?.smtp?.enabled) return 'Email sending is not enabled in Settings';
+    if (!settings.smtp.host) return 'SMTP host is not configured in Settings';
+    if (!settings.smtp.user || !settings.smtp.pass) return 'SMTP username/password are not configured in Settings';
+    return null;
+}
+
 /**
  * Create email transporter from settings
  */
@@ -60,11 +68,9 @@ function createTransporter() {
  * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
  */
 async function sendEmail({ to, subject, html, text }) {
+    const configurationError = getConfigurationError();
+    if (configurationError) return { success: false, error: configurationError };
     const settings = loadSettings();
-
-    if (!settings?.smtp?.enabled) {
-        return { success: false, error: 'Email not enabled in settings' };
-    }
 
     try {
         const transporter = createTransporter();
@@ -264,5 +270,6 @@ module.exports = {
     sendEmail,
     sendBulkEmail,
     testConnection,
-    generateEmailHTML
+    generateEmailHTML,
+    getConfigurationError
 };

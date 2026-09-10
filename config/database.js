@@ -3,12 +3,31 @@ const path = require('path');
 const fs = require('fs');
 
 // Ensure data directory exists
-const dataDir = path.join(__dirname, '..', 'data');
+// Ensure data directory exists
+const isPkg = typeof process.pkg !== 'undefined';
+const baseDir = isPkg ? path.dirname(process.execPath) : path.join(__dirname, '..');
+
+// Debug Log Helper
+const logError = (err) => {
+    const logPath = path.join(baseDir, 'startup-error.log');
+    const msg = `[${new Date().toISOString()}] DB ERROR: ${err.message}\n${err.stack}\n`;
+    try { require('fs').appendFileSync(logPath, msg); } catch (e) { }
+};
+
+const dataDir = path.join(baseDir, 'data');
 if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
 }
 
-const db = new Database(path.join(dataDir, 'extractor.db'));
+let db;
+try {
+    const Database = require('better-sqlite3');
+    db = new Database(path.join(dataDir, 'extractor.db'));
+} catch (err) {
+    logError(err);
+    console.error('Failed to initialize database:', err);
+    throw err; // Re-throw to stop app
+}
 
 // Enable foreign keys
 db.pragma('foreign_keys = ON');

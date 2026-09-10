@@ -11,6 +11,11 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { toolsOps } = require('../config/database');
 const { proxyOps } = require('../config/database');
+const { withBrowserExecutable } = require('../services/browserExecutable');
+
+// Pkg-compatible base directory
+const isPkg = typeof process.pkg !== 'undefined';
+const baseDir = isPkg ? path.dirname(process.execPath) : path.join(__dirname, '..');
 
 // Helper to delay
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -103,10 +108,10 @@ router.post('/traffic', async (req, res) => {
 
                         // Launch New Browser Instance for this SPECIFIC visit
                         // This ensures the --proxy-server arg is applied fresh
-                        browser = await puppeteer.launch({
+                        browser = await puppeteer.launch(withBrowserExecutable({
                             headless: 'new',
                             args: launchArgs
-                        });
+                        }));
 
                         page = await browser.newPage();
 
@@ -255,7 +260,7 @@ router.post('/download', async (req, res) => {
     if (!urls || !Array.isArray(urls)) return res.status(400).json({ error: 'URLs array is required' });
 
     const batchId = Date.now().toString();
-    const saveDir = path.join(__dirname, '..', 'data', 'downloads', batchId);
+    const saveDir = path.join(baseDir, 'data', 'downloads', batchId);
 
     try {
         if (!fs.existsSync(saveDir)) fs.mkdirSync(saveDir, { recursive: true });
@@ -269,7 +274,7 @@ router.post('/download', async (req, res) => {
         let browser = null;
         try {
             if (renderJs) {
-                browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
+                browser = await puppeteer.launch(withBrowserExecutable({ headless: 'new', args: ['--no-sandbox'] }));
             }
 
             for (let i = 0; i < urls.length; i++) {
@@ -350,7 +355,7 @@ router.post('/screenshot', async (req, res) => {
 
     // Create unique folder for this batch
     const batchId = Date.now().toString();
-    const saveDir = path.join(__dirname, '..', 'public', 'screenshots', batchId);
+    const saveDir = path.join(baseDir, 'public', 'screenshots', batchId);
 
     try {
         if (!fs.existsSync(saveDir)) {
@@ -379,7 +384,7 @@ router.post('/screenshot', async (req, res) => {
                 args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu']
             };
 
-            browserInstance = await puppeteer.launch(launchOptions);
+            browserInstance = await puppeteer.launch(withBrowserExecutable(launchOptions));
             const page = await browserInstance.newPage();
 
             // Configure User Agent

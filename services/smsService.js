@@ -20,6 +20,14 @@ function loadSettings() {
     return null;
 }
 
+function getConfigurationError() {
+    const settings = loadSettings();
+    if (!settings?.twilio?.enabled) return 'Twilio is not enabled in Settings';
+    if (!settings.twilio.accountSid || !settings.twilio.authToken) return 'Twilio credentials are not configured in Settings';
+    if (!settings.twilio.fromNumber) return 'Twilio sender phone number is not configured in Settings';
+    return null;
+}
+
 /**
  * Send SMS via Twilio
  * @param {string} to - Phone number to send to
@@ -27,15 +35,9 @@ function loadSettings() {
  * @returns {Promise<{success: boolean, sid?: string, error?: string}>}
  */
 async function sendSMS(to, message) {
+    const configurationError = getConfigurationError();
+    if (configurationError) return { success: false, error: configurationError };
     const settings = loadSettings();
-
-    if (!settings?.twilio?.enabled) {
-        return { success: false, error: 'Twilio not enabled in settings' };
-    }
-
-    if (!settings.twilio.accountSid || !settings.twilio.authToken) {
-        return { success: false, error: 'Twilio credentials not configured' };
-    }
 
     try {
         // Dynamic require to avoid issues if twilio not installed
@@ -187,5 +189,6 @@ async function testConnection() {
 module.exports = {
     sendSMS,
     sendBulkSMS,
-    testConnection
+    testConnection,
+    getConfigurationError
 };

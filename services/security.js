@@ -241,11 +241,13 @@ function getRandomProxy(config = defaultConfig) {
  * @param {Object} config - Configuration object
  */
 async function configurePage(page, config = defaultConfig) {
-    const userAgent = getRandomUserAgent();
+    const userAgent = typeof config.userAgent === 'string' ? config.userAgent : getRandomUserAgent();
     const resolution = getRandomResolution();
 
-    // Set user agent
-    await page.setUserAgent(userAgent);
+    // A caller may already have applied its own rotating user agent.
+    if (config.userAgent !== false) {
+        await page.setUserAgent(userAgent);
+    }
 
     // Set viewport
     await page.setViewport({
@@ -254,18 +256,12 @@ async function configurePage(page, config = defaultConfig) {
         deviceScaleFactor: 1,
     });
 
-    // Set extra headers
+    // Only set headers that are safe for every request. Puppeteer applies extra
+    // headers to scripts/images too, so forcing Sec-Fetch-Dest=document (and
+    // similar navigation-only headers) prevents apps such as Google Maps from
+    // loading their JavaScript and leaves a blank page.
     await page.setExtraHTTPHeaders({
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-User': '?1',
-        'Cache-Control': 'max-age=0',
+        'Accept-Language': 'en-US,en;q=0.9'
     });
 
     // Override navigator properties to avoid detection
@@ -295,7 +291,7 @@ async function configurePage(page, config = defaultConfig) {
         window.navigator.permissions.query = (parameters) => (
             parameters.name === 'notifications' ?
                 Promise.resolve({ state: Notification.permission }) :
-                originalQuery(parameters)
+                originalQuery.call(window.navigator.permissions, parameters)
         );
 
         // Override Chrome

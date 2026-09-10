@@ -13,6 +13,8 @@ const state = {
     currentStep: 1,
     uploadedFile: null,
     itemsCount: 0, // Replaces domainCount
+    currentResults: [],
+    currentResultsType: 'domain',
     ws: null,
     wsConnected: false,
     campaignType: 'domain' // 'domain' or 'maps'
@@ -257,7 +259,7 @@ const elements = {
 
     // Mode selector
     modeOptions: document.querySelectorAll('.mode-option'),
-    tabBtns: document.querySelectorAll('.tab-btn')
+    tabBtns: document.querySelectorAll('.results-tabs .tab-btn')
 };
 
 // ===================================
@@ -279,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // WebSocket
 // ===================================
 
-function initWebSocket() {
+function initWebSocketLegacy() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     state.ws = new WebSocket(`${protocol}//${window.location.host}`);
 
@@ -301,7 +303,7 @@ function initWebSocket() {
     };
 }
 
-function handleWebSocketMessage(data) {
+function handleWebSocketMessageLegacy(data) {
     // Allow screenshot updates to pass through even if not in a "campaign"
     const isScreenshot = data.campaignId && data.campaignId.toString().startsWith('screenshot-');
 
@@ -620,7 +622,7 @@ function initEventListeners() {
     elements.btnStartCampaign.addEventListener('click', startCampaign);
     elements.btnPauseCampaign.addEventListener('click', pauseCampaign);
     if (elements.btnVerifyEmails) {
-        elements.btnVerifyEmails.addEventListener('click', verifyEmails);
+        elements.btnVerifyEmails.addEventListener('click', verifyCampaignEmails);
     }
     elements.btnExportResults.addEventListener('click', () => elements.modalExport.classList.add('active'));
 
@@ -628,6 +630,8 @@ function initEventListeners() {
     if (elements.btnSaveSettings) {
         elements.btnSaveSettings.addEventListener('click', saveSettings);
     }
+    document.getElementById('btnTestSmtp')?.addEventListener('click', testSmtpConnection);
+    document.getElementById('btnTestTwilio')?.addEventListener('click', testTwilioConnection);
 
     // Export Modal
     elements.btnCloseExportModal.addEventListener('click', () => elements.modalExport.classList.remove('active'));
@@ -1099,6 +1103,8 @@ async function loadCampaignDetails(campaignId) {
         const statusMap = verification.statusMap || {};
 
         state.currentCampaign = campaign;
+        state.currentResults = results;
+        state.currentResultsType = campaign.campaign_type;
 
         // Enrich results with verification status
         results.forEach(r => {
@@ -1214,7 +1220,7 @@ async function refreshCampaignStatus(campaignId) {
 
 // navigateToPage is defined at line 271 - removed duplicate
 
-async function verifyEmails() {
+async function verifyCampaignEmails() {
     if (!state.currentCampaign) return;
 
     try {
@@ -1238,6 +1244,24 @@ async function verifyEmails() {
         }
     } catch (error) {
         showToast('Error starting verification: ' + error.message, 'error');
+    }
+}
+
+async function loadCampaignResults(campaignId) {
+    if (!campaignId) return;
+
+    try {
+        const response = await fetch(`/api/campaigns/${campaignId}/results`);
+        if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+
+        const results = await response.json();
+        const type = state.currentCampaign?.campaign_type || state.currentResultsType || 'domain';
+        state.currentResults = results;
+        state.currentResultsType = type;
+        renderResultsTable(results, type);
+    } catch (error) {
+        console.error('Failed to refresh campaign results:', error);
+        showToast('Failed to refresh campaign results', 'error');
     }
 }
 
@@ -1283,7 +1307,7 @@ async function deleteCampaign() {
 // Live Results Table Rendering
 // ===================================
 
-function renderLiveResultsTable() {
+function renderLiveResultsTableLegacy() {
     const container = document.getElementById('liveResultsContainer') || elements.resultsTableBody;
     if (!container) return;
 
@@ -1627,6 +1651,38 @@ function renderResultsTable(results, type) {
             </tr>
         `).join('');
     }
+}
+
+function filterResults(tab) {
+    const results = state.currentResults || [];
+    const type = state.currentResultsType || state.currentCampaign?.campaign_type || 'domain';
+
+    if (tab === 'all' || type !== 'domain') {
+        renderResultsTable(results, type);
+        return;
+    }
+
+    const propertyByTab = {
+        emails: 'emails',
+        phones: 'phones',
+        technology: 'technology',
+        social: 'socialLinks'
+    };
+
+    let filtered;
+    if (tab === 'media') {
+        filtered = results.filter(result => {
+            const media = result.media || {};
+            return ['images', 'videos', 'pdfs'].some(key => Array.isArray(media[key]) && media[key].length > 0);
+        });
+    } else {
+        const property = propertyByTab[tab];
+        filtered = property
+            ? results.filter(result => Array.isArray(result[property]) && result[property].length > 0)
+            : results;
+    }
+
+    renderResultsTable(filtered, type);
 }
 
 // Render live results table during campaign execution
@@ -2217,6 +2273,28 @@ const aiPrompts = {
     emails: "Extract any personal names associated with email addresses if present. Format as 'Name: Email'."
 };
 
+function switchAITab(tabName) {
+    const runTab = document.getElementById('aiTabRun');
+    const settingsTab = document.getElementById('aiTabSettings');
+    const runButton = document.querySelector('[onclick="switchAITab(\'run\')"]');
+    const settingsButton = document.querySelector('[onclick="switchAITab(\'settings\')"]');
+    const showSettings = tabName === 'settings';
+
+    runTab?.classList.toggle('hidden', showSettings);
+    runTab?.classList.toggle('active', !showSettings);
+    settingsTab?.classList.toggle('hidden', !showSettings);
+    settingsTab?.classList.toggle('active', showSettings);
+    runButton?.classList.toggle('active', !showSettings);
+    settingsButton?.classList.toggle('active', showSettings);
+    document.getElementById('btnSaveAISettings')?.classList.toggle('hidden', !showSettings);
+    document.getElementById('btnRunAI')?.classList.toggle('hidden', showSettings);
+}
+
+function togglePasswordVisibility(inputId) {
+    const input = document.getElementById(inputId);
+    if (input) input.type = input.type === 'password' ? 'text' : 'password';
+}
+
 // AI features removed from UI as requested
 // function initAI() { ... }
 // function openAIModal() { ... }
@@ -2227,7 +2305,7 @@ const aiPrompts = {
 // Settings Page Logic
 // ===================================
 
-function switchSettingsTab(tabName) {
+function switchSettingsTabLegacy(tabName) {
     document.querySelectorAll('.settings-tab-content').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.settings-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
 
@@ -2242,7 +2320,7 @@ function switchSettingsTab(tabName) {
     }
 }
 
-async function loadSettings() {
+async function loadSettingsLegacy() {
     try {
         const res = await fetch('/api/settings');
         const settings = await res.json();
@@ -2274,7 +2352,7 @@ async function loadSettings() {
     }
 }
 
-async function saveSettings() {
+async function saveSettingsLegacy() {
     try {
         const settings = {
             proxy: {
@@ -2314,7 +2392,7 @@ async function saveSettings() {
     }
 }
 
-async function testSmtp() {
+async function testSmtpLegacy() {
     try {
         showToast('Testing SMTP connection...', 'info');
         const res = await fetch('/api/settings/test-smtp', { method: 'POST' });
@@ -2328,19 +2406,6 @@ async function testSmtp() {
         showToast('SMTP test error: ' + e.message, 'error');
     }
 }
-
-// Initialize Settings page listeners
-document.addEventListener('DOMContentLoaded', () => {
-    const btnSaveSettings = document.getElementById('btnSaveSettings');
-    if (btnSaveSettings) {
-        btnSaveSettings.addEventListener('click', saveSettings);
-    }
-
-    const btnTestSmtp = document.getElementById('btnTestSmtp');
-    if (btnTestSmtp) {
-        btnTestSmtp.addEventListener('click', testSmtp);
-    }
-});
 
 // ===================================
 // Enrichment Functions
@@ -2435,7 +2500,7 @@ async function enrichAllCampaign() {
 }
 
 // Bulk calculate scores for current campaign
-async function bulkEnrichScore() {
+async function bulkEnrichScoreLegacy() {
     if (!state.currentCampaign) {
         showToast('No campaign selected', 'warning');
         return;
@@ -2690,7 +2755,7 @@ async function bulkEnrichScore() {
 }
 
 // Switch settings tab
-function switchSettingsTab(tabId) {
+function switchSettingsTabLegacyV2(tabId) {
     document.querySelectorAll('.settings-tab-content').forEach(tab => tab.classList.add('hidden'));
     document.querySelectorAll('.settings-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
 
@@ -2701,14 +2766,14 @@ function switchSettingsTab(tabId) {
 }
 
 // Switch marketing tab
-function switchMarketingTab(tabId) {
+function switchMarketingTab(tabId, sourceButton) {
     document.querySelectorAll('.marketing-tab-content').forEach(tab => tab.classList.add('hidden'));
     document.querySelectorAll('.marketing-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
 
     const targetTab = document.getElementById('marketingTab' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
     if (targetTab) targetTab.classList.remove('hidden');
 
-    event?.target?.classList.add('active');
+    sourceButton?.classList.add('active');
 }
 
 // Marketing file upload state
@@ -3157,8 +3222,6 @@ function subscribeToCampaign(campaignId) {
 }
 
 // Initialize WebSocket on page load
-document.addEventListener('DOMContentLoaded', initWebSocket);
-
 // ===================================
 // WhatsApp Web Functions
 // ===================================
@@ -3262,10 +3325,14 @@ async function initWhatsAppSession(sessionName) {
     try {
         showToast(`Starting WhatsApp Web for "${sessionName}"...`, 'info');
 
-        const response = await fetch(`/api/whatsapp/session/${sessionName}/init`, {
+        const response = await fetch(`/api/whatsapp/session/${encodeURIComponent(sessionName)}/init`, {
             method: 'POST'
         });
         const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || data.message || 'Failed to initialize WhatsApp session');
+        }
 
         if (data.qrCode) {
             // Show QR code
@@ -3290,7 +3357,7 @@ async function initWhatsAppSession(sessionName) {
 }
 
 // Delete WhatsApp session
-async function deleteWhatsAppSession(sessionName) {
+async function deleteWhatsAppSessionLegacy(sessionName) {
     if (!confirm(`Are you sure you want to delete session "${sessionName}"? This will remove all saved login data.`)) {
         return;
     }
@@ -3519,7 +3586,7 @@ function exportSmsCampaignResults(type) {
 }
 
 // Insert variable into SMS message template
-function insertSmsVariable(variable) {
+function insertSmsVariableLegacy(variable) {
     const textarea = document.getElementById('smsMessageTemplate');
     if (!textarea) return;
 
@@ -3536,7 +3603,7 @@ function insertSmsVariable(variable) {
 }
 
 // Update SMS character count
-function updateSmsCharCount() {
+function updateSmsCharCountLegacy() {
     const textarea = document.getElementById('smsMessageTemplate');
     const countEl = document.getElementById('smsCharCount');
     if (!textarea || !countEl) return;
@@ -3547,7 +3614,7 @@ function updateSmsCharCount() {
 }
 
 // Send SMS Campaign with results tracking and all Advanced Options
-async function sendSmsCampaign() {
+async function sendSmsCampaignLegacy() {
     const messageTemplate = document.getElementById('smsMessageTemplate').value.trim();
     const senderId = document.getElementById('smsSenderId').value.trim();
 
@@ -3620,21 +3687,19 @@ async function sendSmsCampaign() {
     showToast(`Sending SMS to ${recipients.length} recipients...`, 'info');
 
     try {
-        const response = await fetch('/api/sms/bulk', {
+        const response = await fetch('/api/marketing/send-sms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 recipients,
-                messageTemplate: finalTemplate,
+                message: finalTemplate,
                 senderId,
-                options: {
-                    scheduleType,
-                    scheduleTime,
-                    rateLimit,
-                    ratePeriod,
-                    delay,
-                    trackLinks
-                }
+                scheduleTime: scheduleType === 'later' ? scheduleTime : null,
+                rateLimit,
+                ratePeriod,
+                delay,
+                optOut: includeOptOut,
+                trackLinks
             })
         });
 
@@ -4017,7 +4082,7 @@ loadWhatsAppSessions = async function () {
 // ===================================
 
 // Switch settings tabs
-function switchSettingsTab(tabName) {
+function switchSettingsTab(tabName, sourceButton) {
     // Hide all tabs
     document.querySelectorAll('.settings-tab-content').forEach(tab => {
         tab.classList.add('hidden');
@@ -4037,7 +4102,7 @@ function switchSettingsTab(tabName) {
     }
 
     // Set active button
-    event?.target?.classList?.add('active');
+    sourceButton?.classList.add('active');
 }
 
 // AI settings removed - toggleGeminiSettings function deleted
@@ -4171,30 +4236,6 @@ async function testTwilioConnection() {
         showToast('Error: ' + e.message, 'error');
     }
 }
-
-// Initialize settings page
-document.addEventListener('DOMContentLoaded', function () {
-    // Load settings when page loads
-    loadSettingsUI();
-
-    // Save settings button
-    const saveBtn = document.getElementById('btnSaveSettings');
-    if (saveBtn) {
-        saveBtn.addEventListener('click', saveSettingsUI);
-    }
-
-    // Test SMTP button
-    const testSmtpBtn = document.getElementById('btnTestSmtp');
-    if (testSmtpBtn) {
-        testSmtpBtn.addEventListener('click', testSmtpConnection);
-    }
-
-    // Test Twilio button
-    const testTwilioBtn = document.getElementById('btnTestTwilio');
-    if (testTwilioBtn) {
-        testTwilioBtn.addEventListener('click', testTwilioConnection);
-    }
-});
 
 // ===================================
 // WhatsApp List Groups Feature
@@ -4393,7 +4434,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Verify emails
-async function verifyEmails() {
+async function verifyEmailsLegacy() {
     if (verifyEmailList.length === 0) {
         showToast('Please upload an email file first', 'warning');
         return;
@@ -4435,7 +4476,7 @@ async function verifyEmails() {
 }
 
 // Export verified emails
-function exportVerifiedEmails() {
+function exportVerifiedEmailsLegacy() {
     if (verifiedEmails.valid.length === 0) {
         showToast('No valid emails to export', 'warning');
         return;
@@ -4503,7 +4544,7 @@ async function verifyWhatsAppNumbers() {
 }
 
 // Export verified WhatsApp numbers
-function exportVerifiedWhatsApp() {
+function exportVerifiedWhatsAppLegacy() {
     if (verifiedWhatsApp.valid.length === 0) {
         showToast('No valid WhatsApp numbers to export', 'warning');
         return;
@@ -4530,17 +4571,6 @@ let emailRecipientList = [];
 // Initialize SMS/Email campaign event listeners
 document.addEventListener('DOMContentLoaded', function () {
     // SMS Campaign button
-    const btnSendSms = document.getElementById('btnSendSms');
-    if (btnSendSms) {
-        btnSendSms.addEventListener('click', sendSmsCampaign);
-    }
-
-    // Email Campaign button
-    const btnSendEmail = document.getElementById('btnSendEmail');
-    if (btnSendEmail) {
-        btnSendEmail.addEventListener('click', sendEmailCampaign);
-    }
-
     // SMS file upload
     const smsFile = document.getElementById('smsPhoneFile');
     if (smsFile) {
@@ -4632,7 +4662,7 @@ function updateEmailRecipientCount() {
 }
 
 // Send SMS Campaign
-async function sendSmsCampaign() {
+async function sendSmsCampaignFromCurrentResults() {
     const source = document.getElementById('smsRecipientSource')?.value || 'current';
     const message = document.getElementById('smsMessageTemplate')?.value;
 
@@ -5208,13 +5238,6 @@ async function saveSettings() {
             authToken: (/^•+$/.test(elements.settingsTwilioToken?.value) || !elements.settingsTwilioToken?.value) ? '***' : elements.settingsTwilioToken.value,
             fromNumber: elements.settingsTwilioPhone?.value || ''
         },
-        ai: {
-            provider: elements.settingsAiProvider?.value || 'openai',
-            apiKey: elements.settingsAiKey?.value || '',
-            geminiModel: elements.settingsGeminiModel?.value || 'gemini-1.5-flash',
-            baseUrl: elements.settingsAiBaseUrl?.value || '',
-            model: elements.settingsAiModel?.value || ''
-        },
         apiKeys: {
             zerobounce: elements.settingsApiZerobounce?.value || ''
         }
@@ -5414,7 +5437,7 @@ async function sendMarketingCampaign(type, isTest = false) {
         if (type === 'sms') {
             const senderId = document.getElementById('smsSenderId')?.value?.trim();
             const message = document.getElementById('smsMessageTemplate')?.value?.trim();
-            const source = document.getElementById('smsRecipientSource')?.value;
+            const source = document.getElementById('smsRecipientSource')?.value || 'upload';
             const schedule = document.querySelector('input[name="smsSchedule"]:checked')?.value;
             const scheduleTime = schedule === 'later' ? document.getElementById('smsScheduleTime')?.value : null;
             const rateLimit = document.getElementById('smsRateLimit')?.value;
@@ -5432,7 +5455,7 @@ async function sendMarketingCampaign(type, isTest = false) {
                 if (!phone) return;
                 recipients = [{ phone, name: 'Test User' }];
             } else if (source === 'upload') {
-                recipients = marketingState.smsPhones.map(p => ({ phone: p }));
+                recipients = smsRecipients.map(recipient => ({ ...recipient }));
             } else if (source === 'current') {
                 const rows = document.querySelectorAll('#resultsTableBody tr[data-result-id]');
                 rows.forEach(row => {
@@ -5480,7 +5503,7 @@ async function sendMarketingCampaign(type, isTest = false) {
             const replyTo = document.getElementById('emailReplyTo')?.value?.trim();
             const cc = document.getElementById('emailCc')?.value?.trim();
             const bcc = document.getElementById('emailBcc')?.value?.trim();
-            const source = document.getElementById('emailRecipientSource')?.value;
+            const source = document.getElementById('emailRecipientSource')?.value || 'upload';
             const schedule = document.querySelector('input[name="emailSchedule"]:checked')?.value;
             const scheduleTime = schedule === 'later' ? document.getElementById('emailScheduleTime')?.value : null;
             const rateLimit = document.getElementById('emailRateLimit')?.value;
@@ -5500,7 +5523,7 @@ async function sendMarketingCampaign(type, isTest = false) {
                 if (!email) return;
                 recipients = [{ email, name: 'Test User' }];
             } else if (source === 'upload') {
-                recipients = marketingState.emailAddresses.map(e => ({ email: e }));
+                recipients = emailRecipients.map(recipient => ({ ...recipient }));
             } else if (source === 'current') {
                 const rows = document.querySelectorAll('#resultsTableBody tr[data-result-id]');
                 rows.forEach(row => {
@@ -5794,32 +5817,32 @@ async function verifyEmails() {
 
         showToast(`Starting verification of ${emails.length} emails...`, 'info');
 
-        try {
-            const response = await fetch('/api/verify/email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ emails, method })
-            });
+        for (let index = 0; index < emails.length; index++) {
+            const email = emails[index];
+            document.getElementById('verifyEmailCount').textContent = `${index + 1} / ${emails.length}`;
 
-            const data = await response.json();
+            try {
+                const response = await fetch('/api/enrichment/verify-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, method })
+                });
+                if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
 
-            if (data.success) {
-                emailVerificationResults = data.results || { valid: [], invalid: [] };
-
-                // Update UI
-                document.getElementById('verifyEmailProgress').classList.add('hidden');
-                document.getElementById('verifyEmailResults').classList.remove('hidden');
-                document.getElementById('validEmailCount').textContent = emailVerificationResults.valid.length;
-                document.getElementById('invalidEmailCount').textContent = emailVerificationResults.invalid.length;
-
-                showToast(`Verification complete! ${emailVerificationResults.valid.length} valid, ${emailVerificationResults.invalid.length} invalid`, 'success');
-            } else {
-                showToast('Verification failed: ' + (data.error || 'Unknown error'), 'error');
+                const result = await response.json();
+                const bucket = result.valid ? 'valid' : 'invalid';
+                emailVerificationResults[bucket].push(email);
+            } catch (error) {
+                console.error(`Verification failed for ${email}:`, error);
+                emailVerificationResults.invalid.push(email);
             }
-        } catch (err) {
-            console.error(err);
-            showToast('Verification request failed', 'error');
         }
+
+        document.getElementById('verifyEmailProgress').classList.add('hidden');
+        document.getElementById('verifyEmailResults').classList.remove('hidden');
+        document.getElementById('validEmailCount').textContent = emailVerificationResults.valid.length;
+        document.getElementById('invalidEmailCount').textContent = emailVerificationResults.invalid.length;
+        showToast(`Verification complete! ${emailVerificationResults.valid.length} valid, ${emailVerificationResults.invalid.length} invalid`, 'success');
     };
 
     reader.readAsText(file);

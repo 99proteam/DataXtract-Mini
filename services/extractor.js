@@ -11,6 +11,11 @@ const security = require('./security');
 const sitemapParser = require('./sitemapParser');
 const proxyManager = require('./proxyManager');
 const userAgentRotator = require('./userAgentRotator');
+const { withBrowserExecutable } = require('./browserExecutable');
+
+function isProxyConnectionError(error) {
+    return /ERR_PROXY|ERR_TUNNEL|proxy connection/i.test(error?.message || '');
+}
 
 class ExtractionJob {
     constructor(campaignId, domains, options) {
@@ -19,6 +24,7 @@ class ExtractionJob {
         this.options = options;
         this.isPaused = false;
         this.browser = null;
+        this.activeProxy = null;
         this.processed = 0;
 
         // Security configuration
@@ -47,37 +53,14 @@ class ExtractionJob {
             console.log(`[Extraction] Starting job for campaign ${this.campaignId}`);
 
             // Proxy setup
-            const proxy = proxyManager.getNextProxy();
-            const proxyArgs = proxyManager.formatForPuppeteer(proxy);
-            const proxyAuth = proxyManager.getAuth(proxy);
+            const proxy = this.options.useProxies === false ? null : proxyManager.getNextProxy();
+            this.activeProxy = proxy;
 
             if (proxy) {
                 console.log(`[Extraction] Using proxy: ${proxy.host}:${proxy.port}`);
             }
 
-            // Launch browser with anti-detection args
-            console.log('[Extraction] Launching browser...');
-            this.browser = await puppeteer.launch({
-                headless: 'new',
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-gpu',
-                    '--disable-features=IsolateOrigins,site-per-process',
-                    ...proxyArgs
-                ]
-            });
-
-            // Apply auth to all pages if needed
-            if (proxyAuth) {
-                this.browser.on('targetcreated', async (target) => {
-                    const page = await target.page();
-                    if (page) {
-                        await page.authenticate(proxyAuth);
-                    }
-                });
-            }
+            await this.launchBrowser(proxy);
 
             // Process domains
             // We can implement concurrency here if needed, but keeping it sequential with delays for safety
@@ -131,7 +114,32 @@ class ExtractionJob {
         }
     }
 
-    async processDomain(domainRecord) {
+    async launchBrowser(proxy = null) {
+        const proxyArgs = proxyManager.formatForPuppeteer(proxy);
+        const proxyAuth = proxyManager.getAuth(proxy);
+
+        console.log('[Extraction] Launching browser...');
+        this.browser = await puppeteer.launch(withBrowserExecutable({
+            headless: 'new',
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-features=IsolateOrigins,site-per-process',
+                ...proxyArgs
+            ]
+        }));
+
+        if (proxyAuth) {
+            this.browser.on('targetcreated', async (target) => {
+                const page = await target.page();
+                if (page) await page.authenticate(proxyAuth);
+            });
+        }
+    }
+
+    async processDomain(domainRecord, retriedDirect = false) {
         const { id: domainId, domain } = domainRecord;
         const baseUrl = `https://${domain}`;
         const results = [];
@@ -150,7 +158,7 @@ class ExtractionJob {
             }
 
             // Configure page with anti-detection measures
-            await security.configurePage(page, this.securityConfig);
+            await security.configurePage(page, { ...this.securityConfig, userAgent: false });
             await page.setDefaultNavigationTimeout(this.securityConfig.requestTimeout);
 
             // 1. Initial Navigation
@@ -254,6 +262,20 @@ class ExtractionJob {
             });
 
         } catch (error) {
+            if (this.activeProxy && !retriedDirect && isProxyConnectionError(error)) {
+                this.log(`⚠️ Proxy ${this.activeProxy.host}:${this.activeProxy.port} is unavailable. Retrying directly...`);
+                if (page) {
+                    try { await page.close(); } catch (e) { }
+                    page = null;
+                }
+                if (this.browser) {
+                    try { await this.browser.close(); } catch (e) { }
+                }
+                this.activeProxy = null;
+                await this.launchBrowser(null);
+                return this.processDomain(domainRecord, true);
+            }
+
             console.error(`Error processing ${domain}:`, error.message);
             domainOps.updateStatus.run('error', error.message, domainId);
 

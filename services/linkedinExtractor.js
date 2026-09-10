@@ -6,9 +6,12 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
+const { withBrowserExecutable } = require('./browserExecutable');
 
-// Session storage
-const SESSIONS_DIR = path.join(__dirname, '..', 'data', 'linkedin-sessions');
+// Session storage (pkg compatible)
+const isPkg = typeof process.pkg !== 'undefined';
+const baseDir = isPkg ? path.dirname(process.execPath) : path.join(__dirname, '..');
+const SESSIONS_DIR = path.join(baseDir, 'data', 'linkedin-sessions');
 const activeSessions = new Map();
 
 // Ensure sessions directory exists
@@ -49,7 +52,7 @@ async function initSession(sessionName, onLoginNeeded) {
     try {
         console.log(`[LinkedIn] Initializing session "${sessionName}"${hasExistingSession ? ' (existing data found)' : ''}...`);
 
-        const browser = await puppeteer.launch({
+        const browser = await puppeteer.launch(withBrowserExecutable({
             headless: false, // Show browser for login
             userDataDir: sessionPath,
             args: [
@@ -58,7 +61,7 @@ async function initSession(sessionName, onLoginNeeded) {
                 '--disable-dev-shm-usage',
                 '--disable-blink-features=AutomationControlled'
             ]
-        });
+        }));
 
         const page = await browser.newPage();
 

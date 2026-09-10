@@ -40,7 +40,7 @@ router.post('/start/:campaignId', async (req, res) => {
         }
 
         // Start extraction in background
-        const job = startMapsExtraction(campaignId, keywords, options);
+        const job = startMapsExtraction(campaignId, keywords, options, campaign.mode);
         activeJobs.set(campaignId, job);
 
         res.json({
@@ -54,7 +54,7 @@ router.post('/start/:campaignId', async (req, res) => {
 });
 
 // Start Maps extraction job
-async function startMapsExtraction(campaignId, keywords, options) {
+async function startMapsExtraction(campaignId, keywords, options, mode) {
     const job = {
         isPaused: false,
         processed: 0,
@@ -67,10 +67,11 @@ async function startMapsExtraction(campaignId, keywords, options) {
     // Run extraction asynchronously
     (async () => {
         try {
+            const configuredDelay = Number(options.security?.delay);
             const securityConfig = {
                 ...security.defaultConfig,
-                minDelay: options.security?.minDelay || 2000,
-                maxDelay: options.security?.maxDelay || 5000,
+                minDelay: options.security?.minDelay ?? (Number.isFinite(configuredDelay) ? configuredDelay : 2000),
+                maxDelay: options.security?.maxDelay ?? (Number.isFinite(configuredDelay) ? configuredDelay : 5000),
             };
 
             for (const keywordRecord of keywords) {
@@ -89,11 +90,12 @@ async function startMapsExtraction(campaignId, keywords, options) {
 
                     // Search Google Maps
                     const results = await googleMapsExtractor.searchGoogleMaps(keyword, {
-                        maxResults: options.maxResultsPerKeyword !== undefined ? options.maxResultsPerKeyword : 20,
-                        getDetails: options.getBusinessDetails !== false, // Default to true for phone extraction
+                        maxResults: options.maxResults ?? options.maxResultsPerKeyword ?? 20,
+                        getDetails: options.getDetails !== false && options.getBusinessDetails !== false,
+                        useUserAgentRotation: options.useUserAgentRotation !== false,
                         securityConfig,
                         // If "live" mode is selected, show browser. Otherwise headless (new).
-                        headless: options.mode === 'live' ? false : 'new',
+                        headless: mode === 'live' ? false : 'new',
                         onLog: (msg) => {
                             if (global.broadcastToCampaign) {
                                 global.broadcastToCampaign(campaignId, {
