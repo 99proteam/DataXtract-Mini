@@ -68,6 +68,35 @@ router.get('/', (req, res) => {
     if (masked.ai?.apiKey) masked.ai.apiKey = masked.ai.apiKey.substring(0, 8) + '...';
     res.json(masked);
 });
+// GET /api/settings/status — readiness check, NEVER returns secret values
+router.get('/status', (req, res) => {
+    const settings = loadSettings();
+
+    const status = {
+        proxy: {
+            configured: Boolean(settings.proxy?.webshareApiKey),
+            settingsTab: 'proxy'
+        },
+        smtp: {
+            configured: Boolean(settings.smtp?.host && settings.smtp?.user && settings.smtp?.pass),
+            settingsTab: 'smtp'
+        },
+        twilio: {
+            configured: Boolean(settings.twilio?.accountSid && settings.twilio?.authToken && settings.twilio?.fromNumber),
+            settingsTab: 'twilio'
+        },
+        zerobounce: {
+            configured: Boolean(settings.apiKeys?.zerobounce),
+            settingsTab: 'apikeys'
+        },
+        ai: {
+            configured: Boolean(settings.ai?.apiKey),
+            settingsTab: 'apikeys'
+        }
+    };
+
+    res.json(status);
+});
 
 // GET raw settings (for internal use)
 router.get('/raw', (req, res) => {
@@ -264,5 +293,4 @@ router.post('/fetch-webshare-proxies', async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 });
-
 module.exports = router;

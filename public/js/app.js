@@ -140,6 +140,42 @@ async function exportTrafficLogs() {
         showToast('Failed to export logs', 'error');
     }
 }
+const INTEGRATION_LABELS = {
+    proxy: 'Proxy (Webshare)',
+    smtp: 'Email (SMTP)',
+    twilio: 'SMS (Twilio)',
+    zerobounce: 'Email Verification (ZeroBounce)',
+    ai: 'AI (OpenAI/Gemini)'
+};
+
+async function loadIntegrationStatus() {
+    try {
+        const res = await fetch('/api/settings/status');
+        const status = await res.json();
+        const container = document.getElementById('integrationStatusList');
+        container.innerHTML = Object.entries(status).map(([key, val]) => `
+            <div class="integration-badge ${val.configured ? 'configured' : 'not-configured'}">
+                <span>${val.configured ? '✅' : '⚠️'} ${INTEGRATION_LABELS[key] || key}</span>
+                ${!val.configured ? `<a href="#" onclick="goToSettingsTab('${val.settingsTab}')">Configure</a>` : ''}
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error('Failed to load integration status', e);
+    }
+}
+function goToSettingsTab(tab) {
+    const settingsNavLink = document.querySelector('.nav-item[data-page="settings"]');
+    if (settingsNavLink) settingsNavLink.click();
+
+    // tab switch thoda delay ke baad, taaki settings page pehle render ho jaaye
+    setTimeout(() => {
+        const btn = document.querySelector(`.tab-btn[onclick*="switchSettingsTab('${tab}'"]`);
+        if (btn) switchSettingsTab(tab, btn);
+    }, 50);
+}
+
+// call on dashboard load
+loadIntegrationStatus();
 
 function appendLog(consoleDiv, message) {
     const div = document.createElement('div');
