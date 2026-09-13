@@ -2467,3 +2467,44 @@ textarea {
     color: white;
     transform: scale(1.1);
 }
+
+
+/* Integration Readiness Status */
+.integration-status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.integration-badge {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.integration-badge.configured {
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.integration-badge.not-configured {
+    border-color: var(--warning);
+    color: var(--text-secondary);
+}
+
+.integration-badge a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.integration-badge a:hover {
+    text-decoration: underline;
+}
