@@ -91,7 +91,7 @@ router.get('/status', (req, res) => {
         },
         ai: {
             configured: Boolean(settings.ai?.apiKey),
-            settingsTab: 'apikeys'
+            settingsTab: 'ai'
         }
     };
 

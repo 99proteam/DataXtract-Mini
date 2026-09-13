@@ -5240,7 +5240,15 @@ async function loadSettings() {
         }
         if (elements.settingsTwilioPhone) elements.settingsTwilioPhone.value = settings.twilio?.fromNumber || '';
 
-        // AI settings removed
+        // AI
+        if (elements.settingsAiProvider) elements.settingsAiProvider.value = settings.ai?.provider || 'openai';
+        if (elements.settingsAiBaseUrl) elements.settingsAiBaseUrl.value = settings.ai?.baseUrl || '';
+        if (elements.settingsAiModel) elements.settingsAiModel.value = settings.ai?.model || '';
+        if (elements.settingsGeminiModel) elements.settingsGeminiModel.value = settings.ai?.geminiModel || '';
+        if (elements.settingsAiKey) {
+            elements.settingsAiKey.value = settings.ai?.apiKey || '';
+            elements.settingsAiKey.dataset.masked = settings.ai?.apiKey?.includes('...') ? 'true' : 'false';
+        }
 
         // API Keys
         if (elements.settingsApiZerobounce) elements.settingsApiZerobounce.value = settings.apiKeys?.zerobounce || '';
@@ -5273,6 +5281,13 @@ async function saveSettings() {
             // Send '***' if showing masked dots or empty - preserve existing token
             authToken: (/^•+$/.test(elements.settingsTwilioToken?.value) || !elements.settingsTwilioToken?.value) ? '***' : elements.settingsTwilioToken.value,
             fromNumber: elements.settingsTwilioPhone?.value || ''
+        },
+        ai: {
+            provider: elements.settingsAiProvider?.value || 'openai',
+            apiKey: elements.settingsAiKey?.value || '',
+            baseUrl: elements.settingsAiBaseUrl?.value || '',
+            model: elements.settingsAiModel?.value || '',
+            geminiModel: elements.settingsGeminiModel?.value || ''
         },
         apiKeys: {
             zerobounce: elements.settingsApiZerobounce?.value || ''

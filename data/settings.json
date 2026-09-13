@@ -5,11 +5,11 @@
     "webshareApiKey": ""
   },
   "smtp": {
-    "host": "smtp.gmail.com",
+    "host": "",
     "port": 465,
     "secure": false,
-    "user": "test@gmail.com",
-    "pass": "test123",
+    "user": "",
+    "pass": "",
     "enabled": true
   },
   "twilio": {

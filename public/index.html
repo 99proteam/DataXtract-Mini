@@ -98,16 +98,16 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <div class="card" id="integrationStatusCard" style="margin-bottom: 20px; padding: 16px;">
-    <h3 style="margin-bottom: 12px;">Integration Readiness</h3>
-    <div id="integrationStatusList" class="integration-status-list"></div>
-</div>
             <!-- Dashboard Page -->
             <section class="page active" id="pageDashboard">
                 <header class="page-header">
                     <h1>Dashboard</h1>
                     <p class="subtitle">Overview of your extraction campaigns</p>
                 </header>
+                  <div class="card" id="integrationStatusCard" style="margin-bottom: 20px; padding: 16px;">
+                         <h3 style="margin-bottom: 12px;">Integration Readiness</h3>
+                        <div id="integrationStatusList" class="integration-status-list"></div>
+                    </div>
 
                 <div class="stats-grid">
                     <div class="stat-card">
@@ -534,6 +534,8 @@
                             SMTP</button>
                         <button class="tab-btn" onclick="switchSettingsTab('twilio', this)" style="flex:1;">📱
                             Twilio</button>
+                        <button class="tab-btn" onclick="switchSettingsTab('ai', this)" style="flex:1;">
+                            🤖 AI</button>
                         <button class="tab-btn" onclick="switchSettingsTab('apikeys', this)" style="flex:1;">🔑
                             API
                             Keys</button>
@@ -690,8 +692,38 @@
                             style="padding: 8px 16px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer;">🧪
                             Test Connection</button>
                     </div>
-
-
+                    <!-- AI Settings -->
+                    <div id="settingsTabAi" class="settings-tab-content hidden"
+                        style="background: var(--bg-card); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                        <div style="background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(236,72,153,0.1)); padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem;">
+                            <strong>ℹ️ AI</strong> settings let you configure an AI provider for enrichment/analysis.
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <label style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Provider</label>
+                            <select id="settingsAiProvider" style="width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                                <option value="openai">OpenAI</option>
+                                <option value="gemini">Gemini</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <label style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">API Key</label>
+                            <input type="password" id="settingsAiKey" placeholder="sk-..." style="width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                            <div>
+                                <label style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Base URL (optional)</label>
+                                <input type="text" id="settingsAiBaseUrl" placeholder="https://api.openai.com/v1" style="width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Model</label>
+                                <input type="text" id="settingsAiModel" placeholder="gpt-4o-mini" style="width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Gemini Model (if using Gemini)</label>
+                            <input type="text" id="settingsGeminiModel" placeholder="gemini-1.5-flash" style="width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary);">
+                        </div>
+                    </div>
 
                     <!-- API Keys Settings -->
                     <div id="settingsTabApikeys" class="settings-tab-content hidden"

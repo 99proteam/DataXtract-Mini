@@ -11,17 +11,16 @@ class AIService {
         this.initClient();
     }
 
-   loadConfig() {
-    try {
+    loadConfig() {
         if (fs.existsSync(SETTINGS_FILE)) {
             const allSettings = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
             return allSettings.ai || { provider: 'gemini', apiKey: '' };
         }
-    } catch (e) {
-        console.error('Error loading AI config, using defaults:', e.message);
+        return {
+            provider: 'gemini',
+            apiKey: ''
+        };
     }
-    return { provider: 'gemini', apiKey: '' };
-}
 
     saveConfig(newConfig) {
         let allSettings = {};
