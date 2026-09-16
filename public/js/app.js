@@ -140,6 +140,42 @@ async function exportTrafficLogs() {
         showToast('Failed to export logs', 'error');
     }
 }
+const INTEGRATION_LABELS = {
+    proxy: 'Proxy (Webshare)',
+    smtp: 'Email (SMTP)',
+    twilio: 'SMS (Twilio)',
+    zerobounce: 'Email Verification (ZeroBounce)',
+    ai: 'AI (OpenAI/Gemini)'
+};
+
+async function loadIntegrationStatus() {
+    try {
+        const res = await fetch('/api/settings/status');
+        const status = await res.json();
+        const container = document.getElementById('integrationStatusList');
+        container.innerHTML = Object.entries(status).map(([key, val]) => `
+            <div class="integration-badge ${val.configured ? 'configured' : 'not-configured'}">
+                <span>${val.configured ? '✅' : '⚠️'} ${INTEGRATION_LABELS[key] || key}</span>
+                ${!val.configured ? `<a href="#" onclick="goToSettingsTab('${val.settingsTab}')">Configure</a>` : ''}
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error('Failed to load integration status', e);
+    }
+}
+function goToSettingsTab(tab) {
+    const settingsNavLink = document.querySelector('.nav-item[data-page="settings"]');
+    if (settingsNavLink) settingsNavLink.click();
+
+    // tab switch thoda delay ke baad, taaki settings page pehle render ho jaaye
+    setTimeout(() => {
+        const btn = document.querySelector(`.tab-btn[onclick*="switchSettingsTab('${tab}'"]`);
+        if (btn) switchSettingsTab(tab, btn);
+    }, 50);
+}
+
+// call on dashboard load
+loadIntegrationStatus();
 
 function appendLog(consoleDiv, message) {
     const div = document.createElement('div');
@@ -5204,7 +5240,15 @@ async function loadSettings() {
         }
         if (elements.settingsTwilioPhone) elements.settingsTwilioPhone.value = settings.twilio?.fromNumber || '';
 
-        // AI settings removed
+        // AI
+        if (elements.settingsAiProvider) elements.settingsAiProvider.value = settings.ai?.provider || 'openai';
+        if (elements.settingsAiBaseUrl) elements.settingsAiBaseUrl.value = settings.ai?.baseUrl || '';
+        if (elements.settingsAiModel) elements.settingsAiModel.value = settings.ai?.model || '';
+        if (elements.settingsGeminiModel) elements.settingsGeminiModel.value = settings.ai?.geminiModel || '';
+        if (elements.settingsAiKey) {
+            elements.settingsAiKey.value = settings.ai?.apiKey || '';
+            elements.settingsAiKey.dataset.masked = settings.ai?.apiKey?.includes('...') ? 'true' : 'false';
+        }
 
         // API Keys
         if (elements.settingsApiZerobounce) elements.settingsApiZerobounce.value = settings.apiKeys?.zerobounce || '';
@@ -5237,6 +5281,13 @@ async function saveSettings() {
             // Send '***' if showing masked dots or empty - preserve existing token
             authToken: (/^•+$/.test(elements.settingsTwilioToken?.value) || !elements.settingsTwilioToken?.value) ? '***' : elements.settingsTwilioToken.value,
             fromNumber: elements.settingsTwilioPhone?.value || ''
+        },
+        ai: {
+            provider: elements.settingsAiProvider?.value || 'openai',
+            apiKey: elements.settingsAiKey?.value || '',
+            baseUrl: elements.settingsAiBaseUrl?.value || '',
+            model: elements.settingsAiModel?.value || '',
+            geminiModel: elements.settingsGeminiModel?.value || ''
         },
         apiKeys: {
             zerobounce: elements.settingsApiZerobounce?.value || ''

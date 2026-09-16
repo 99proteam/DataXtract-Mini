@@ -7,9 +7,9 @@
     "start": "node server.js",
     "dev": "node server.js",
     "deploy": "npm install && npm start",
-    "test": "node --test tests/frontend-integrity.test.js tests/browser-executable.test.js",
+    "test": "node --test tests/frontend-integrity.test.js tests/browser-executable.test.js tests/integration-status.test.js tests/settings-status-functional.test.js tests/configure-buttons.test.js",
     "capture:readme": "node scripts/capture-readme-screenshot.js"
-  },
+},
   "keywords": [
     "google-maps-scraper",
     "data-extractor",
