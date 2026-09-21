@@ -6,7 +6,9 @@ const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
 
 const root = path.join(__dirname, '..');
-const testPort = 3998;
+// Test files run concurrently under `node --test`; use a per-process high port
+// so this isolated server cannot collide with the browser integration suite.
+const testPort = 43000 + (process.pid % 1000);
 const baseUrl = `http://127.0.0.1:${testPort}`;
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dataxtract-api-'));
 let serverProcess;
