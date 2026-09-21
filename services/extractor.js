@@ -17,6 +17,42 @@ function isProxyConnectionError(error) {
     return /ERR_PROXY|ERR_TUNNEL|proxy connection/i.test(error?.message || '');
 }
 
+function isProxyHttpFailure(response) {
+    if (!response) return true;
+    const status = response.status();
+    return status === 407 || status === 403 || status >= 500;
+}
+
+function isNavigationTimeout(error) {
+    return error?.name === 'TimeoutError' || /Navigation timeout.*exceeded/i.test(error?.message || '');
+}
+
+function hasUsablePageHtml(html) {
+    if (typeof html !== 'string' || html.length < 500) return false;
+    const $ = cheerio.load(html);
+    const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
+    if (bodyText.length < 80) return false;
+    return !/just a moment|performing security verification|checking your browser|enable javascript and cookies/i.test(bodyText);
+}
+
+async function recoverTimedOutNavigation(page, error) {
+    if (!isNavigationTimeout(error)) throw error;
+    try { await page.evaluate(() => window.stop()); } catch (_) { }
+    const html = await page.content();
+    if (!hasUsablePageHtml(html)) throw error;
+    return html;
+}
+
+async function navigateWithPartialRecovery(page, url) {
+    try {
+        const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
+        return { response, html: null, recoveredFromTimeout: false };
+    } catch (error) {
+        const html = await recoverTimedOutNavigation(page, error);
+        return { response: null, html, recoveredFromTimeout: true };
+    }
+}
+
 class ExtractionJob {
     constructor(campaignId, domains, options) {
         this.campaignId = campaignId;
@@ -26,6 +62,7 @@ class ExtractionJob {
         this.browser = null;
         this.activeProxy = null;
         this.processed = 0;
+        this.failed = 0;
 
         // Security configuration
         this.securityConfig = {
@@ -53,7 +90,7 @@ class ExtractionJob {
             console.log(`[Extraction] Starting job for campaign ${this.campaignId}`);
 
             // Proxy setup
-            const proxy = this.options.useProxies === false ? null : proxyManager.getNextProxy();
+            const proxy = this.options.useProxies === true ? proxyManager.getNextProxy() : null;
             this.activeProxy = proxy;
 
             if (proxy) {
@@ -71,7 +108,8 @@ class ExtractionJob {
                 }
 
                 console.log(`[Extraction] Processing domain: ${domainRecord.domain}`);
-                await this.processDomain(domainRecord);
+                const outcome = await this.processDomain(domainRecord);
+                if (outcome?.success === false) this.failed++;
                 this.processed++;
 
                 // Update campaign progress
@@ -99,12 +137,20 @@ class ExtractionJob {
 
             // Mark campaign as completed if not paused
             if (!this.isPaused) {
-                console.log('[Extraction] Job completed');
-                campaignOps.complete.run(this.campaignId);
-                this.broadcast({ type: 'completed' });
+                if (this.failed > 0) {
+                    const message = `${this.failed} of ${this.processed} domain(s) failed. Use Restart after checking the error log.`;
+                    console.error(`[Extraction] ${message}`);
+                    campaignOps.updateStatus.run('error', this.campaignId);
+                    this.broadcast({ type: 'error', message, terminal: true });
+                } else {
+                    console.log('[Extraction] Job completed');
+                    campaignOps.complete.run(this.campaignId);
+                    this.broadcast({ type: 'completed' });
+                }
             }
         } catch (error) {
             console.error('Extraction job error:', error);
+            campaignOps.updateStatus.run('error', this.campaignId);
             this.broadcast({ type: 'error', message: error.message });
 
             // Try to close browser on error
@@ -163,12 +209,27 @@ class ExtractionJob {
 
             // 1. Initial Navigation
             this.log(`🌐 Navigating to ${baseUrl}`);
-            const response = await page.goto(baseUrl, { waitUntil: 'networkidle2' });
+            const navigation = await navigateWithPartialRecovery(page, baseUrl);
+            const response = navigation.response;
+
+            if (navigation.recoveredFromTimeout) {
+                this.log('Navigation timed out, but usable HTML was received. Continuing with the page content already received.');
+            }
+
+            if (this.activeProxy && !retriedDirect && !navigation.recoveredFromTimeout && isProxyHttpFailure(response)) {
+                this.log(`⚠️ Proxy returned ${response ? response.status() : 'no response'}. Retrying ${domain} directly...`);
+                await page.close();
+                page = null;
+                await this.browser.close();
+                this.activeProxy = null;
+                await this.launchBrowser(null);
+                return this.processDomain(domainRecord, true);
+            }
 
             // Handle redirects/errors
-            if (!response || !response.ok()) {
+            if (!navigation.recoveredFromTimeout && (!response || !response.ok())) {
                 this.log(`⚠️ Warning: ${baseUrl} returned status ${response ? response.status() : 'No response'}`);
-            } else {
+            } else if (!navigation.recoveredFromTimeout) {
                 this.log(`✓ Page loaded successfully`);
             }
 
@@ -176,7 +237,7 @@ class ExtractionJob {
             await security.simulateHumanBehavior(page);
 
             // Get page content
-            const html = await page.content();
+            const html = navigation.html || await page.content();
             const $ = cheerio.load(html);
 
             // 2. Discover URLs (Sitemap/Robots.txt integration)
@@ -204,8 +265,18 @@ class ExtractionJob {
             // 3. Extract data from main page
             await this.extractFromPage(page, $, baseUrl, domainId, domain, results);
 
+            // Business emails are commonly published only on Contact/About pages.
+            const emailEnabled = this.options.extractionOptions?.emails?.enabled !== false;
+            const hasBusinessEmail = results.some(result =>
+                result.dataType === 'email' && emailExtractor.isLikelyBusinessEmail(result.value, baseUrl)
+            );
+            if (!crawlSettings.deepCrawl && emailEnabled && !hasBusinessEmail) {
+                pagesToCrawl = await this.getPagesToCrawl(page, $, baseUrl);
+                if (pagesToCrawl.length > 0) this.log('📧 No first-party homepage email found. Checking priority contact pages...');
+            }
+
             // 4. Crawl additional pages
-            const maxPages = crawlSettings.maxPages || 5;
+            const maxPages = crawlSettings.deepCrawl ? (crawlSettings.maxPages || 5) : 3;
             const crawledUrls = new Set([baseUrl]);
             // Ensure we don't recrawl main page
             const uniquePages = pagesToCrawl.filter(u => {
@@ -228,10 +299,13 @@ class ExtractionJob {
 
                     // Navigate to page
                     this.log(`📄 Crawling: ${pageUrl}`);
-                    await page.goto(pageUrl, { waitUntil: 'networkidle2' });
+                    const pageNavigation = await navigateWithPartialRecovery(page, pageUrl);
+                    if (pageNavigation.recoveredFromTimeout) {
+                        this.log('Subpage navigation timed out. Continuing with the page content already received.');
+                    }
                     await security.simulateHumanBehavior(page);
 
-                    const pageHtml = await page.content();
+                    const pageHtml = pageNavigation.html || await page.content();
                     const $page = cheerio.load(pageHtml);
 
                     // Extract data
@@ -245,6 +319,22 @@ class ExtractionJob {
             }
 
             await page.close();
+
+            // Prefer addresses owned by the crawled site when unrelated public-mail
+            // addresses are present in reviews or embedded page content.
+            const emailResults = results.filter(result => result.dataType === 'email');
+            const preferredEmails = new Set(emailExtractor.preferBusinessEmails(
+                emailResults.map(result => result.value),
+                baseUrl
+            ));
+            if (preferredEmails.size < emailResults.length) {
+                for (let index = results.length - 1; index >= 0; index -= 1) {
+                    if (results[index].dataType === 'email' && !preferredEmails.has(results[index].value)) {
+                        results.splice(index, 1);
+                    }
+                }
+                this.log(`📧 Kept ${preferredEmails.size} first-party business email(s); ignored unrelated public-mail addresses.`);
+            }
 
             // Save results to database
             if (results.length > 0) {
@@ -260,6 +350,7 @@ class ExtractionJob {
                 domain,
                 resultsCount: results.length
             });
+            return { success: true, resultsCount: results.length };
 
         } catch (error) {
             if (this.activeProxy && !retriedDirect && isProxyConnectionError(error)) {
@@ -288,6 +379,7 @@ class ExtractionJob {
                 domain,
                 error: error.message
             });
+            return { success: false, error: error.message };
         }
     }
 
@@ -714,5 +806,9 @@ function startExtraction(campaignId, domains, options) {
 
 module.exports = {
     startExtraction,
-    ExtractionJob
+    ExtractionJob,
+    isProxyHttpFailure,
+    isNavigationTimeout,
+    hasUsablePageHtml,
+    recoverTimedOutNavigation
 };

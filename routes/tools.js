@@ -8,10 +8,10 @@ const router = express.Router();
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
 const { toolsOps } = require('../config/database');
 const { proxyOps } = require('../config/database');
 const { withBrowserExecutable } = require('../services/browserExecutable');
+const { normalizeUrls, parseUploadedList } = require('../services/inputList');
 
 // Project data directory
 const baseDir = path.join(__dirname, '..');
@@ -38,15 +38,45 @@ const getRandomUA = (type = 'desktop') => {
         : desktopUAs[Math.floor(Math.random() * desktopUAs.length)];
 };
 
+router.post('/import-urls', (req, res) => {
+    const upload = req.app.get('upload');
+    upload.single('file')(req, res, async (error) => {
+        if (error) return res.status(400).json({ error: error.message });
+        try {
+            const urls = normalizeUrls(await parseUploadedList(req.file));
+            if (!urls.length) return res.status(400).json({ error: 'No valid HTTP/HTTPS links were found' });
+            res.json({ success: true, urls, count: urls.length });
+        } catch (parseError) {
+            console.error('URL import error:', parseError);
+            res.status(400).json({ error: 'Could not read that file' });
+        }
+    });
+});
+
 /**
  * POST /api/tools/traffic
  * Run authorized traffic tests against URLs
  */
 router.post('/traffic', async (req, res) => {
-    const { urls, config } = req.body;
+    const inputConfig = req.body.config || {};
+    const clamp = (value, fallback, min, max) => {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? Math.min(max, Math.max(min, Math.floor(parsed))) : fallback;
+    };
+    const config = {
+        useProxies: Boolean(inputConfig.useProxies),
+        device: ['desktop', 'mobile', 'mix'].includes(inputConfig.device) ? inputConfig.device : 'desktop',
+        visitCount: clamp(inputConfig.visitCount, 1, 1, 20),
+        internalVisits: clamp(inputConfig.internalVisits, 0, 0, 5),
+        enableHuman: inputConfig.enableHuman !== false,
+        durationMin: clamp(inputConfig.durationMin, 5, 1, 300),
+        durationMax: clamp(inputConfig.durationMax, 10, 1, 300)
+    };
+    if (config.durationMax < config.durationMin) config.durationMax = config.durationMin;
+    const urls = normalizeUrls(req.body.urls || []);
     // config: { useProxies: bool, durationMin: int, durationMax: int, device: 'desktop'|'mobile', visitCount: int }
 
-    if (!urls || !Array.isArray(urls)) return res.status(400).json({ error: 'URLs array is required' });
+    if (!urls.length) return res.status(400).json({ error: 'At least one valid HTTP/HTTPS URL is required' });
 
     const jobId = Date.now().toString();
     const visitCount = config.visitCount || 1;
@@ -254,9 +284,10 @@ router.post('/traffic', async (req, res) => {
  * Download Source Code
  */
 router.post('/download', async (req, res) => {
-    const { urls, renderJs } = req.body;
+    const renderJs = Boolean(req.body.renderJs);
+    const urls = normalizeUrls(req.body.urls || []);
 
-    if (!urls || !Array.isArray(urls)) return res.status(400).json({ error: 'URLs array is required' });
+    if (!urls.length) return res.status(400).json({ error: 'At least one valid HTTP/HTTPS URL is required' });
 
     const batchId = Date.now().toString();
     const saveDir = path.join(baseDir, 'data', 'downloads', batchId);
@@ -293,8 +324,12 @@ router.post('/download', async (req, res) => {
                         await page.close();
                     } else {
                         // Static fetch using built-in fetch (Node 18+) or axios
-                        const response = await fetch(url);
+                        const response = await fetch(url, { signal: AbortSignal.timeout(60000) });
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        const contentLength = Number(response.headers.get('content-length') || 0);
+                        if (contentLength > 10 * 1024 * 1024) throw new Error('Response is larger than 10 MB');
                         html = await response.text();
+                        if (Buffer.byteLength(html, 'utf8') > 10 * 1024 * 1024) throw new Error('Response is larger than 10 MB');
                     }
 
                     // Save file
@@ -346,10 +381,11 @@ router.post('/download', async (req, res) => {
  * Take screenshots of multiple URLs
  */
 router.post('/screenshot', async (req, res) => {
-    const { urls, browser, device, campaignId } = req.body;
+    const { browser, device, campaignId } = req.body;
+    const urls = normalizeUrls(req.body.urls || []);
 
-    if (!urls || !Array.isArray(urls)) {
-        return res.status(400).json({ error: 'URLs array is required' });
+    if (!urls.length) {
+        return res.status(400).json({ error: 'At least one valid HTTP/HTTPS URL is required' });
     }
 
     // Create unique folder for this batch

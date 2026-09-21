@@ -3,6 +3,7 @@ const router = express.Router();
 const { campaignOps, keywordOps, mapsResultOps } = require('../config/database');
 const googleMapsExtractor = require('../services/googleMapsExtractor');
 const security = require('../services/security');
+const { createWorkbookBuffer } = require('../services/excelExport');
 
 // Active Google Maps extraction jobs
 const activeJobs = new Map();
@@ -92,6 +93,7 @@ async function startMapsExtraction(campaignId, keywords, options, mode) {
                     const results = await googleMapsExtractor.searchGoogleMaps(keyword, {
                         maxResults: options.maxResults ?? options.maxResultsPerKeyword ?? 20,
                         getDetails: options.getDetails !== false && options.getBusinessDetails !== false,
+                        useProxies: options.useProxies === true,
                         useUserAgentRotation: options.useUserAgentRotation !== false,
                         securityConfig,
                         // If "live" mode is selected, show browser. Otherwise headless (new).
@@ -249,7 +251,7 @@ router.get('/results/:campaignId', (req, res) => {
 });
 
 // Export Maps results
-router.get('/export/:campaignId/:format', (req, res) => {
+router.get('/export/:campaignId/:format', async (req, res) => {
     try {
         const { campaignId, format } = req.params;
         const results = mapsResultOps.getGroupedByCampaign(campaignId);
@@ -285,9 +287,7 @@ router.get('/export/:campaignId/:format', (req, res) => {
                 break;
 
             case 'excel':
-                const XLSX = require('xlsx');
-                const wb = generateMapsExcel(flatResults);
-                const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+                const buffer = await generateMapsExcel(flatResults);
                 res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 res.setHeader('Content-Disposition', `attachment; filename="${campaign.name}-maps.xlsx"`);
                 res.send(buffer);
@@ -326,10 +326,7 @@ function generateMapsCSV(results) {
 }
 
 // Generate Excel for Maps results
-function generateMapsExcel(results) {
-    const XLSX = require('xlsx');
-    const wb = XLSX.utils.book_new();
-
+async function generateMapsExcel(results) {
     const data = results.map(r => ({
         'Search Keyword': r.keyword || '',
         'Business Name': r.name || '',
@@ -344,10 +341,7 @@ function generateMapsExcel(results) {
         'Place ID': r.placeId || ''
     }));
 
-    const sheet = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(wb, sheet, 'Google Maps Results');
-
-    return wb;
+    return createWorkbookBuffer([{ name: 'Google Maps Results', rows: data }]);
 }
 
 // Export the router and the start function

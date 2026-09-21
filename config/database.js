@@ -12,7 +12,7 @@ const logError = (err) => {
     try { require('fs').appendFileSync(logPath, msg); } catch (e) { }
 };
 
-const dataDir = path.join(baseDir, 'data');
+const dataDir = process.env.DATAXTRACT_DATA_DIR || path.join(baseDir, 'data');
 if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
 }
@@ -201,6 +201,12 @@ db.exec(`
         output_path TEXT, -- for downloads/screenshots
         details TEXT, -- JSON
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Anonymous unique-browser visitor counter shown in the application header.
+    CREATE TABLE IF NOT EXISTS app_visitors (
+        visitor_id TEXT PRIMARY KEY,
+        first_seen DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 `);
 

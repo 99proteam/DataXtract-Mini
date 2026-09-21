@@ -3,6 +3,7 @@ const router = express.Router();
 const { campaignOps, domainOps, resultOps } = require('../config/database');
 const extractorService = require('../services/extractor');
 const security = require('../services/security');
+const { createWorkbookBuffer } = require('../services/excelExport');
 
 
 // Active extraction jobs
@@ -120,7 +121,7 @@ router.get('/status/:campaignId', (req, res) => {
 });
 
 // Export results
-router.get('/export/:campaignId/:format', (req, res) => {
+router.get('/export/:campaignId/:format', async (req, res) => {
     try {
         const { campaignId, format } = req.params;
         const results = resultOps.getGroupedByCampaign(campaignId);
@@ -145,9 +146,7 @@ router.get('/export/:campaignId/:format', (req, res) => {
                 break;
 
             case 'excel':
-                const XLSX = require('xlsx');
-                const wb = generateExcel(results);
-                const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+                const buffer = await generateExcel(results);
                 res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 res.setHeader('Content-Disposition', `attachment; filename="${campaign.name}-results.xlsx"`);
                 res.end(buffer); // Use end() for binary buffers
@@ -189,10 +188,7 @@ function generateCSV(results) {
 }
 
 // Generate Excel workbook from results
-function generateExcel(results) {
-    const XLSX = require('xlsx');
-    const wb = XLSX.utils.book_new();
-
+async function generateExcel(results) {
     // Main results sheet
     const mainData = results.map(r => ({
         'Domain': r.domain,
@@ -205,9 +201,6 @@ function generateExcel(results) {
         'Address': r.address || ''
     }));
 
-    const mainSheet = XLSX.utils.json_to_sheet(mainData);
-    XLSX.utils.book_append_sheet(wb, mainSheet, 'Results');
-
     // Detailed emails sheet
     const emailData = [];
     for (const r of results) {
@@ -218,10 +211,6 @@ function generateExcel(results) {
                 'Found On Page': e.source
             });
         }
-    }
-    if (emailData.length > 0) {
-        const emailSheet = XLSX.utils.json_to_sheet(emailData);
-        XLSX.utils.book_append_sheet(wb, emailSheet, 'Emails');
     }
 
     // Detailed phones sheet
@@ -234,10 +223,6 @@ function generateExcel(results) {
                 'Found On Page': p.source
             });
         }
-    }
-    if (phoneData.length > 0) {
-        const phoneSheet = XLSX.utils.json_to_sheet(phoneData);
-        XLSX.utils.book_append_sheet(wb, phoneSheet, 'Phones');
     }
 
     // Media sheet
@@ -253,12 +238,12 @@ function generateExcel(results) {
             mediaData.push({ 'Domain': r.domain, 'Type': 'PDF', 'URL': pdf });
         }
     }
-    if (mediaData.length > 0) {
-        const mediaSheet = XLSX.utils.json_to_sheet(mediaData);
-        XLSX.utils.book_append_sheet(wb, mediaSheet, 'Media');
-    }
-
-    return wb;
+    return createWorkbookBuffer([
+        { name: 'Results', rows: mainData, headers: ['Domain', 'Emails', 'Phones', 'Technology', 'Social Links', 'Title', 'Description', 'Address'] },
+        { name: 'Emails', rows: emailData },
+        { name: 'Phones', rows: phoneData },
+        { name: 'Media', rows: mediaData }
+    ]);
 }
 
 // Helper to start extraction (exposed for Scheduler)

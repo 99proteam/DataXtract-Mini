@@ -4,11 +4,14 @@ This roadmap communicates direction rather than guaranteed dates. Community feed
 
 ## Near term
 
-- Expand automated route and service tests.
-- Add sample import files and anonymized export examples.
 - Improve first-run configuration checks and error messages.
 - Add clearer progress, cancellation, and retry states for long-running jobs.
-- Document platform-specific browser troubleshooting.
+
+## Recently completed
+
+- Added isolated API smoke coverage for startup, core read-only routes, and validation failures.
+- Added safe sample import files and anonymized CSV/JSON export examples.
+- Documented Chrome and Edge discovery, platform overrides, and common browser launch errors.
 
 ## Next
 

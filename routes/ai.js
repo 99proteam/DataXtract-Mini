@@ -5,15 +5,22 @@ const { mapsResultOps, resultOps, campaignOps, db } = require('../config/databas
 
 // Get AI Configuration
 router.get('/config', (req, res) => {
-    res.json(aiService.config);
+    const { apiKey, ...safeConfig } = aiService.config || {};
+    res.json({ ...safeConfig, configured: Boolean(apiKey) });
 });
 
 // Update AI Configuration
 router.post('/config', (req, res) => {
     try {
         const { provider, apiKey, baseUrl, model } = req.body;
-        aiService.saveConfig({ provider, apiKey, baseUrl, model });
-        res.json({ success: true, config: aiService.config });
+        if (!['gemini', 'openai'].includes(provider)) return res.status(400).json({ error: 'Unsupported AI provider' });
+        aiService.saveConfig({
+            provider,
+            apiKey: typeof apiKey === 'string' ? apiKey.trim().slice(0, 512) : '',
+            baseUrl: typeof baseUrl === 'string' ? baseUrl.trim().slice(0, 500) : '',
+            model: typeof model === 'string' ? model.trim().slice(0, 100) : ''
+        });
+        res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

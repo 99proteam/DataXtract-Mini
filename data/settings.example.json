@@ -1,0 +1,8 @@
+{
+  "proxy": { "enabled": false, "rotateOnError": true, "webshareApiKey": "" },
+  "smtp": { "host": "", "port": 587, "secure": false, "user": "", "pass": "", "enabled": false },
+  "twilio": { "accountSid": "", "authToken": "", "fromNumber": "", "enabled": false },
+  "apiKeys": { "zerobounce": "" },
+  "ai": { "provider": "gemini", "apiKey": "" },
+  "verification": {}
+}

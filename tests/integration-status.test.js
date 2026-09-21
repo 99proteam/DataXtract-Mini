@@ -11,7 +11,7 @@ test('settings status route never returns raw secret values', () => {
     const statusRoute = source.match(/router\.get\('\/status'[\s\S]*?\}\);/)[0];
     // status block should only build booleans, never echo settings.smtp.pass / authToken / apiKey directly
     assert.doesNotMatch(statusRoute, /res\.json\(settings\)/);
-    assert.match(statusRoute, /configured:\s*Boolean\(/);
+    assert.match(statusRoute, /buildIntegrationStatus\(settings\)/);
 });
 
 test('dashboard has an integration status container with a render function', () => {

@@ -414,7 +414,7 @@ router.post('/verify-email', async (req, res) => {
                     user: settings.smtp.user,
                     pass: settings.smtp.pass
                 },
-                tls: { rejectUnauthorized: false }
+                tls: { minVersion: 'TLSv1.2' }
             });
 
             try {

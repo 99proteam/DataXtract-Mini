@@ -5,6 +5,7 @@
 
 // Email regex pattern
 const emailPattern = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi;
+const emailValidationPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i;
 
 // Common false positives to exclude
 const excludePatterns = [
@@ -21,6 +22,36 @@ const excludePatterns = [
 
 // Common image file extensions
 const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp'];
+const publicEmailDomains = new Set([
+    'gmail.com', 'googlemail.com', 'yahoo.com', 'hotmail.com', 'outlook.com',
+    'live.com', 'aol.com', 'icloud.com', 'proton.me', 'protonmail.com', 'gmx.com'
+]);
+
+function normalizedHost(value) {
+    try {
+        const url = value.includes('://') ? new URL(value) : new URL(`https://${value}`);
+        return url.hostname.toLowerCase().replace(/^www\./, '');
+    } catch (_) {
+        return String(value || '').toLowerCase().replace(/^www\./, '').split('/')[0];
+    }
+}
+
+function emailDomain(email) {
+    return String(email || '').toLowerCase().split('@')[1] || '';
+}
+
+function isLikelyBusinessEmail(email, sourceUrl) {
+    const domain = emailDomain(email);
+    const host = normalizedHost(sourceUrl);
+    if (!domain || !host || publicEmailDomains.has(domain)) return false;
+    return domain === host || domain.endsWith(`.${host}`) || host.endsWith(`.${domain}`);
+}
+
+function preferBusinessEmails(emails, sourceUrl) {
+    const unique = [...new Set(emails.map(email => String(email).toLowerCase()))];
+    const firstParty = unique.filter(email => isLikelyBusinessEmail(email, sourceUrl));
+    return firstParty.length > 0 ? firstParty : unique;
+}
 
 /**
  * Extract emails from HTML content
@@ -30,12 +61,11 @@ const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp'];
  */
 function extract($, sourceUrl) {
     const emails = new Set();
-    const htmlContent = $.html();
-    const textContent = $.text();
-
-    // Extract from HTML
-    const htmlMatches = htmlContent.match(emailPattern) || [];
-    htmlMatches.forEach(email => emails.add(email.toLowerCase()));
+    // Script/style payloads often contain analytics, cached reviews or unrelated
+    // account addresses. Only inspect text that a visitor can reasonably see.
+    const visibleRoot = $.root().clone();
+    visibleRoot.find('script, style, noscript, template, svg').remove();
+    const textContent = visibleRoot.text();
 
     // Extract from visible text
     const textMatches = textContent.match(emailPattern) || [];
@@ -46,7 +76,7 @@ function extract($, sourceUrl) {
         const href = $(el).attr('href');
         if (href) {
             const email = href.replace('mailto:', '').split('?')[0].toLowerCase();
-            if (emailPattern.test(email)) {
+            if (emailValidationPattern.test(email)) {
                 emails.add(email);
             }
         }
@@ -55,9 +85,20 @@ function extract($, sourceUrl) {
     // Extract from data attributes
     $('[data-email], [data-mail]').each((_, el) => {
         const email = $(el).attr('data-email') || $(el).attr('data-mail');
-        if (email && emailPattern.test(email)) {
+        if (email && emailValidationPattern.test(email)) {
             emails.add(email.toLowerCase());
         }
+    });
+
+    // Decode Cloudflare-protected addresses.
+    $('[data-cfemail]').each((_, el) => {
+        const encoded = $(el).attr('data-cfemail');
+        const decoded = decodeObfuscatedEmail(`/cdn-cgi/l/email-protection#${encoded || ''}`);
+        if (decoded) emails.add(decoded);
+    });
+    $('a[href*="/cdn-cgi/l/email-protection#"]').each((_, el) => {
+        const decoded = decodeObfuscatedEmail($(el).attr('href') || '');
+        if (decoded) emails.add(decoded);
     });
 
     // Filter out false positives
@@ -100,7 +141,7 @@ function decodeObfuscatedEmail(encoded) {
                 for (let i = 2; i < hex.length; i += 2) {
                     decoded += String.fromCharCode(parseInt(hex.substr(i, 2), 16) ^ key);
                 }
-                if (emailPattern.test(decoded)) {
+                if (emailValidationPattern.test(decoded)) {
                     return decoded.toLowerCase();
                 }
             } catch (e) {
@@ -119,7 +160,7 @@ function decodeObfuscatedEmail(encoded) {
         .replace(/\s*<\s*dot\s*>\s*/gi, '.')
         .replace(/\s+/g, '');
 
-    if (emailPattern.test(decoded)) {
+    if (emailValidationPattern.test(decoded)) {
         return decoded.toLowerCase();
     }
 
@@ -129,5 +170,7 @@ function decodeObfuscatedEmail(encoded) {
 module.exports = {
     extract,
     decodeObfuscatedEmail,
-    emailPattern
+    emailPattern,
+    isLikelyBusinessEmail,
+    preferBusinessEmails
 };

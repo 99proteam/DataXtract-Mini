@@ -6,20 +6,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Domain Data Extractor - Campaign System</title>
     <meta name="description" content="Professional bulk domain data extraction with campaign-based workflow">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <body>
     <!-- Main Application -->
     <div class="app-container">
+        <aside id="promoBar" class="promo-bar" aria-label="BundleWP product offers">
+            <div class="promo-announcement">
+                <div class="promo-header-controls" aria-label="Offer bar controls">
+                    <button type="button" id="promoToggle" aria-expanded="true" title="Collapse product offers"><span id="promoToggleIcon" aria-hidden="true">&minus;</span><span id="promoToggleLabel">Collapse</span></button>
+                    <button type="button" id="promoClose" title="Close product offers" aria-label="Close product offers">&times;</button>
+                </div>
+                <span class="promo-offer-label">Limited offer</span>
+                <strong>Apply <button type="button" id="copyCouponButton" class="coupon-code" title="Copy SAVE50 coupon">SAVE50</button> coupon to get 50% discount on each product</strong>
+                <span class="visitor-total" title="Unique browsers that opened this installation"><span aria-hidden="true">&#128101;</span> Total visitors <strong id="totalVisitors" aria-live="polite">&mdash;</strong></span>
+            </div>
+            <div class="promo-products" aria-label="Premium products">
+                <div id="promoScroller" class="promo-scroller">
+                    <div class="promo-track">
+                        <div class="promo-set">
+                        <article class="promo-product"><div><strong>Auto Lead Pilot AI</strong><span class="promo-description">87-module lead generation, CRM and automation platform.</span></div><div class="promo-actions"><button type="button" data-product-details="auto-lead">View details</button><a href="https://bundlewp.com/product/auto-lead-pilot-ai/" target="_blank" rel="noopener noreferrer">Buy now</a></div></article>
+                        <article class="promo-product"><div><strong>Smart Extractor</strong><span class="promo-description">Windows suite for business, social and marketplace research.</span></div><div class="promo-actions"><button type="button" data-product-details="smart-extractor">View details</button><a href="https://bundlewp.com/product/all-in-one-smart-extractor/" target="_blank" rel="noopener noreferrer">Buy now</a></div></article>
+                        <article class="promo-product"><div><strong>Pro Fin Suite</strong><span class="promo-description">Finance, business, office and productivity tools.</span></div><div class="promo-actions"><button type="button" data-product-details="pro-fin">View details</button><a href="https://bundlewp.com/product/pro-fin-suite/" target="_blank" rel="noopener noreferrer">Buy now</a></div></article>
+                        <article class="promo-product"><div><strong>Billify</strong><span class="promo-description">Inventory, invoices, stock and point of sale for Windows.</span></div><div class="promo-actions"><button type="button" data-product-details="billify">View details</button><a href="https://bundlewp.com/product/billify-smart-inventory-billing-and-pos-windows-software/" target="_blank" rel="noopener noreferrer">Buy now</a></div></article>
+                        <article class="promo-product"><div><strong>Fin Tools</strong><span class="promo-description">Nearly 100 calculators, PDF, image and developer tools.</span></div><div class="promo-actions"><button type="button" data-product-details="fin-tools">View details</button><a href="https://bundlewp.com/product/fin-tools-100-premium-web-tools-for-wordpress/" target="_blank" rel="noopener noreferrer">Buy now</a></div></article>
+                        <article class="promo-product"><div><strong>WooFlow Manager</strong><span class="promo-description">WooCommerce orders, rewards, recovery and reporting.</span></div><div class="promo-actions"><button type="button" data-product-details="wooflow">View details</button><a href="https://bundlewp.com/product/wooflow-manager-store-automation-toolkit-for-woocommerce/" target="_blank" rel="noopener noreferrer">Buy now</a></div></article>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        <div id="productDetailsModal" class="product-modal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle" hidden>
+            <div class="product-modal-backdrop" data-close-product-modal></div>
+            <div class="product-modal-card">
+                <button type="button" class="product-modal-close" data-close-product-modal aria-label="Close product details">&times;</button>
+                <span class="product-modal-eyebrow">BundleWP premium product</span>
+                <h2 id="productModalTitle"></h2>
+                <p id="productModalDescription"></p>
+                <h3 id="productModalFeatureHeading">Included tools and features</h3>
+                <ul id="productModalFeatures" data-module-count="87"></ul>
+                <div class="product-modal-offer">Use coupon <strong>SAVE50</strong> at checkout for 50% off.</div>
+                <a id="productModalBuy" class="product-modal-buy" href="https://bundlewp.com/" target="_blank" rel="noopener noreferrer">Buy now on BundleWP ↗</a>
+            </div>
+        </div>
         <!-- App Header (Desktop & Mobile) -->
         <header class="app-header">
             <div class="header-left">
-                <div class="logo">
+                <a href="/dashboard" class="logo" id="logoHomeLink" aria-label="Go to DataXtract dashboard" title="Dashboard">
                     <div class="logo-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10" />
@@ -28,18 +67,19 @@
                         </svg>
                     </div>
                     <span class="logo-text">DataXtract</span>
-                </div>
+                </a>
+                <button type="button" id="promoReopen" class="promo-reopen" title="Open product offers" aria-label="Open product offers" hidden>Offers <span aria-hidden="true">&darr;</span></button>
             </div>
 
             <div class="header-right">
                 <!-- Desktop Navigation (Hidden on Mobile) -->
                 <nav class="desktop-nav">
-                    <a href="#" class="nav-item active" data-page="dashboard">Dashboard</a>
-                    <a href="#" class="nav-item" data-page="campaigns">Campaigns</a>
-                    <a href="#" class="nav-item" data-page="marketing">Marketing</a>
-                    <a href="#" class="nav-item" data-page="tools">Visual Tools</a>
-                    <a href="#" class="nav-item" data-page="settings">Settings</a>
-                    <a href="#" class="nav-item" data-page="guide">User Guide</a>
+                    <a href="/dashboard" class="nav-item active" data-page="dashboard">Dashboard</a>
+                    <a href="/campaigns" class="nav-item" data-page="campaigns">Campaigns</a>
+                    <a href="/marketing/sms" class="nav-item" data-page="marketing">Marketing</a>
+                    <a href="/visual-tools/screenshots" class="nav-item" data-page="tools">Visual Tools</a>
+                    <a href="/settings/proxy" class="nav-item" data-page="settings">Settings</a>
+                    <a href="/guide" class="nav-item" data-page="guide">User Guide</a>
                 </nav>
 
                 <!-- Action Button (Desktop) -->
@@ -78,12 +118,12 @@
                 </button>
 
                 <nav class="mobile-nav">
-                    <a href="#" class="mobile-nav-item active" data-page="dashboard">Dashboard</a>
-                    <a href="#" class="mobile-nav-item" data-page="campaigns">Campaigns</a>
-                    <a href="#" class="mobile-nav-item" data-page="marketing">Marketing</a>
-                    <a href="#" class="mobile-nav-item" data-page="tools">Visual Tools</a>
-                    <a href="#" class="mobile-nav-item" data-page="settings">Settings</a>
-                    <a href="#" class="mobile-nav-item" data-page="guide">User Guide</a>
+                    <a href="/dashboard" class="mobile-nav-item active" data-page="dashboard">Dashboard</a>
+                    <a href="/campaigns" class="mobile-nav-item" data-page="campaigns">Campaigns</a>
+                    <a href="/marketing/sms" class="mobile-nav-item" data-page="marketing">Marketing</a>
+                    <a href="/visual-tools/screenshots" class="mobile-nav-item" data-page="tools">Visual Tools</a>
+                    <a href="/settings/proxy" class="mobile-nav-item" data-page="settings">Settings</a>
+                    <a href="/guide" class="mobile-nav-item" data-page="guide">User Guide</a>
                 </nav>
 
                 <div class="mobile-menu-footer">
@@ -104,10 +144,20 @@
                     <h1>Dashboard</h1>
                     <p class="subtitle">Overview of your extraction campaigns</p>
                 </header>
-                  <div class="card" id="integrationStatusCard" style="margin-bottom: 20px; padding: 16px;">
-                         <h3 style="margin-bottom: 12px;">Integration Readiness</h3>
-                        <div id="integrationStatusList" class="integration-status-list"></div>
+                <section id="integrationStatusCard" class="readiness-panel" aria-labelledby="integrationReadinessTitle">
+                    <div class="readiness-heading">
+                        <div>
+                            <span class="readiness-eyebrow">Connection health</span>
+                            <h2 id="integrationReadinessTitle">Integration Readiness</h2>
+                        </div>
+                        <div class="readiness-legend" aria-label="Status legend">
+                            <span><i class="legend-dot working"></i>Working</span>
+                            <span><i class="legend-dot untested"></i>Added, not tested</span>
+                            <span><i class="legend-dot not-configured"></i>Not configured</span>
+                        </div>
                     </div>
+                    <div id="integrationStatusList" class="integration-status-list"></div>
+                </section>
 
                 <div class="stats-grid">
                     <div class="stat-card">
@@ -406,6 +456,8 @@
                                 </svg>
                                 Pause
                             </button>
+                            <button class="btn-action edit" id="btnEditCampaign" title="Edit campaign name, mode and extraction settings">✎ Edit</button>
+                            <button class="btn-action restart" id="btnRestartCampaign" title="Clear results and run all source items again">↻ Restart</button>
                             <!-- Removed Verify, Schedule, Enrich buttons as per user request -->
                             <button class="btn-action export" id="btnExportResults">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1685,15 +1737,15 @@
 
                 <div class="marketing-tabs"
                     style="display: flex; gap: 12px; margin-bottom: 24px; background: rgba(30, 30, 40, 0.6); padding: 8px; border-radius: 16px; flex-wrap: wrap; border: 1px solid var(--border-color); backdrop-filter: blur(10px);">
-                    <button class="marketing-tab active" onclick="switchToolTab('screenshots')"
+                    <button class="marketing-tab active" data-tool="screenshots" onclick="switchToolTab('screenshots')"
                         style="flex: 1; min-width: 140px; justify-content: center; color: #fff;">
                         📸 Bulk Screenshots
                     </button>
-                    <button class="marketing-tab" onclick="switchToolTab('traffic')"
+                    <button class="marketing-tab" data-tool="traffic" onclick="switchToolTab('traffic')"
                         style="flex: 1; min-width: 140px; justify-content: center; color: #fff;">
                         🚦 Website Traffic Tester
                     </button>
-                    <button class="marketing-tab" onclick="switchToolTab('downloader')"
+                    <button class="marketing-tab" data-tool="downloader" onclick="switchToolTab('downloader')"
                         style="flex: 1; min-width: 140px; justify-content: center; color: #fff;">
                         💾 Code Downloader
                     </button>
@@ -1707,9 +1759,11 @@
                             <div>
                                 <label style="font-weight: 600; display: block; margin-bottom: 12px;">📁 Upload Domains
                                     List</label>
+                                <textarea id="screenshotUrls" rows="7" class="form-control" placeholder="https://example.com&#10;https://bundlewp.com"></textarea>
+                                <div class="input-divider">or import a TXT, CSV or Excel file</div>
                                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; border: 2px dashed var(--border-color); border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.2s;"
                                     class="upload-zone" id="screenshotDropZone">
-                                    <input type="file" id="screenshotFile" accept=".txt,.csv" hidden>
+                                    <input type="file" id="screenshotFile" accept=".txt,.csv,.xlsx,.xls" hidden>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                         style="width: 48px; height: 48px; margin-bottom: 12px; color: var(--accent-primary);">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -1718,8 +1772,7 @@
                                     </svg>
                                     <span style="font-size: 1.1rem; font-weight: 500;">Click to upload list</span>
                                     <span style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">.txt or
-                                        .csv
-                                        (one domain per line)</span>
+                                        .csv or Excel (links can be in any column)</span>
                                     <div id="screenshotFileInfo"
                                         style="margin-top: 12px; font-weight: 600; color: var(--accent-primary);">
                                     </div>
@@ -1809,6 +1862,9 @@
                                 <textarea id="trafficUrls" rows="10"
                                     style="width: 100%; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: monospace; font-size: 0.9rem; resize: vertical;"
                                     placeholder="https://example.com&#10;https://mysite.com/blog"></textarea>
+                                <label class="file-import-button" for="trafficFile">Import TXT, CSV or Excel</label>
+                                <input type="file" id="trafficFile" accept=".txt,.csv,.xlsx,.xls" hidden>
+                                <small id="trafficFileStatus" class="file-import-status"></small>
                             </div>
                             <div>
                                 <div
@@ -1888,6 +1944,9 @@
                                 <textarea id="downloadUrls" rows="10"
                                     style="width: 100%; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-tertiary); font-family: monospace; font-size: 0.9rem; resize: vertical;"
                                     placeholder="https://example.com&#10;https://competitor.com"></textarea>
+                                <label class="file-import-button" for="downloadFile">Import TXT, CSV or Excel</label>
+                                <input type="file" id="downloadFile" accept=".txt,.csv,.xlsx,.xls" hidden>
+                                <small id="downloadFileStatus" class="file-import-status"></small>
                             </div>
                             <div>
                                 <div
@@ -1929,7 +1988,7 @@
     <div class="modal-overlay" id="modalNewCampaign">
         <div class="modal">
             <div class="modal-header">
-                <h2>Create New Campaign</h2>
+                <h2 id="campaignWizardTitle">Create New Campaign</h2>
                 <button class="modal-close" id="btnCloseModal">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18" />
@@ -2029,6 +2088,11 @@
                 <div class="wizard-content" data-step="2">
                     <!-- Domain Upload View -->
                     <div id="domainUploadView">
+                        <div class="form-group">
+                            <label for="domainsInput">Paste domains or website links <small>(one per line)</small></label>
+                            <textarea id="domainsInput" rows="7" class="form-control" placeholder="example.com&#10;https://bundlewp.com/contact"></textarea>
+                        </div>
+                        <div class="input-divider">or upload a TXT, CSV or Excel file</div>
                         <div class="upload-zone" id="uploadZone">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -2038,7 +2102,7 @@
                             <h3>Upload Domain List</h3>
                             <p>Drag and drop your .txt file here or click to browse</p>
                             <span class="file-info">One domain per line (e.g., example.com)</span>
-                            <input type="file" id="domainsFile" accept=".txt" hidden>
+                            <input type="file" id="domainsFile" accept=".txt,.csv,.xlsx,.xls" hidden>
                         </div>
                         <div class="uploaded-file hidden" id="uploadedFile">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2240,6 +2304,14 @@
                                     <span>Respect robots.txt</span>
                                 </label>
                             </div>
+                            <div class="setting-row proxy-choice">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="domainUseProxies">
+                                    <span>Use rotating proxies <span class="info-icon"
+                                            title="Off uses your direct connection. Enable this only when you want the domain crawler to use configured proxies.">ⓘ</span></span>
+                                    <small class="hint">Disabled by default. Failed proxy responses automatically retry directly.</small>
+                                </label>
+                            </div>
                             <div class="setting-row">
                                 <label class="checkbox-label">
                                     <input type="checkbox" id="enableUserAgentRotation" checked>
@@ -2295,6 +2367,14 @@
                         </div>
                         <div class="crawl-settings-section">
                             <h4>Security</h4>
+                            <div class="setting-row proxy-choice">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="mapsUseProxies">
+                                    <span>Use rotating proxies <span class="info-icon"
+                                            title="Off uses your direct connection. Turn this on only when you want Maps searches to use configured proxies.">ⓘ</span></span>
+                                    <small class="hint">Disabled by default. Failed proxy searches automatically retry directly.</small>
+                                </label>
+                            </div>
                             <div class="setting-row">
                                 <label>Delay between actions: <span class="info-icon"
                                         title="Wait time between each extraction. Longer delays reduce the chance of being blocked by Google.">ⓘ</span></label>
@@ -2353,7 +2433,7 @@
                             <line x1="12" y1="16" x2="12" y2="12" />
                             <line x1="12" y1="8" x2="12.01" y2="8" />
                         </svg>
-                        <p>Ready to create your campaign! Click "Create Campaign" to save and optionally
+                        <p id="campaignReviewNote">Ready to create your campaign! Click "Create Campaign" to save and optionally
                             start
                             extraction immediately.</p>
                     </div>
@@ -2379,7 +2459,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="20 6 9 17 4 12" />
                     </svg>
-                    Create Campaign
+                    <span id="campaignSubmitLabel">Create Campaign</span>
                 </button>
             </div>
         </div>
@@ -2633,7 +2713,7 @@ host:port"></textarea>
     <div class="toast-container" id="toastContainer"></div>
 
 
-    <script src="js/app.js"></script>
+        <script src="/js/app.js"></script>
 </body>
 
 </html>

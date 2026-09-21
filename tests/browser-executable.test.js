@@ -56,3 +56,14 @@ test('Maps and domain extraction retry directly when a proxy is unavailable', ()
     assert.match(domains, /isProxyConnectionError\(error\)/);
     assert.match(domains, /launchBrowser\(null\)/);
 });
+
+test('installation guide documents browser discovery and overrides on every supported OS', () => {
+    const guide = fs.readFileSync(path.join(__dirname, '..', 'docs', 'INSTALLATION.md'), 'utf8');
+    assert.match(guide, /automatic(?:ally)? looks for a usable Chrome-family browser/i);
+    assert.match(guide, /### Windows \(PowerShell\)[\s\S]*PUPPETEER_EXECUTABLE_PATH/);
+    assert.match(guide, /### macOS \(zsh\/bash\)[\s\S]*PUPPETEER_EXECUTABLE_PATH/);
+    assert.match(guide, /### Linux \(bash\)[\s\S]*PUPPETEER_EXECUTABLE_PATH/);
+    assert.match(guide, /Permission denied/i);
+    assert.match(guide, /Browser executable not found/i);
+    assert.doesNotMatch(guide, /C:\\Users\\(?!YourName)/i);
+});

@@ -59,6 +59,8 @@ microsoft.com
 
 Drag and drop or click to upload.
 
+You can start with the safe [domain input example](../examples/domain-input.txt). All names, domains, email addresses, and phone numbers in the example files are fictional or reserved for documentation.
+
 ### 3. Configure Filters
 
 Select what data to extract:
@@ -88,6 +90,8 @@ Review your settings and click **"Create Campaign"**.
 
 - **Export**: Click "Export" to download CSV, JSON, or Excel.
 - **Lead Scoring**: Click **"Calculate Lead Scores"** to grade leads based on data completeness (Phone, Email, Website quality, etc.).
+
+See the expected output shape in the anonymized [CSV export](../examples/export-results.csv) or [JSON export](../examples/export-results.json). For lead verification imports, use the [CSV input example](../examples/lead-verification.csv).
 
 ---
 

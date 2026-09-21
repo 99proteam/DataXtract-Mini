@@ -1,0 +1,4 @@
+domain,data_type,value,source_url
+example.com,email,hello@example.com,https://example.com/contact
+example.org,phone,+1-202-555-0104,https://example.org/contact
+example.net,social,https://social.example.net/example-company,https://example.net/about

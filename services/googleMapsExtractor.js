@@ -13,6 +13,10 @@ function isProxyConnectionError(error) {
     return /ERR_PROXY|ERR_TUNNEL|proxy connection/i.test(error?.message || '');
 }
 
+function shouldRetryDirect({ proxyAttempted, resultCount, retriedDirect }) {
+    return Boolean(proxyAttempted && resultCount === 0 && !retriedDirect);
+}
+
 /**
  * Google Maps Business Data Structure
  * @typedef {Object} BusinessData
@@ -50,6 +54,7 @@ async function searchGoogleMaps(keyword, options = {}) {
 
         // Proxy setup
         proxy = options.useProxies === false ? null : proxyManager.getNextProxy();
+        const proxyAttempted = Boolean(proxy);
         const proxyArgs = proxyManager.formatForPuppeteer(proxy);
         const proxyAuth = proxyManager.getAuth(proxy);
 
@@ -141,9 +146,14 @@ async function searchGoogleMaps(keyword, options = {}) {
 
         } else {
             // Standard Search Logic
+            let resultsSurfaceFound = false;
             // Wait for results to load
             try {
-                await page.waitForSelector('[role="feed"]', { timeout: 10000 });
+                await page.waitForFunction(() => (
+                    document.querySelector('[role="feed"]') ||
+                    document.querySelector('a[href*="/maps/place/"]')
+                ), { timeout: 15000 });
+                resultsSurfaceFound = true;
                 log('Results feed found.');
             } catch (e) {
                 log('Results feed not found. Checking for consent popup...');
@@ -193,15 +203,45 @@ async function searchGoogleMaps(keyword, options = {}) {
 
                 // Try to find the feed again
                 try {
-                    await page.waitForSelector('[role="feed"]', { timeout: 10000 });
+                    await page.waitForFunction(() => (
+                        document.querySelector('[role="feed"]') ||
+                        document.querySelector('a[href*="/maps/place/"]')
+                    ), { timeout: 15000 });
+                    resultsSurfaceFound = true;
                     log('Results feed found after consent handling.');
                 } catch (e2) {
                     log('Still no results feed - page may have different layout.');
                 }
             }
 
+            if (!resultsSurfaceFound && shouldRetryDirect({ proxyAttempted, resultCount: 0, retriedDirect: options._retriedDirect })) {
+                const pageState = await page.evaluate(() => ({ title: document.title, url: location.href })).catch(() => ({}));
+                log(`Proxy did not load Maps results${pageState.title ? ` (${pageState.title})` : ''}. Retrying without the proxy now...`);
+                if (browser) {
+                    try { await browser.close(); } catch (_) { /* already closed */ }
+                    browser = null;
+                }
+                return searchGoogleMaps(keyword, { ...options, useProxies: false, _retriedDirect: true });
+            }
+
             // Human-like delay
             await security.humanDelay(securityConfig);
+
+            // Read the listings already visible before looking for an end-of-list marker.
+            // Small towns and narrow searches can show every result on the first page.
+            const initialBusinesses = await extractBusinessListings(page);
+            for (const biz of initialBusinesses) {
+                const exists = businesses.some(existing =>
+                    (biz.placeId && existing.placeId && existing.placeId === biz.placeId) ||
+                    (existing.name === biz.name && existing.address === biz.address)
+                );
+                if (!exists) {
+                    businesses.push(biz);
+                    if (options.onResult) options.onResult({ ...biz, partial: true });
+                }
+                if (maxResults >= 0 && businesses.length >= maxResults) break;
+            }
+            log(`Read ${initialBusinesses.length} visible listings before scrolling. Total: ${businesses.length}`);
 
             // Scroll to load more results
             // Handle unlimited (-1) by using a very high limit comparison
@@ -287,6 +327,15 @@ async function searchGoogleMaps(keyword, options = {}) {
                 } else {
                     noNewItemsCount = 0; // Reset if we found something
                 }
+            }
+
+            if (shouldRetryDirect({ proxyAttempted, resultCount: businesses.length, retriedDirect: options._retriedDirect })) {
+                log(`Proxy returned no listings. Retrying directly before marking the search empty...`);
+                if (browser) {
+                    try { await browser.close(); } catch (_) { /* already closed */ }
+                    browser = null;
+                }
+                return searchGoogleMaps(keyword, { ...options, useProxies: false, _retriedDirect: true });
             }
 
             // Get detailed info for each business (optional)
@@ -680,6 +729,7 @@ async function searchMultipleKeywords(keywords, options = {}) {
 
 module.exports = {
     searchGoogleMaps,
+    shouldRetryDirect,
     extractBusinessListings,
     getBusinessDetails,
     extractCoordinates,

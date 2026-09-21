@@ -1,0 +1,3 @@
+example.com
+example.org/contact
+https://www.example.net/

@@ -17,17 +17,18 @@ const state = {
     currentResultsType: 'domain',
     ws: null,
     wsConnected: false,
-    campaignType: 'domain' // 'domain' or 'maps'
+    campaignType: 'domain', // 'domain' or 'maps'
+    editingCampaignId: null
 };
 
 // Visual Tools Logic
 let currentToolTab = 'screenshots';
 
-function switchToolTab(tabName) {
+function switchToolTab(tabName, updateUrl = true) {
     currentToolTab = tabName;
 
     // Update Tabs
-    document.querySelectorAll('.marketing-tab').forEach(tab => {
+    document.querySelectorAll('#pageTools .marketing-tab').forEach(tab => {
         tab.classList.remove('active');
         if (tab.textContent.toLowerCase().includes(tabName === 'downloader' ? 'code' : tabName === 'traffic' ? 'traffic' : 'screenshots')) {
             tab.classList.add('active');
@@ -42,6 +43,7 @@ function switchToolTab(tabName) {
     const targetSection = document.getElementById(tabName === 'screenshots' ? 'toolScreenshots' :
         tabName === 'traffic' ? 'toolTraffic' : 'toolDownloader');
     if (targetSection) targetSection.classList.remove('hidden');
+    if (updateUrl) history.pushState(null, '', `/visual-tools/${tabName}`);
 }
 
 async function startTrafficGen() {
@@ -148,19 +150,300 @@ const INTEGRATION_LABELS = {
     ai: 'AI (OpenAI/Gemini)'
 };
 
+const PRODUCT_DETAILS = {
+    'auto-lead': {
+        name: 'Auto Lead Pilot AI',
+        description: 'An all-in-one lead generation, CRM, customer engagement and business automation platform with 87 integrated modules.',
+        url: 'https://bundlewp.com/product/auto-lead-pilot-ai/',
+        features: [
+            'Central Command Operations Dashboard',
+            'Omni-Channel Support Ticket Helpdesk',
+            'Real-Time Appointments & Calendar Scheduling Engine',
+            'Dynamic Interactive Survey & Feedback Builder',
+            'High-Volume Auto Submitter & Directory Poster',
+            'Traffic Generator & SERP Backlink Extractor',
+            'Visual Kanban CRM Sales Pipeline',
+            'Targeted Leads Audience Management Hub',
+            'Universal Enterprise Contact Manager',
+            'AI Knowledge Base Brain & Product Catalog Hub',
+            'Multi-Currency Invoice Generator & Billing Suite',
+            'High-Deliverability Email Campaigns & Sequences',
+            'Unified Social Inbox',
+            'Telegram Phone & Deep Group Member Scraper Suite',
+            'YouTube Studio & Social Growth Engine',
+            'Real-Time Live Chat & Proactive AI Sales Assistant',
+            'Internal Team Collaboration & Workspace Channels',
+            'Unified Cross-Channel Customer Message Feed',
+            'Enterprise Bulk SMS Broadcasting & Two-Way Texting',
+            'WhatsApp Web QR Direct Session Sender',
+            'Official Meta WhatsApp Cloud API Workstation',
+            'Bulk WhatsApp Phone Number Active Verifier',
+            'Bulk Email Deliverability & Hygiene Verifier',
+            'Conversational AI Voice Agents & Phone Dispatcher',
+            'Studio Bulk Text-to-Speech Voice Generator',
+            'Autonomous AI Business Intelligence Analyst',
+            'Autonomous AI Social Media Content Manager',
+            'LinkedIn Lead Generation & Content Studio',
+            'Autonomous AI SEO Long-Form Article Writer',
+            'Autonomous Competitor Spy & Market Intelligence Agent',
+            'AI Corporate Legal Agent & Contract Reviewer',
+            'AI HR Recruiter & Candidate Screening Agent',
+            'Multi-LLM Side-by-Side Model Comparison Studio',
+            'Local SEO & Google Business Reviews Booster',
+            'Customer Satisfaction & Net Promoter Score Hub',
+            'Website Click, Mouse Movement & Scroll Heatmaps',
+            'Instant WHOIS & Domain Intelligence Lookup',
+            'High-Speed Web Lead & B2B Directory Extractor',
+            'Instant AI Sales Funnel & Landing Page Builder',
+            'Dynamic Web Form Builder & Lead Intake Studio',
+            'Sticky Header Notification Bars & Countdown Banners',
+            'Exit-Intent & Behavioral Website Popup Builder',
+            'Live Social Proof & Recent Purchase Notification Feeds',
+            'Custom AI Website Chatbot & Lead Qualifier',
+            'Dynamic Business QR Code Generator & Analytics',
+            'Unified Meta & Google Ads Campaign Manager',
+            'Visual Automated Workflows & Event Triggers',
+            '24/7 Autonomous Sales Autopilot Engine (BETA)',
+            'Self-Hosted Cron Job Scheduler & Remote Worker',
+            'Server Health, Uptime Monitoring & SSL Watchdog',
+            'Branded Link Shortener & Advanced Click Analytics',
+            'GitHub Repository & Developer Workflow Sync',
+            'PayPal Payment Gateway & Subscription Ledger',
+            'Paddle Merchant-of-Record SaaS Billing Hub',
+            'Wise Multi-Currency International Payouts Hub',
+            'Shiprocket E-Commerce Logistics & Courier Tracker',
+            'WooCommerce Store Bi-Directional Synchronization',
+            'Payhip Digital Downloads & Membership Sync',
+            'Twilio Cloud Telephony & Infrastructure Hub',
+            'Cloudflare DNS, SSL & Security Edge Manager',
+            'Instagram Business Analytics & Growth Insights',
+            'Cron-Job.org Cloud Integration & Task Orchestrator',
+            'Gmail Full HTML Inbox & Advanced Compose Engine',
+            'Google Docs Document Generator & Cloud Sync',
+            'Google Drive Cloud Asset Management & File Storage',
+            'Google Sheets Live Two-Way Spreadsheet Sync',
+            'Google Forms Response Importer & Lead Bridge',
+            'Gmail Postmaster & Email Deliverability Auditor',
+            'Google Calendar Two-Way Meeting Synchronization',
+            'Google Meet Video Conferencing Automation Bridge',
+            'Google AdSense Revenue & Ad Placement Analytics',
+            'Google AdMob Mobile App Advertising Monetization',
+            'Google Safe Browsing & URL Security Scanner',
+            'Chrome Browser Extension Command Toolkit',
+            'Chrome AI Webpage Analysis & SEO Tech Inspector',
+            'Studio Screen Recorder, Audio & Media Capture',
+            'Agile Project & Task Management Workstation',
+            'Complete Enterprise HRM & Payroll System',
+            'Collaborative Rich-Text Team Notebook',
+            'Encrypted Cloud File Sharing & Document Vault',
+            'Centralized Marketing Media Asset Library',
+            'Digital E-Signature Agreement & Contract Vault',
+            'Automated KYC & Identity Verification System',
+            'Centralized Team Bookmark & Resource Navigator',
+            'Employee Activity Tracking & Productivity Monitor',
+            'Zero-Knowledge Team Password & Credential Vault',
+            'Administrative CMS & Global Site Content Editor'
+        ]
+    },
+    'smart-extractor': {
+        name: 'All In One Smart Extractor',
+        description: 'A Windows research suite for collecting structured business, social, marketplace and e-commerce data.',
+        url: 'https://bundlewp.com/product/all-in-one-smart-extractor/',
+        featureHeading: 'Supported platforms, sources and capabilities',
+        features: [
+            'Windows desktop application',
+            'Google Maps and local businesses',
+            'Web domains and websites',
+            'Website source data',
+            'Search engine research',
+            'Social platform research',
+            'Trustpilot',
+            'Reddit',
+            'GitHub',
+            'Flipkart',
+            'Telegram',
+            'Online marketplaces and e-commerce',
+            'Business names, phone numbers and websites',
+            'Ratings, reviews, categories and addresses',
+            'Links, contacts and metadata',
+            'CSV export and organized results',
+            'License verification and activation',
+            'App password, recovery question and vault PIN',
+            'Backup, activity cleanup and secure workspace controls'
+        ]
+    },
+    'pro-fin': {
+        name: 'Pro Fin Suite',
+        description: 'A Windows toolkit bringing finance, business management, office, productivity and media utilities into one workspace.',
+        url: 'https://bundlewp.com/product/pro-fin-suite/',
+        features: ['Finance calculators', 'Business management tools', 'Office utilities', 'Productivity tools', 'Document tools', 'PDF utilities', 'Image and media tools', 'Data converters', 'Reporting helpers', 'Everyday desktop utilities']
+    },
+    billify: {
+        name: 'Billify',
+        description: 'Windows inventory, billing and POS software for everyday retail and small-business operations.',
+        url: 'https://bundlewp.com/product/billify-smart-inventory-billing-and-pos-windows-software/',
+        features: ['Dashboard and KPIs', 'Product and barcode management', 'Stock and low-stock alerts', 'Point of sale', 'Invoices and quotations', 'Purchase orders', 'Customers and suppliers', 'Payments, expenses and returns', 'Reports and profit/loss', 'Discounts, loyalty, backup and restore']
+    },
+    'fin-tools': {
+        name: 'Fin Tools WordPress Theme',
+        description: 'A WordPress tools-directory theme with nearly 100 privacy-friendly browser tools.',
+        url: 'https://bundlewp.com/product/fin-tools-100-premium-web-tools-for-wordpress/',
+        features: ['EMI, SIP, GST and tax calculators', 'Salary and percentage tools', 'PDF merge, split and rotate', 'PDF compression and conversion', 'Image compress, resize and crop', 'Image and Base64 conversion', 'JSON, JWT and regex tools', 'Code editor and minifiers', 'QR and color tools', 'Text, data and network utilities']
+    },
+    wooflow: {
+        name: 'WooFlow Manager',
+        description: 'A WooCommerce operations toolkit for automating common store-management workflows.',
+        url: 'https://bundlewp.com/product/wooflow-manager-store-automation-toolkit-for-woocommerce/',
+        features: ['Order control workflows', 'Product automation', 'Customer rewards', 'Abandoned-cart recovery', 'Store reports', 'Bulk operations', 'Customer management', 'Promotion workflows', 'Operational dashboards', 'WooCommerce admin productivity']
+    }
+};
+
+function initProductPromotions() {
+    const modal = document.getElementById('productDetailsModal');
+    if (!modal) return;
+
+    const closeModal = () => {
+        modal.hidden = true;
+        document.body.style.overflow = '';
+    };
+
+    const scroller = document.getElementById('promoScroller');
+    const track = scroller?.querySelector('.promo-track');
+    if (track && !track.dataset.loopReady) {
+        const productSet = track.querySelector('.promo-set');
+        const clone = productSet?.cloneNode(true);
+        if (clone) {
+            clone.setAttribute('aria-hidden', 'true');
+            track.appendChild(clone);
+        }
+        track.dataset.loopReady = 'true';
+    }
+
+    document.querySelectorAll('[data-product-details]').forEach(button => {
+        button.addEventListener('click', () => {
+            const product = PRODUCT_DETAILS[button.dataset.productDetails];
+            if (!product) return;
+            document.getElementById('productModalTitle').textContent = product.name;
+            document.getElementById('productModalDescription').textContent = product.description;
+            const featuresList = document.getElementById('productModalFeatures');
+            featuresList.innerHTML = product.features.map((feature, index) => `<li><span>${index + 1}</span>${feature}</li>`).join('');
+            featuresList.classList.toggle('complete-catalog', product.features.length > 20);
+            const heading = product.featureHeading || 'Included tools and features';
+            document.getElementById('productModalFeatureHeading').textContent = `${heading} (${product.features.length})`;
+            document.getElementById('productModalBuy').href = product.url;
+            modal.hidden = false;
+            document.body.style.overflow = 'hidden';
+            modal.querySelector('.product-modal-close')?.focus();
+        });
+    });
+
+    modal.querySelectorAll('[data-close-product-modal]').forEach(button => button.addEventListener('click', closeModal));
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !modal.hidden) closeModal();
+    });
+    document.getElementById('copyCouponButton')?.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText('SAVE50');
+            showToast('Coupon SAVE50 copied', 'success');
+        } catch (_) {
+            showToast('Coupon code: SAVE50', 'info');
+        }
+    });
+
+    const toggleButton = document.getElementById('promoToggle');
+    const closeButton = document.getElementById('promoClose');
+    const reopenButton = document.getElementById('promoReopen');
+    const toggleIcon = document.getElementById('promoToggleIcon');
+    const toggleLabel = document.getElementById('promoToggleLabel');
+
+    const setCollapsed = collapsed => {
+        document.body.classList.toggle('promo-collapsed', collapsed);
+        document.body.classList.remove('promo-hidden');
+        toggleButton?.setAttribute('aria-expanded', String(!collapsed));
+        if (toggleIcon) toggleIcon.textContent = collapsed ? '+' : '−';
+        if (toggleLabel) toggleLabel.textContent = collapsed ? 'Expand' : 'Collapse';
+        if (toggleButton) toggleButton.title = collapsed ? 'Expand product offers' : 'Collapse product offers';
+        if (reopenButton) reopenButton.hidden = true;
+    };
+
+    toggleButton?.addEventListener('click', () => setCollapsed(!document.body.classList.contains('promo-collapsed')));
+    closeButton?.addEventListener('click', () => {
+        document.body.classList.remove('promo-collapsed');
+        document.body.classList.add('promo-hidden');
+        if (reopenButton) reopenButton.hidden = false;
+    });
+    reopenButton?.addEventListener('click', () => setCollapsed(false));
+
+}
+
+async function loadVisitorCount() {
+    const counter = document.getElementById('totalVisitors');
+    if (!counter) return;
+
+    try {
+        if (navigator.webdriver === true) {
+            const response = await fetch('/api/metrics/visitors');
+            const result = await response.json();
+            counter.textContent = Number(result.totalVisitors || 0).toLocaleString();
+            return;
+        }
+
+        let visitorId = localStorage.getItem('dataxtractVisitorId');
+        if (!visitorId) {
+            visitorId = typeof crypto.randomUUID === 'function'
+                ? crypto.randomUUID()
+                : `${Date.now()}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}`;
+            localStorage.setItem('dataxtractVisitorId', visitorId);
+        }
+
+        const response = await fetch('/api/metrics/visitors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ visitorId })
+        });
+        if (!response.ok) throw new Error(`Visitor count failed (${response.status})`);
+        const result = await response.json();
+        counter.textContent = Number(result.totalVisitors || 0).toLocaleString();
+    } catch (error) {
+        console.warn('Unable to load visitor count', error);
+        try {
+            const response = await fetch('/api/metrics/visitors');
+            const result = await response.json();
+            counter.textContent = Number(result.totalVisitors || 0).toLocaleString();
+        } catch (_) {
+            counter.textContent = '0';
+        }
+    }
+}
+
 async function loadIntegrationStatus() {
+    const container = document.getElementById('integrationStatusList');
+    if (!container) return;
+    container.innerHTML = Object.keys(INTEGRATION_LABELS).map(key => `
+        <article class="integration-badge loading"><div class="integration-summary"><span class="status-dot"></span><div><strong>${INTEGRATION_LABELS[key]}</strong><small>Checking status…</small></div></div></article>
+    `).join('');
     try {
         const res = await fetch('/api/settings/status');
+        if (!res.ok) throw new Error(`Status request failed (${res.status})`);
         const status = await res.json();
-        const container = document.getElementById('integrationStatusList');
-        container.innerHTML = Object.entries(status).map(([key, val]) => `
-            <div class="integration-badge ${val.configured ? 'configured' : 'not-configured'}">
-                <span>${val.configured ? '✅' : '⚠️'} ${INTEGRATION_LABELS[key] || key}</span>
-                ${!val.configured ? `<a href="#" onclick="goToSettingsTab('${val.settingsTab}')">Configure</a>` : ''}
-            </div>
-        `).join('');
+        const stateMeta = {
+            'not-configured': { icon: '●', label: 'Not configured' },
+            untested: { icon: '●', label: 'Added, not tested' },
+            working: { icon: '●', label: 'Working' }
+        };
+        container.innerHTML = Object.keys(INTEGRATION_LABELS).map(key => {
+            const val = status[key] || { state: 'not-configured', settingsTab: key === 'proxy' ? 'proxy' : key === 'smtp' ? 'smtp' : 'api' };
+            return `
+            <article class="integration-badge ${val.state}" title="${stateMeta[val.state].label}">
+                <div class="integration-summary"><span class="status-dot"></span><div><strong>${INTEGRATION_LABELS[key] || key}</strong><small>${stateMeta[val.state].label}</small></div></div>
+                ${val.state === 'not-configured'
+                    ? `<button type="button" onclick="goToSettingsTab('${val.settingsTab}')">Configure</button>`
+                    : `<button type="button" onclick="testIntegration('${key}', this)">${val.state === 'working' ? 'Retest' : 'Test'}</button>`}
+            </article>
+        `; }).join('');
     } catch (e) {
         console.error('Failed to load integration status', e);
+        container.innerHTML = `<article class="integration-badge not-configured"><div class="integration-summary"><span class="status-dot"></span><div><strong>Readiness unavailable</strong><small>Could not check connections</small></div></div><button type="button" onclick="loadIntegrationStatus()">Retry</button></article>`;
     }
 }
 function goToSettingsTab(tab) {
@@ -173,9 +456,6 @@ function goToSettingsTab(tab) {
         if (btn) switchSettingsTab(tab, btn);
     }, 50);
 }
-
-// call on dashboard load
-loadIntegrationStatus();
 
 function appendLog(consoleDiv, message) {
     const div = document.createElement('div');
@@ -311,7 +591,13 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCampaigns();
     loadProxies(); // Load proxies on startup
     initMobileMenu(); // Initialize mobile sidebar
+    initProductPromotions();
+    loadVisitorCount();
+    loadIntegrationStatus();
+    routeFromPath();
 });
+
+window.addEventListener('popstate', routeFromPath);
 
 // ===================================
 // WebSocket
@@ -408,6 +694,10 @@ function handleWebSocketMessageLegacy(data) {
 
         case 'error':
             showToast(`Error: ${data.message}`, 'error');
+            if (data.terminal && state.currentCampaign?.id) {
+                loadCampaigns();
+                loadCampaignDetails(state.currentCampaign.id);
+            }
             break;
 
         case 'result':
@@ -494,7 +784,7 @@ function handleWebSocketMessageLegacy(data) {
                         badge.textContent = 'Failed';
                         badge.style.background = '#ef4444';
                         badge.style.color = '#fff';
-                        card.insertAdjacentHTML('beforeend', `<div style="color: #ef4444; font-size: 0.8rem; margin-top: 8px;">${data.error}</div>`);
+                        card.insertAdjacentHTML('beforeend', `<div style="color: #ef4444; font-size: 0.8rem; margin-top: 8px;">${escapeHtml(data.error || 'Capture failed')}</div>`);
                     }
                 }
             }
@@ -512,7 +802,7 @@ function subscribeTocamp(campaignId) {
 // Page Navigation
 // ===================================
 
-function navigateToPage(pageId) {
+function navigateToPage(pageId, updateUrl = true) {
     // Query pages fresh each time to ensure we get all pages
     const allPages = document.querySelectorAll('.page');
     // Select both desktop and mobile nav items
@@ -557,6 +847,66 @@ function navigateToPage(pageId) {
     if (pageId === 'schedules') loadSchedules();
     if (pageId === 'proxies') loadProxies();
     if (pageId === 'settings') loadSettings();
+    if (pageId === 'dashboard') loadIntegrationStatus();
+
+    if (updateUrl) {
+        const paths = {
+            dashboard: '/dashboard', campaigns: '/campaigns', guide: '/guide',
+            marketing: '/marketing/sms', tools: currentToolTab === 'screenshots' ? '/visual-tools/screenshots' : `/visual-tools/${currentToolTab}`,
+            settings: '/settings/proxy'
+        };
+        const path = paths[pageId];
+        if (path && window.location.pathname !== path) history.pushState(null, '', path);
+    }
+}
+async function testIntegration(name, button) {
+    const endpoint = {
+        proxy: '/api/settings/test-webshare', smtp: '/api/settings/test-smtp',
+        twilio: '/api/settings/test-twilio', zerobounce: '/api/settings/test-integration/zerobounce',
+        ai: '/api/settings/test-integration/ai'
+    }[name];
+    if (!endpoint) return;
+    button.disabled = true;
+    button.textContent = 'Testing…';
+    try {
+        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+        const result = await response.json();
+        showToast(result.message || (result.success ? 'Connection verified' : 'Connection test failed'), result.success ? 'success' : 'error');
+    } catch (_) {
+        showToast('Connection test failed', 'error');
+    } finally {
+        await loadIntegrationStatus();
+    }
+}
+
+function routeFromPath() {
+    if (window.location.hash.startsWith('#/')) {
+        history.replaceState(null, '', window.location.hash.slice(1));
+    }
+    const parts = (window.location.pathname || '/dashboard').split('/').filter(Boolean);
+    const section = parts[0] || 'dashboard';
+    if (section === 'campaigns' && parts[1]) {
+        navigateToPage('campaignDetails', false);
+        loadCampaignDetails(decodeURIComponent(parts[1]));
+        return;
+    }
+    if (section === 'visual-tools') {
+        navigateToPage('tools', false);
+        switchToolTab(['screenshots', 'traffic', 'downloader'].includes(parts[1]) ? parts[1] : 'screenshots', false);
+        return;
+    }
+    if (section === 'marketing') {
+        navigateToPage('marketing', false);
+        switchMarketingTab(parts[1] || 'sms', document.querySelector(`[onclick*="switchMarketingTab('${parts[1] || 'sms'}'"]`), false);
+        return;
+    }
+    if (section === 'settings') {
+        navigateToPage('settings', false);
+        const tab = parts[1] || 'proxy';
+        switchSettingsTab(tab, document.querySelector(`.tab-btn[onclick*="switchSettingsTab('${tab}'"]`), false);
+        return;
+    }
+    navigateToPage(['dashboard', 'campaigns', 'guide'].includes(section) ? section : 'dashboard', false);
 }
 
 // ===================================
@@ -565,6 +915,14 @@ function navigateToPage(pageId) {
 
 function initEventListeners() {
     // Navigation
+    const logoHomeLink = document.getElementById('logoHomeLink');
+    if (logoHomeLink) {
+        logoHomeLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            navigateToPage('dashboard');
+        });
+    }
+
     elements.navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
@@ -657,6 +1015,8 @@ function initEventListeners() {
     elements.btnBackToCampaigns.addEventListener('click', () => navigateToPage('campaigns'));
     elements.btnStartCampaign.addEventListener('click', startCampaign);
     elements.btnPauseCampaign.addEventListener('click', pauseCampaign);
+    document.getElementById('btnEditCampaign')?.addEventListener('click', () => openEditCampaign());
+    document.getElementById('btnRestartCampaign')?.addEventListener('click', restartCampaign);
     if (elements.btnVerifyEmails) {
         elements.btnVerifyEmails.addEventListener('click', verifyCampaignEmails);
     }
@@ -714,8 +1074,8 @@ function setCampaignType(type) {
 
 
 function openNewCampaignModal() {
-    elements.modalNewCampaign.classList.add('active');
     resetWizard();
+    elements.modalNewCampaign.classList.add('active');
 }
 
 function closeNewCampaignModal() {
@@ -728,6 +1088,7 @@ function resetWizard() {
     state.uploadedFile = null;
     state.itemsCount = 0;
     state.campaignType = 'domain';
+    state.editingCampaignId = null;
 
     // Reset form
     elements.formNewCampaign.reset();
@@ -748,9 +1109,18 @@ function resetWizard() {
     elements.uploadZone.classList.remove('hidden');
     elements.uploadedFile.classList.add('hidden');
     if (elements.keywordsInput) elements.keywordsInput.value = '';
+    const domainsInput = document.getElementById('domainsInput');
+    if (domainsInput) domainsInput.value = '';
 
     // Reset default views
     setCampaignType('domain');
+    if (elements.deepCrawlOptions) elements.deepCrawlOptions.classList.add('hidden');
+    const title = document.getElementById('campaignWizardTitle');
+    const submitLabel = document.getElementById('campaignSubmitLabel');
+    const reviewNote = document.getElementById('campaignReviewNote');
+    if (title) title.textContent = 'Create New Campaign';
+    if (submitLabel) submitLabel.textContent = 'Create Campaign';
+    if (reviewNote) reviewNote.textContent = 'Ready to create your campaign. Click “Create Campaign” to save it.';
 
     // Reset wizard steps
     updateWizardUI();
@@ -768,10 +1138,12 @@ function nextStep() {
 
     if (state.currentStep === 2) {
         if (state.campaignType === 'domain') {
-            if (!state.uploadedFile) {
-                showToast('Please upload a domain list file', 'error');
+            const directDomains = document.getElementById('domainsInput')?.value?.trim() || '';
+            if (!state.uploadedFile && !directDomains) {
+                showToast('Paste domains or upload a domain list file', 'error');
                 return;
             }
+            if (directDomains) state.itemsCount = directDomains.split(/\r?\n/).filter(value => value.trim()).length;
         } else if (state.campaignType === 'maps') {
             // Maps: Check keywords input or file
             const keywordsText = elements.keywordsInput?.value?.trim() || '';
@@ -936,10 +1308,11 @@ function updateReview() {
         if (document.getElementById('filterMedia')?.checked) filters.push('Media');
 
         const deepCrawl = document.getElementById('enableDeepCrawl')?.checked;
-        settings = `Max Pages: ${document.getElementById('maxPages')?.value || 5}, Deep Crawl: ${deepCrawl ? 'Yes' : 'No'}`;
+        settings = `Max Pages: ${document.getElementById('maxPages')?.value || 5}, Deep Crawl: ${deepCrawl ? 'Yes' : 'No'}, Connection: ${document.getElementById('domainUseProxies')?.checked ? 'Proxies' : 'Direct'}`;
     } else if (state.campaignType === 'maps') {
         filters.push('Business Info');
         if (document.getElementById('getBusinessDetails')?.checked) filters.push('Detailed Info (Phone/Web)');
+        filters.push(document.getElementById('mapsUseProxies')?.checked ? 'Proxies enabled' : 'Direct connection');
 
         let maxRes = document.getElementById('mapsMaxResults')?.value;
         if (maxRes === '-1') {
@@ -975,32 +1348,74 @@ async function loadCampaigns() {
 }
 
 async function createCampaign() {
-    const formData = new FormData();
     const mode = document.querySelector('input[name="mode"]:checked').value;
+    const name = document.getElementById('campaignName').value || `Campaign ${new Date().toLocaleDateString()}`;
+    const options = getExtractionOptions();
 
-    formData.append('name', document.getElementById('campaignName').value || `Campaign ${new Date().toLocaleDateString()}`);
+    if (state.editingCampaignId) {
+        const sourceText = state.campaignType === 'domain'
+            ? document.getElementById('domainsInput')?.value || ''
+            : document.getElementById('keywordsInput')?.value || '';
+        const sourceItems = sourceText.split(/\r?\n/).map(value => value.trim()).filter(Boolean);
+        if (sourceItems.length === 0) {
+            showToast(state.campaignType === 'domain' ? 'Enter at least one domain' : 'Enter at least one search keyword', 'error');
+            return;
+        }
+
+        const campaignId = state.editingCampaignId;
+        elements.btnCreateCampaign.disabled = true;
+        try {
+            const response = await fetch(`/api/campaigns/${campaignId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, mode, campaignType: state.campaignType, options, sourceItems })
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) throw new Error(result.error || 'Could not update campaign');
+            showToast('Campaign updated. Previous results were cleared so the edited campaign can run again.', 'success');
+            closeNewCampaignModal();
+            await loadCampaigns();
+            openCampaignDetails(campaignId);
+        } catch (error) {
+            showToast(error.message, 'error');
+        } finally {
+            elements.btnCreateCampaign.disabled = false;
+        }
+        return;
+    }
+
+    const formData = new FormData();
+
+    formData.append('name', name);
     formData.append('mode', mode);
     formData.append('campaignType', state.campaignType);
-    formData.append('options', JSON.stringify(getExtractionOptions()));
+    formData.append('options', JSON.stringify(options));
 
     // Get input data based on campaign type
     let inputData = [];
 
     switch (state.campaignType) {
         case 'domain':
-            if (state.uploadedFile) {
-                formData.append('domainsFile', state.uploadedFile);
+            {
+                const domainsText = document.getElementById('domainsInput')?.value?.trim() || '';
+                if (domainsText) {
+                inputData = domainsText.split(/\r?\n/).map(value => value.trim()).filter(Boolean);
+                formData.append('domains', JSON.stringify(inputData));
+                } else if (state.uploadedFile) {
+                    formData.append('domainsFile', state.uploadedFile);
+                }
             }
             break;
 
         case 'maps':
-            if (state.uploadedFile) {
-                formData.append('domainsFile', state.uploadedFile);
-            } else {
-                const keywordsText = document.getElementById('keywordsInput')?.value || '';
-
+            {
+                const keywordsText = document.getElementById('keywordsInput')?.value?.trim() || '';
+                if (keywordsText) {
                 inputData = keywordsText.split(/\r?\n/).filter(k => k.trim());
                 formData.append('keywords', JSON.stringify(inputData));
+                } else if (state.uploadedFile) {
+                    formData.append('domainsFile', state.uploadedFile);
+                }
             }
             break;
 
@@ -1121,8 +1536,166 @@ async function pauseCampaign() {
 
 // Open campaign details page
 function openCampaignDetails(campaignId) {
-    navigateToPage('campaignDetails');
+    navigateToPage('campaignDetails', false);
+    history.pushState(null, '', `/campaigns/${encodeURIComponent(campaignId)}`);
     loadCampaignDetails(campaignId);
+}
+
+async function restartCampaign() {
+    if (!state.currentCampaign || !confirm('Restart this campaign? Existing results will be cleared and every source item will run again.')) return;
+    try {
+        const response = await fetch(`/api/campaigns/${state.currentCampaign.id}/restart`, { method: 'POST' });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.error || 'Restart failed');
+        showToast('Campaign is ready to run again', 'success');
+        await loadCampaignDetails(state.currentCampaign.id);
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+}
+
+async function openEditCampaign(campaignId = state.currentCampaign?.id) {
+    if (!campaignId) return;
+    try {
+        const response = await fetch(`/api/campaigns/${campaignId}`);
+        if (!response.ok) throw new Error('Campaign could not be loaded');
+        const campaign = await response.json();
+        if (campaign.status === 'running') {
+            showToast('Pause the campaign before editing it', 'info');
+            return;
+        }
+
+        resetWizard();
+        state.editingCampaignId = campaign.id;
+        state.campaignType = campaign.campaign_type === 'maps' ? 'maps' : 'domain';
+        state.itemsCount = campaign.sourceItems?.length || 0;
+        document.getElementById('campaignWizardTitle').textContent = 'Edit Campaign';
+        document.getElementById('campaignSubmitLabel').textContent = 'Save Campaign';
+        document.getElementById('campaignReviewNote').textContent = 'Saving changes resets previous results and makes the edited campaign ready to run again.';
+        document.getElementById('campaignName').value = campaign.name || '';
+
+        const selectRadio = (name, value) => {
+            const input = document.querySelector(`input[name="${name}"][value="${value}"]`);
+            if (!input) return;
+            input.checked = true;
+            const group = input.closest('.mode-selector');
+            group?.querySelectorAll('.mode-option').forEach(option => option.classList.remove('selected'));
+            input.closest('.mode-option')?.classList.add('selected');
+        };
+        selectRadio('campaignType', state.campaignType);
+        selectRadio('mode', campaign.mode || 'live');
+        setCampaignType(state.campaignType);
+
+        const sources = campaign.sourceItems || [];
+        document.getElementById('domainsInput').value = state.campaignType === 'domain' ? sources.join('\n') : '';
+        elements.keywordsInput.value = state.campaignType === 'maps' ? sources.join('\n') : '';
+        const options = campaign.options || {};
+        if (state.campaignType === 'maps') {
+            const presets = ['10', '20', '50', '100', '200', '500', '-1'];
+            const maxResults = String(options.maxResults ?? 20);
+            document.getElementById('mapsMaxResults').value = presets.includes(maxResults) ? maxResults : 'custom';
+            document.getElementById('mapsCustomResults').value = presets.includes(maxResults) ? '' : maxResults;
+            toggleCustomResults();
+            document.getElementById('getBusinessDetails').checked = options.getDetails !== false;
+            document.getElementById('mapsUseProxies').checked = options.useProxies === true;
+            document.getElementById('mapsUARotation').checked = options.useUserAgentRotation !== false;
+            document.getElementById('mapsDelay').value = String(options.security?.delay ?? 4000);
+        } else {
+            const extraction = options.extractionOptions || {};
+            document.getElementById('filterEmails').checked = extraction.emails?.enabled !== false;
+            document.getElementById('emailLimit').value = String(extraction.emails?.limit ?? 5);
+            document.getElementById('filterPhones').checked = extraction.phones?.enabled !== false;
+            document.getElementById('phoneLimit').value = String(extraction.phones?.limit ?? 5);
+            document.getElementById('filterTechnology').checked = extraction.technology?.enabled !== false;
+            document.getElementById('filterSocial').checked = extraction.socialLinks?.enabled !== false;
+            document.getElementById('filterMetadata').checked = extraction.metadata?.enabled !== false;
+            document.getElementById('enableDeepCrawl').checked = options.crawlSettings?.deepCrawl === true;
+            document.getElementById('useSitemap').checked = options.crawlSettings?.useSitemap !== false;
+            document.getElementById('respectRobots').checked = options.crawlSettings?.respectRobotsTxt !== false;
+            document.getElementById('maxPages').value = String(options.crawlSettings?.maxPages ?? 5);
+            document.getElementById('enableUserAgentRotation').checked = options.useUserAgentRotation !== false;
+            document.getElementById('domainUseProxies').checked = options.useProxies === true;
+            document.getElementById('requestDelay').value = String(options.security?.minDelay ?? 2000);
+            elements.deepCrawlOptions.classList.toggle('hidden', !document.getElementById('enableDeepCrawl').checked);
+        }
+
+        state.currentStep = 1;
+        updateWizardUI();
+        elements.modalNewCampaign.classList.add('active');
+        document.getElementById('campaignName').focus();
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+}
+
+async function saveCampaignEdits() {
+    const modal = document.getElementById('modalEditCampaign');
+    const campaignId = modal?.dataset.campaignId;
+    if (!campaignId) return;
+
+    const campaign = state.campaigns.find(item => item.id === campaignId) || state.currentCampaign;
+    const name = document.getElementById('editCampaignName').value.trim();
+    if (!name) {
+        showToast('Campaign name is required', 'error');
+        return;
+    }
+
+    const options = { ...(campaign?.options || {}) };
+    if (campaign?.campaign_type === 'maps') {
+        const maxResults = Number(document.getElementById('editMapsMaxResults').value);
+        options.maxResults = maxResults === -1 ? -1 : Math.max(1, Math.min(10000, maxResults || 20));
+        options.getDetails = document.getElementById('editMapsDetails').checked;
+        options.useProxies = document.getElementById('editMapsUseProxies').checked;
+    } else {
+        options.crawlSettings = {
+            ...(options.crawlSettings || {}),
+            maxPages: Math.max(1, Math.min(100, Number(document.getElementById('editMaxPages').value) || 5)),
+            deepCrawl: document.getElementById('editDeepCrawl').checked
+        };
+    }
+
+    const saveButton = document.getElementById('btnSaveEditCampaign');
+    saveButton.disabled = true;
+    saveButton.textContent = 'Saving…';
+    try {
+        const response = await fetch(`/api/campaigns/${campaignId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name,
+                mode: document.getElementById('editCampaignMode').value,
+                options
+            })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.error || 'Could not update campaign');
+        closeEditCampaign();
+        showToast('Campaign updated', 'success');
+        await loadCampaigns();
+        if (state.currentCampaign?.id === campaignId) await loadCampaignDetails(campaignId);
+    } catch (error) {
+        showToast(error.message, 'error');
+    } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = 'Save changes';
+    }
+}
+
+function updateRestartButton(status) {
+    const button = document.getElementById('btnRestartCampaign');
+    if (!button) return;
+    const unavailable = status === 'running';
+    button.disabled = unavailable;
+    button.title = unavailable
+        ? 'Pause the running campaign before restarting it'
+        : 'Clear results and run every source item again';
+    const editButton = document.getElementById('btnEditCampaign');
+    if (editButton) {
+        editButton.disabled = unavailable;
+        editButton.title = unavailable
+            ? 'Pause the running campaign before editing it'
+            : 'Edit campaign name, mode and extraction settings';
+    }
 }
 
 async function loadCampaignDetails(campaignId) {
@@ -1157,6 +1730,7 @@ async function loadCampaignDetails(campaignId) {
         elements.campaignDetailName.textContent = campaign.name;
         elements.campaignDetailStatus.textContent = campaign.status;
         elements.campaignDetailStatus.className = `value status status-${campaign.status}`;
+        updateRestartButton(campaign.status);
 
         const total = campaign.total_domains || 0;
         const processed = campaign.processed_domains || 0;
@@ -1175,7 +1749,7 @@ async function loadCampaignDetails(campaignId) {
         if (campaign.status === 'running') {
             elements.btnStartCampaign.classList.add('hidden');
             elements.btnPauseCampaign.classList.remove('hidden');
-        } else if (campaign.status === 'completed') {
+        } else if (campaign.status === 'completed' || campaign.status === 'error') {
             elements.btnStartCampaign.classList.add('hidden');
             elements.btnPauseCampaign.classList.add('hidden');
         } else {
@@ -1221,6 +1795,7 @@ async function refreshCampaignStatus(campaignId) {
                 elements.campaignDetailStatus.textContent = campaign.status;
                 elements.campaignDetailStatus.className = `value status status-${campaign.status}`;
             }
+            updateRestartButton(campaign.status);
 
             // Update Progress
             const total = campaign.total_domains || 0;
@@ -1239,6 +1814,9 @@ async function refreshCampaignStatus(campaignId) {
             if (campaign.status === 'running') {
                 elements.btnStartCampaign.classList.add('hidden');
                 elements.btnPauseCampaign.classList.remove('hidden');
+            } else if (campaign.status === 'completed' || campaign.status === 'error') {
+                elements.btnStartCampaign.classList.add('hidden');
+                elements.btnPauseCampaign.classList.add('hidden');
             } else {
                 elements.btnStartCampaign.classList.remove('hidden');
                 elements.btnPauseCampaign.classList.add('hidden');
@@ -1269,7 +1847,7 @@ async function verifyCampaignEmails() {
             showToast(`Verification started for ${result.count} emails`, 'success');
             // Poll for updates every 5 seconds
             const interval = setInterval(async () => {
-                if (window.location.hash !== '#pageCampaignDetails') {
+                if (!window.location.pathname.startsWith('/campaigns/')) {
                     clearInterval(interval);
                     return;
                 }
@@ -1436,6 +2014,7 @@ function getExtractionOptions() {
         return {
             maxResults,
             getDetails: document.getElementById('getBusinessDetails').checked,
+            useProxies: document.getElementById('mapsUseProxies').checked,
             useUserAgentRotation: document.getElementById('mapsUARotation').checked, // Enabled by default
             security: {
                 delay: parseInt(document.getElementById('mapsDelay').value)
@@ -1445,6 +2024,8 @@ function getExtractionOptions() {
 
     // Domain options
     return {
+        useProxies: document.getElementById('domainUseProxies').checked,
+        useUserAgentRotation: document.getElementById('enableUserAgentRotation').checked,
         extractionOptions: {
             emails: {
                 enabled: document.getElementById('filterEmails').checked,
@@ -1859,27 +2440,20 @@ function handleKeywordsFileSelect(e) {
     }
 }
 
-function processFile(file) {
-    if (!file.name.endsWith('.txt')) {
-        showToast('Please upload a .txt file', 'error');
+async function processFile(file) {
+    if (!/\.(txt|csv|xlsx|xls)$/i.test(file.name)) {
+        showToast('Please upload a TXT, CSV or Excel file', 'error');
         return;
     }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const content = e.target.result;
-        const domains = content.split(/[\r\n]+/).filter(d => d.trim().length > 0);
-
-        state.uploadedFile = file;
+    const domains = await importUrlFile(file, 'domainsInput');
+    if (domains.length > 0) {
+        state.uploadedFile = null;
         state.itemsCount = domains.length;
-
         elements.fileName.textContent = file.name;
         elements.domainCount.textContent = `${domains.length} domains found`;
-
         elements.uploadZone.classList.add('hidden');
         elements.uploadedFile.classList.remove('hidden');
-    };
-    reader.readAsText(file);
+    }
 }
 
 function removeFile() {
@@ -1920,8 +2494,15 @@ function renderCampaignLists() {
     elements.allCampaigns.innerHTML = state.campaigns.length ? state.campaigns.map(c => createCampaignCard(c)).join('') : emptyHtml;
 
     document.querySelectorAll('.campaign-card').forEach(card => {
-        card.addEventListener('click', () => {
+        card.addEventListener('click', event => {
+            if (event.target.closest('.campaign-card-edit')) return;
             openCampaignDetails(card.dataset.id);
+        });
+    });
+    document.querySelectorAll('.campaign-card-edit').forEach(button => {
+        button.addEventListener('click', event => {
+            event.stopPropagation();
+            openEditCampaign(button.dataset.campaignId);
         });
     });
 }
@@ -1947,6 +2528,7 @@ function createCampaignCard(campaign) {
             </div>
             <div class="campaign-status">
                 <span class="status-badge ${campaign.status}">${campaign.status}</span>
+                <button type="button" class="campaign-card-edit" data-campaign-id="${campaign.id}" ${campaign.status === 'running' ? 'disabled title="Pause this campaign before editing"' : 'title="Edit campaign"'}>✎ Edit</button>
             </div>
         </div>
     `;
@@ -2802,7 +3384,7 @@ function switchSettingsTabLegacyV2(tabId) {
 }
 
 // Switch marketing tab
-function switchMarketingTab(tabId, sourceButton) {
+function switchMarketingTab(tabId, sourceButton, updateUrl = true) {
     document.querySelectorAll('.marketing-tab-content').forEach(tab => tab.classList.add('hidden'));
     document.querySelectorAll('.marketing-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
 
@@ -2810,6 +3392,7 @@ function switchMarketingTab(tabId, sourceButton) {
     if (targetTab) targetTab.classList.remove('hidden');
 
     sourceButton?.classList.add('active');
+    if (updateUrl) history.pushState(null, '', `/marketing/${tabId}`);
 }
 
 // Marketing file upload state
@@ -2987,7 +3570,7 @@ function handleWebSocketMessage(data) {
                 entry.style.paddingBottom = '2px';
 
                 const time = new Date().toLocaleTimeString();
-                entry.innerHTML = `<span style="opacity:0.6; margin-right:8px;">[${time}]</span> ${data.message}`;
+                entry.innerHTML = `<span style="opacity:0.6; margin-right:8px;">[${time}]</span> ${escapeHtml(data.message || '')}`;
 
                 logConsole.appendChild(entry);
                 logConsole.scrollTop = logConsole.scrollHeight;
@@ -3038,7 +3621,7 @@ function handleWebSocketMessage(data) {
                 entry.style.color = '#22c55e'; // Green
 
                 const time = new Date().toLocaleTimeString();
-                entry.innerHTML = `<span style="opacity:0.6; margin-right:8px;">[${time}]</span> ✅ Finished processing ${data.domain} (${data.resultsCount} items found)`;
+                entry.innerHTML = `<span style="opacity:0.6; margin-right:8px;">[${time}]</span> ✅ Finished processing ${escapeHtml(data.domain || '')} (${Number(data.resultsCount) || 0} items found)`;
 
                 logSuccess.appendChild(entry);
                 logSuccess.scrollTop = logSuccess.scrollHeight;
@@ -3056,7 +3639,7 @@ function handleWebSocketMessage(data) {
                 entry.style.color = '#ef4444'; // Red
 
                 const time = new Date().toLocaleTimeString();
-                entry.innerHTML = `<span style="opacity:0.6; margin-right:8px;">[${time}]</span> ❌ Failed processing ${data.domain}: ${data.error}`;
+                entry.innerHTML = `<span style="opacity:0.6; margin-right:8px;">[${time}]</span> ❌ Failed processing ${escapeHtml(data.domain || '')}: ${escapeHtml(data.error || '')}`;
 
                 logError.appendChild(entry);
                 logError.scrollTop = logError.scrollHeight;
@@ -4118,7 +4701,7 @@ loadWhatsAppSessions = async function () {
 // ===================================
 
 // Switch settings tabs
-function switchSettingsTab(tabName, sourceButton) {
+function switchSettingsTab(tabName, sourceButton, updateUrl = true) {
     // Hide all tabs
     document.querySelectorAll('.settings-tab-content').forEach(tab => {
         tab.classList.add('hidden');
@@ -4139,6 +4722,7 @@ function switchSettingsTab(tabName, sourceButton) {
 
     // Set active button
     sourceButton?.classList.add('active');
+    if (updateUrl) history.pushState(null, '', `/settings/${tabName}`);
 }
 
 // AI settings removed - toggleGeminiSettings function deleted
@@ -5663,22 +6247,30 @@ async function sendMarketingCampaign(type, isTest = false) {
 // Bulk Screenshots Logic
 let screenshotFile = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Tab Switching for Tools
-    const toolsNavItem = document.querySelector('[data-page="tools"]');
-    if (toolsNavItem) {
-        toolsNavItem.addEventListener('click', (e) => {
-            e.preventDefault();
-            // Hide all pages
-            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-            // Show Tools page
-            document.getElementById('pageTools').classList.remove('hidden');
-            toolsNavItem.classList.add('active');
-        });
+async function importUrlFile(file, textareaId, statusId) {
+    if (!file) return [];
+    const formData = new FormData();
+    formData.append('file', file);
+    const status = statusId ? document.getElementById(statusId) : null;
+    if (status) status.textContent = 'Reading file…';
+    try {
+        const response = await fetch('/api/tools/import-urls', { method: 'POST', body: formData });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.error || 'Import failed');
+        const textarea = document.getElementById(textareaId);
+        const existing = textarea.value.trim();
+        textarea.value = [existing, ...result.urls].filter(Boolean).join('\n');
+        if (status) status.textContent = `${result.count} valid links imported`;
+        showToast(`${result.count} links imported`, 'success');
+        return result.urls;
+    } catch (error) {
+        if (status) status.textContent = error.message;
+        showToast(error.message, 'error');
+        return [];
     }
+}
 
+document.addEventListener('DOMContentLoaded', () => {
     // File Drop Zone
     const dropZone = document.getElementById('screenshotDropZone');
     const fileInput = document.getElementById('screenshotFile');
@@ -5715,17 +6307,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnStart) {
         btnStart.addEventListener('click', startBulkScreenshots);
     }
+
+    document.getElementById('trafficFile')?.addEventListener('change', event => {
+        importUrlFile(event.target.files[0], 'trafficUrls', 'trafficFileStatus');
+    });
+    document.getElementById('downloadFile')?.addEventListener('change', event => {
+        importUrlFile(event.target.files[0], 'downloadUrls', 'downloadFileStatus');
+    });
 });
 
-function handleScreenshotFile(file) {
+async function handleScreenshotFile(file) {
     if (!file) return;
     screenshotFile = file;
-    document.getElementById('screenshotFileInfo').textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    const urls = await importUrlFile(file, 'screenshotUrls');
+    document.getElementById('screenshotFileInfo').textContent = urls.length ? `${urls.length} valid links imported from ${file.name}` : '';
 }
 
 async function startBulkScreenshots() {
-    if (!screenshotFile) {
-        showToast('Please upload a domains list first', 'error');
+    const urls = document.getElementById('screenshotUrls').value.split(/\r?\n/).map(value => value.trim()).filter(Boolean);
+    if (!urls.length) {
+        showToast('Paste links or import a file first', 'error');
         return;
     }
 
@@ -5737,17 +6338,6 @@ async function startBulkScreenshots() {
         showToast('Please select at least one device type', 'error');
         return;
     }
-
-    // Read file content
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        const text = e.target.result;
-        const urls = text.split('\n').map(l => l.trim()).filter(l => l);
-
-        if (urls.length === 0) {
-            showToast('No valid URLs found in file', 'error');
-            return;
-        }
 
         // Reset UI
         document.getElementById('screenshotProgressSection').classList.remove('hidden');
@@ -5772,7 +6362,7 @@ async function startBulkScreenshots() {
                 if (device === 'mobile') deviceIcon = '📱';
 
                 card.innerHTML = `
-                    <div style="font-weight: 600; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${url}">${url}</div>
+                    <div style="font-weight: 600; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(url)}">${escapeHtml(url)}</div>
                     <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">${deviceIcon} ${device}</div>
                     <div class="status-badge" style="background: var(--bg-tertiary); display: inline-block;">Waiting...</div>
                     <div class="result-image" style="margin-top: 12px; display: none;"></div>
@@ -5813,8 +6403,6 @@ async function startBulkScreenshots() {
             console.error(e);
             showToast('Request failed', 'error');
         }
-    };
-    reader.readAsText(screenshotFile);
 }
 
 function updateScreenshotProgress(current, total) {

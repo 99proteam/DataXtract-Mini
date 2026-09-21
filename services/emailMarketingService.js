@@ -52,9 +52,7 @@ function createTransporter() {
             user: settings.smtp.user,
             pass: settings.smtp.pass
         },
-        tls: {
-            rejectUnauthorized: false // Allow self-signed certs
-        }
+        tls: { minVersion: 'TLSv1.2' }
     });
 }
 

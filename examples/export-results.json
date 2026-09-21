@@ -1,0 +1,14 @@
+[
+  {
+    "domain": "example.com",
+    "dataType": "email",
+    "value": "hello@example.com",
+    "sourceUrl": "https://example.com/contact"
+  },
+  {
+    "domain": "example.org",
+    "dataType": "phone",
+    "value": "+1-202-555-0104",
+    "sourceUrl": "https://example.org/contact"
+  }
+]

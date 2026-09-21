@@ -6,6 +6,9 @@ node_modules/
 
 # Database
 *.db
+data/settings.json
+data/ai_settings.json
+data/webshare-proxies.json
 
 # OS generated files
 .DS_Store
@@ -31,6 +34,7 @@ temp/
 # Uploads and exports (user data)
 uploads/
 exports/
+public/screenshots/
 
 # ZIP files
 *.zip

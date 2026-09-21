@@ -17,6 +17,7 @@
 - Installs and starts with one command
 - Exports structured results without requiring a hosted account
 - Keeps application data and integration settings on your computer
+- Requires no login, user account, or authentication setup; it binds to your own computer by default
 
 > If DataXtract Mini saves you time, consider [starring the repository](https://github.com/99proteam/DataXtract-Mini) so more developers can discover it.
 
@@ -61,7 +62,7 @@ The dashboard provides a single place to start extraction jobs, review activity,
    npm run deploy
    ```
 
-6. Open **http://localhost:3007**.
+6. Open **http://127.0.0.1:3007**.
 
 The command installs all dependencies and starts the server. For later starts, use `npm start`.
 
@@ -75,7 +76,7 @@ npm run deploy
 
 ## First-time configuration
 
-1. Open **http://localhost:3007**.
+1. Open **http://127.0.0.1:3007**.
 2. Select **Settings**.
 3. Configure only the integrations you intend to use:
 
@@ -103,8 +104,8 @@ If a configured proxy is unreachable, the extractor automatically retries throug
 
 ### Domain extraction
 
-1. Create a text or CSV file containing one domain per line, without paths.
-2. Click **New Campaign**, select **Domain Extraction**, and upload the file.
+1. Prepare domains or website links, one per line. You can paste them directly or use a TXT, CSV, or XLSX file.
+2. Click **New Campaign**, select **Domain Extraction**, and paste or upload the list.
 3. Choose emails, phones, technology, social links, metadata, media, and crawl depth.
 4. Create and start the campaign.
 5. Export the grouped results as CSV, JSON, or Excel.
@@ -115,6 +116,13 @@ Example input:
 example.com
 company.example
 ```
+
+Downloadable safe examples:
+
+- [Domain input (TXT)](examples/domain-input.txt)
+- [Lead verification input (CSV)](examples/lead-verification.csv)
+- [Anonymized export (CSV)](examples/export-results.csv)
+- [Anonymized export (JSON)](examples/export-results.json)
 
 ### Verify leads
 
@@ -162,9 +170,11 @@ LinkedIn may show verification challenges. Complete them manually and use reason
 ### Bulk Screenshots
 
 1. Open **Tools → Bulk Screenshots**.
-2. Upload a URL list.
+2. Paste URLs directly or import a TXT, CSV, or XLSX URL list.
 3. Select desktop, laptop, tablet, or mobile viewports.
 4. Start the job and download the generated PNG files.
+
+Completed or paused campaigns can be reset with **Restart**. Restart clears the old result rows, keeps the source domains/keywords, and places every source item back in the pending queue.
 
 ### Code Downloader
 
@@ -176,7 +186,7 @@ LinkedIn may show verification challenges. Complete them manually and use reason
 ### Website traffic testing
 
 1. Open **Visual Tools → Website Traffic Tester**.
-2. Enter URLs you own or are authorized to test.
+2. Enter URLs you own or are authorized to test, or import them from TXT, CSV, or XLSX.
 3. Choose visit count, device, duration, human simulation, and optional proxies.
 4. Start the job and review the activity log.
 
@@ -188,6 +198,8 @@ LinkedIn may show verification challenges. Complete them manually and use reason
 | `npm start` | Start an already-installed copy |
 | `npm run dev` | Start the development server |
 | `npm test` | Run automated integrity tests |
+
+`npm test` includes isolated API smoke tests. They create temporary data and settings paths, do not use your local database, and never contact third-party services.
 
 ## Troubleshooting
 
@@ -232,21 +244,30 @@ Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), browse
 
 For support questions and feature ideas, use [GitHub Discussions](https://github.com/99proteam/DataXtract-Mini/discussions). The planned direction is documented in the [roadmap](docs/ROADMAP.md).
 
-## Premium products from BundleWP
+## Take the next step with BundleWP Premium
 
-Explore the complete catalog at **[bundlewp.com/shop](https://bundlewp.com/shop/)**.
+<p align="center">
+  <strong>Turn the free toolkit into a complete business workflow.</strong><br>
+  Premium BundleWP products cover lead generation, outreach, finance, billing, WooCommerce automation, web tools, and multi-platform research.
+</p>
 
-| Product | Description | Listed price* |
-|---|---|---:|
-| [Auto Lead Pilot AI – The Complete Business Solution](https://bundlewp.com/product/auto-lead-pilot-ai/) | All-in-one lead generation and business automation platform for campaigns, CRM, customer engagement, Google integrations, website tools, and team productivity. | $699–$1,999 |
-| [Billify – Smart Inventory, Billing and POS](https://bundlewp.com/product/billify-smart-inventory-billing-and-pos-windows-software/) | Windows software for products, invoices, sales, stock alerts, customers, suppliers, reports, and barcode workflows. | $19 sale |
-| [DataXtract Pro Web Application](https://bundlewp.com/product/dataxtract-pro/) | Data extraction and outreach suite for finding leads, extracting business data, managing campaigns, and automating marketing workflows. | $30 |
-| [WooFlow Manager](https://bundlewp.com/product/wooflow-manager-store-automation-toolkit-for-woocommerce/) | WooCommerce order control, product automation, rewards, recovery workflows, reports, exports, and license delivery. | $29 |
-| [Fin Tools WordPress Theme](https://bundlewp.com/product/fin-tools-100-premium-web-tools-for-wordpress/) | WordPress tools website with finance calculators, PDF, image, developer, text, converter, and network tools. | $29 |
-| [Pro Fin Suite Windows Software](https://bundlewp.com/product/pro-fin-suite/) | Finance, business management, productivity, office, media, security, marketing, and system tools. | $45 |
-| [All In One Smart Extractor Windows Software](https://bundlewp.com/product/all-in-one-smart-extractor/) | Windows extraction suite for business data, social intelligence, e-commerce research, marketplace data, and lead generation. | $20 |
+> **Save 50%:** use coupon `SAVE50` at checkout. [Browse every BundleWP product →](https://bundlewp.com/shop/)
 
-*Prices shown on BundleWP when this README was updated; visit the website for current pricing and availability.
+| Premium product | Best for | What it helps you do | Get it |
+|---|---|---|---|
+| **Auto Lead Pilot AI** | Complete lead-to-customer operations | Run lead generation, CRM, campaigns, customer engagement, Google integrations, website utilities, and team productivity from one solution. | **[View plans →](https://bundlewp.com/product/auto-lead-pilot-ai/)** |
+| **DataXtract Pro** | Growing extraction and outreach teams | Find and organize business leads, manage extraction campaigns, enrich contacts, and coordinate outreach workflows. | **[Buy now →](https://bundlewp.com/product/dataxtract-pro/)** |
+| **All In One Smart Extractor** | Multi-platform business research | Research Google Maps, websites, search, social networks, Trustpilot, Reddit, GitHub, Flipkart, Telegram, and online marketplaces from Windows. | **[Buy now →](https://bundlewp.com/product/all-in-one-smart-extractor/)** |
+| **Billify** | Inventory, billing, and point of sale | Manage products, invoices, sales, customers, suppliers, stock alerts, reports, and barcode workflows on Windows. | **[Buy now →](https://bundlewp.com/product/billify-smart-inventory-billing-and-pos-windows-software/)** |
+| **WooFlow Manager** | WooCommerce store automation | Control orders, automate products and rewards, recover sales, build reports, export records, and deliver licenses. | **[Buy now →](https://bundlewp.com/product/wooflow-manager-store-automation-toolkit-for-woocommerce/)** |
+| **Fin Tools** | Launching a utility-tools website | Publish 100+ finance, PDF, image, developer, text, converter, and network tools as a WordPress website. | **[Buy now →](https://bundlewp.com/product/fin-tools-100-premium-web-tools-for-wordpress/)** |
+| **Pro Fin Suite** | Everyday business productivity | Use finance, office, media, security, marketing, business-management, and system utilities in one Windows suite. | **[Buy now →](https://bundlewp.com/product/pro-fin-suite/)** |
+
+<p align="center">
+  <a href="https://bundlewp.com/shop/"><strong>Explore the complete BundleWP catalog →</strong></a>
+</p>
+
+Coupon availability and product pricing can change; confirm the current offer on BundleWP before purchase.
 
 ## Support and license
 

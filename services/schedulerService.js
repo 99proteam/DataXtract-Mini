@@ -3,7 +3,6 @@ const { scheduleOps, campaignOps } = require('../config/database');
 const fs = require('fs');
 const path = require('path');
 const { Parser } = require('json2csv');
-const xlsx = require('xlsx');
 
 // Import your extraction logic triggering mechanism
 // Since triggering logic is in routes or other services, we might need a way to reuse it.

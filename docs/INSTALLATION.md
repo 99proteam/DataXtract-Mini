@@ -46,6 +46,55 @@ Open your web browser and go to:
 
 ---
 
+## Chrome and Edge browser setup
+
+DataXtract Mini automatically looks for a usable Chrome-family browser whenever a browser-backed tool starts. Discovery uses the first existing executable in this order:
+
+1. `PUPPETEER_EXECUTABLE_PATH`
+2. `CHROME_PATH`
+3. A browser bundled inside this project (`chrome-win64`, `chrome-win`, or `chromium`)
+4. Standard Google Chrome and Microsoft Edge installation paths for the current operating system
+5. Puppeteer's managed browser, when one was installed with the package
+
+You normally do not need to configure a path. Use `PUPPETEER_EXECUTABLE_PATH` only when Chrome or Edge is installed in a non-standard location.
+
+### Windows (PowerShell)
+
+```powershell
+$env:PUPPETEER_EXECUTABLE_PATH = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+npm start
+```
+
+For Microsoft Edge, use `C:\Program Files\Microsoft\Edge\Application\msedge.exe` instead. To keep the variable for later terminals, set it through **System Properties → Environment Variables** and then reopen PowerShell.
+
+### macOS (zsh/bash)
+
+```bash
+export PUPPETEER_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+npm start
+```
+
+For Microsoft Edge, use `/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge` instead. Add the export line to your shell profile only if you want it to persist.
+
+### Linux (bash)
+
+```bash
+export PUPPETEER_EXECUTABLE_PATH="/usr/bin/google-chrome-stable"
+npm start
+```
+
+Common alternatives are `/usr/bin/google-chrome`, `/usr/bin/chromium`, `/usr/bin/chromium-browser`, and `/usr/bin/microsoft-edge`. Confirm an executable with `command -v google-chrome-stable` (or the relevant browser command).
+
+### Browser troubleshooting
+
+- **Browser executable not found / Could not find Chrome:** install current Chrome or Edge, confirm the executable exists, then set `PUPPETEER_EXECUTABLE_PATH` using the matching platform example above.
+- **Permission denied on Linux or macOS:** confirm the current account may execute the browser (`chmod +x /path/to/browser` when appropriate) and that every parent directory is accessible. Do not run the whole application as root to work around file permissions.
+- **Failed to launch because a shared library is missing on Linux:** install the browser's required system libraries using your distribution package manager; the Debian/Ubuntu package list below covers common dependencies.
+- **Browser blocked by Windows security software:** allow the installed Chrome/Edge executable and the Node.js process, then retry. Do not disable security software globally.
+- **A configured path stopped working after an update:** remove the override so automatic discovery can run again, or update it to the browser's new executable path.
+
+---
+
 ## ☁️ VPS / Server Installation (Ubuntu/Debian)
 
 ### 1. Prepare Server

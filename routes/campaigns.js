@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { v4: uuidv4 } = require('uuid');
-const fs = require('fs');
-const path = require('path');
+const { randomUUID } = require('crypto');
 const { campaignOps, domainOps, resultOps, keywordOps, mapsResultOps, db } = require('../config/database');
+const { normalizeDomains, parseUploadedList, flattenValues } = require('../services/inputList');
 
 // Get all campaigns
 router.get('/', (req, res) => {
@@ -26,6 +25,9 @@ router.get('/:id', (req, res) => {
             return res.status(404).json({ error: 'Campaign not found' });
         }
         campaign.options = campaign.options ? JSON.parse(campaign.options) : null;
+        campaign.sourceItems = campaign.campaign_type === 'domain'
+            ? domainOps.getByCampaign.all(req.params.id).map(item => item.domain)
+            : keywordOps.getByCampaign.all(req.params.id).map(item => item.keyword);
         res.json(campaign);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -37,7 +39,7 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
     const upload = req.app.get('upload');
 
-    upload.single('domainsFile')(req, res, (err) => {
+    upload.single('domainsFile')(req, res, async (err) => {
         if (err) {
             console.error('Upload Error:', err);
             return res.status(400).json({ error: err.message });
@@ -50,55 +52,15 @@ router.post('/', (req, res) => {
         }
 
         try {
-            const { name, mode, options, campaignType, keywords } = req.body;
-            const campaignId = uuidv4();
+            const { name, mode, options, campaignType, keywords, domains: directDomains } = req.body;
+            const campaignId = randomUUID();
             const type = campaignType || 'domain';
 
             // Parse options if it's a string
             const parsedOptions = typeof options === 'string' ? JSON.parse(options) : options;
 
             // Helper to parse file content based on extension
-            const parseUploadedFile = (file) => {
-                if (!file) return [];
-
-                const ext = path.extname(file.originalname).toLowerCase();
-                let items = [];
-
-                if (ext === '.xlsx' || ext === '.xls') {
-                    const XLSX = require('xlsx');
-                    const workbook = XLSX.readFile(file.path);
-                    const sheetName = workbook.SheetNames[0];
-                    const sheet = workbook.Sheets[sheetName];
-                    const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-                    // Flatten 2D array and filter empty
-                    items = data.flat().filter(item => item && String(item).trim().length > 0);
-                } else if (ext === '.csv') {
-                    // Simple CSV parser - split by newline and comma
-                    const content = fs.readFileSync(file.path, 'utf-8');
-                    items = content
-                        .split(/[\r\n]+/)
-                        .flatMap(line => line.split(','))
-                        .map(item => item.trim())
-                        .filter(item => item.length > 0);
-                } else {
-                    // Default text file
-                    const content = fs.readFileSync(file.path, 'utf-8');
-                    items = content
-                        .split(/[\r\n]+/)
-                        .map(item => item.trim())
-                        .filter(item => item.length > 0);
-                }
-
-                // Clean up file
-                try {
-                    fs.unlinkSync(file.path);
-                } catch (e) {
-                    console.error('Error deleting temp file:', e);
-                }
-
-                return items;
-            };
+            const parseUploadedFile = parseUploadedList;
 
             if (type === 'maps') {
                 // Google Maps campaign - use keywords
@@ -106,11 +68,9 @@ router.post('/', (req, res) => {
 
                 // Keywords can come from file or direct input
                 if (req.file) {
-                    keywordList = parseUploadedFile(req.file);
+                    keywordList = await parseUploadedFile(req.file);
                 } else if (keywords) {
-                    keywordList = (typeof keywords === 'string' ? JSON.parse(keywords) : keywords)
-                        .map(k => k.trim())
-                        .filter(k => k && k.length > 0);
+                    keywordList = flattenValues(typeof keywords === 'string' ? JSON.parse(keywords) : keywords);
                 }
 
                 if (keywordList.length === 0) {
@@ -191,15 +151,14 @@ router.post('/', (req, res) => {
                 // Domain extraction campaign
                 let domains = [];
                 if (req.file) {
-                    const items = parseUploadedFile(req.file);
-                    domains = items.map(d => {
-                        // Clean domain - remove protocol if present
-                        return String(d).replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-                    });
+                    domains = normalizeDomains(await parseUploadedFile(req.file));
+                } else if (directDomains) {
+                    const values = typeof directDomains === 'string' ? JSON.parse(directDomains) : directDomains;
+                    domains = normalizeDomains(values);
                 }
 
                 if (domains.length === 0) {
-                    return res.status(400).json({ error: 'No valid domains found in file. Please upload a file with domains.' });
+                    return res.status(400).json({ error: 'No valid domains found. Paste domains or upload a file.' });
                 }
 
                 // Create campaign
@@ -299,6 +258,72 @@ router.get('/:id/domains', (req, res) => {
 });
 
 // Update campaign status (pause/resume)
+router.patch('/:id', (req, res) => {
+    try {
+        const campaign = campaignOps.getById.get(req.params.id);
+        if (!campaign) return res.status(404).json({ error: 'Campaign not found' });
+        if (campaign.status === 'running') {
+            return res.status(409).json({ error: 'Pause the campaign before editing its settings' });
+        }
+
+        const name = String(req.body.name || '').trim();
+        if (!name) return res.status(400).json({ error: 'Campaign name is required' });
+        if (name.length > 120) return res.status(400).json({ error: 'Campaign name must be 120 characters or fewer' });
+
+        const mode = req.body.mode;
+        if (!['live', 'background'].includes(mode)) {
+            return res.status(400).json({ error: 'Invalid extraction mode' });
+        }
+
+        const campaignType = req.body.campaignType;
+        if (!['domain', 'maps'].includes(campaignType)) {
+            return res.status(400).json({ error: 'Campaign type must be domain or maps' });
+        }
+
+        const options = req.body.options;
+        if (!options || typeof options !== 'object' || Array.isArray(options)) {
+            return res.status(400).json({ error: 'Campaign options must be an object' });
+        }
+
+        const sourceItems = campaignType === 'domain'
+            ? normalizeDomains(req.body.sourceItems || [])
+            : [...new Set(flattenValues(req.body.sourceItems || []).map(value => String(value).trim()).filter(Boolean))];
+        if (sourceItems.length === 0) {
+            return res.status(400).json({ error: campaignType === 'domain' ? 'At least one valid domain is required' : 'At least one search keyword is required' });
+        }
+
+        db.transaction(() => {
+            db.prepare('DELETE FROM results WHERE campaign_id = ?').run(req.params.id);
+            db.prepare('DELETE FROM maps_results WHERE campaign_id = ?').run(req.params.id);
+            db.prepare('DELETE FROM domains WHERE campaign_id = ?').run(req.params.id);
+            db.prepare('DELETE FROM keywords WHERE campaign_id = ?').run(req.params.id);
+            db.prepare(`
+                UPDATE campaigns
+                SET name = ?, mode = ?, campaign_type = ?, options = ?, total_domains = ?,
+                    processed_domains = 0, status = 'pending', started_at = NULL, completed_at = NULL
+                WHERE id = ?
+            `).run(name, mode, campaignType, JSON.stringify(options), sourceItems.length, req.params.id);
+
+            if (campaignType === 'domain') {
+                const insertDomain = db.prepare('INSERT INTO domains(campaign_id, domain) VALUES(?, ?)');
+                sourceItems.forEach(domain => insertDomain.run(req.params.id, domain));
+            } else {
+                const insertKeyword = db.prepare('INSERT INTO keywords(campaign_id, keyword) VALUES(?, ?)');
+                sourceItems.forEach(keyword => insertKeyword.run(req.params.id, keyword));
+            }
+        })();
+
+        const updated = campaignOps.getById.get(req.params.id);
+        updated.options = updated.options ? JSON.parse(updated.options) : {};
+        updated.sourceItems = sourceItems;
+        res.json({ success: true, campaign: updated });
+    } catch (error) {
+        console.error('Campaign edit error:', error);
+        res.status(500).json({ error: 'Could not update campaign' });
+    }
+});
+
+// Update campaign status (pause/resume)
 router.patch('/:id/status', (req, res) => {
     try {
         const { status } = req.body;
@@ -306,6 +331,28 @@ router.patch('/:id/status', (req, res) => {
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Clear previous output and put every source item back in the pending queue.
+router.post('/:id/restart', (req, res) => {
+    try {
+        const campaign = campaignOps.getById.get(req.params.id);
+        if (!campaign) return res.status(404).json({ error: 'Campaign not found' });
+        if (campaign.status === 'running') return res.status(409).json({ error: 'Pause the campaign before restarting it' });
+
+        db.transaction((campaignId) => {
+            db.prepare('DELETE FROM results WHERE campaign_id = ?').run(campaignId);
+            db.prepare('DELETE FROM maps_results WHERE campaign_id = ?').run(campaignId);
+            db.prepare("UPDATE domains SET status = 'pending', processed_at = NULL, error = NULL WHERE campaign_id = ?").run(campaignId);
+            db.prepare("UPDATE keywords SET status = 'pending', processed_at = NULL, results_count = 0, error = NULL WHERE campaign_id = ?").run(campaignId);
+            db.prepare("UPDATE campaigns SET status = 'pending', processed_domains = 0, started_at = NULL, completed_at = NULL WHERE id = ?").run(campaignId);
+        })(req.params.id);
+
+        res.json({ success: true, message: 'Campaign reset and ready to run again' });
+    } catch (error) {
+        console.error('Campaign restart error:', error);
+        res.status(500).json({ error: 'Could not restart campaign' });
     }
 });
 

@@ -5,11 +5,11 @@ const { spawn } = require('node:child_process');
 
 const root = path.join(__dirname, '..');
 const TEST_PORT = 3999;
-const BASE_URL = `http://localhost:${TEST_PORT}`;
+const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
 
 let serverProcess;
 
-function waitForServer(url, retries = 30) {
+function waitForServer(url, retries = 60) {
     return new Promise((resolve, reject) => {
         const attempt = (n) => {
             fetch(url)

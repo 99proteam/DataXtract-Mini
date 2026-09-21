@@ -4,7 +4,7 @@ const { WebSocketServer } = require('ws');
 const http = require('http');
 const multer = require('multer');
 const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 
 // Polyfill File for older Node 18 releases
 if (typeof global.File === 'undefined') {
@@ -33,9 +33,24 @@ const wss = new WebSocketServer({ server });
 const clients = new Map();
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' ws: wss:");
+    next();
+});
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+app.use(express.static(path.join(__dirname, 'public'), {
+    setHeaders: (res, filePath) => {
+        if (/\.(?:html|js|css)$/i.test(filePath)) {
+            res.setHeader('Cache-Control', 'no-store, max-age=0');
+        }
+    }
+}));
 
 // Create uploads and exports directories
 const baseDir = __dirname;
@@ -67,10 +82,11 @@ if (!fs.existsSync(exportsDir)) fs.mkdirSync(exportsDir, { recursive: true });
 // File upload configuration
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, uploadsDir),
-    filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
+    filename: (req, file, cb) => cb(null, `${Date.now()}-${randomUUID()}${path.extname(file.originalname).toLowerCase()}`)
 });
 const upload = multer({
     storage,
+    limits: { fileSize: 10 * 1024 * 1024, files: 1 },
     fileFilter: (req, file, cb) => {
         const allowedExts = ['.txt', '.csv', '.xlsx', '.xls'];
         const ext = path.extname(file.originalname).toLowerCase();
@@ -107,6 +123,15 @@ app.use('/api/whatsapp', require('./routes/whatsapp'));
 app.use('/api/marketing', require('./routes/marketing'));
 app.use('/api/linkedin', require('./routes/linkedin'));
 app.use('/api/tools', require('./routes/tools'));
+app.use('/api/metrics', require('./routes/metrics'));
+
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        uptimeSeconds: Math.floor(process.uptime()),
+        timestamp: new Date().toISOString()
+    });
+});
 
 // Initialize Scheduler
 const schedulerService = require('./services/schedulerService');
@@ -118,9 +143,15 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Clean client-side routes. API routes are mounted above and are never caught here.
+app.get(/^\/(dashboard|campaigns(?:\/[^/]+)?|marketing(?:\/[^/]+)?|visual-tools(?:\/[^/]+)?|settings(?:\/[^/]+)?|guide)\/?$/, (req, res) => {
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // WebSocket connection handling
 wss.on('connection', (ws) => {
-    const clientId = uuidv4();
+    const clientId = randomUUID();
     clients.set(clientId, ws);
 
     ws.send(JSON.stringify({ type: 'connected', clientId }));
@@ -157,17 +188,19 @@ global.broadcastToCampaign = broadcastToCampaign;
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).json({ error: err.message || 'Something went wrong!' });
+    const isClientError = err instanceof multer.MulterError || /File type not allowed/.test(err.message || '');
+    res.status(isClientError ? 400 : 500).json({ error: isClientError ? err.message : 'Something went wrong!' });
 });
 
 const PORT = process.env.PORT || 3007;
-server.listen(PORT, () => {
+const HOST = process.env.HOST || '127.0.0.1';
+server.listen(PORT, HOST, () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
 ║     🚀 Domain Data Extractor - Campaign System                ║
 ║                                                               ║
-║     Server running at: http://localhost:${PORT}                 ║
+║     Server running at: http://${HOST}:${PORT}                   ║
 ║                                                               ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝

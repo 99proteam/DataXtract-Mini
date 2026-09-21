@@ -3,8 +3,9 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { proxyOps } = require('../config/database');
+const { buildIntegrationStatus, markVerified } = require('../services/integrationReadiness');
 
-const SETTINGS_FILE = path.join(__dirname, '..', 'data', 'settings.json');
+const SETTINGS_FILE = process.env.DATAXTRACT_SETTINGS_FILE || path.join(__dirname, '..', 'data', 'settings.json');
 
 // Default settings structure
 const defaultSettings = {
@@ -33,7 +34,8 @@ const defaultSettings = {
     ai: {
         provider: 'gemini',
         apiKey: ''
-    }
+    },
+    verification: {}
 };
 
 function loadSettings() {
@@ -41,8 +43,16 @@ function loadSettings() {
         if (fs.existsSync(SETTINGS_FILE)) {
             const settings = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
             // Ensure structure exists
-            if (!settings.ai) settings.ai = { provider: 'gemini', apiKey: '' };
-            return settings;
+            return {
+                ...defaultSettings,
+                ...settings,
+                proxy: { ...defaultSettings.proxy, ...settings.proxy },
+                smtp: { ...defaultSettings.smtp, ...settings.smtp },
+                twilio: { ...defaultSettings.twilio, ...settings.twilio },
+                apiKeys: { ...defaultSettings.apiKeys, ...settings.apiKeys },
+                ai: { ...defaultSettings.ai, ...settings.ai },
+                verification: settings.verification || {}
+            };
         }
     } catch (e) {
         console.error('Error loading settings:', e);
@@ -62,60 +72,61 @@ function saveSettings(settings) {
 router.get('/', (req, res) => {
     const settings = loadSettings();
     // Mask sensitive data - include length for UI display
-    const masked = { ...settings };
+    const masked = JSON.parse(JSON.stringify(settings));
+    if (masked.proxy?.webshareApiKey) masked.proxy.webshareApiKey = '***:' + masked.proxy.webshareApiKey.length;
     if (masked.smtp?.pass) masked.smtp.pass = '***:' + masked.smtp.pass.length;
     if (masked.twilio?.authToken) masked.twilio.authToken = '***:' + masked.twilio.authToken.length;
-    if (masked.ai?.apiKey) masked.ai.apiKey = masked.ai.apiKey.substring(0, 8) + '...';
+    if (masked.apiKeys?.zerobounce) masked.apiKeys.zerobounce = '***:' + masked.apiKeys.zerobounce.length;
+    if (masked.ai?.apiKey) masked.ai.apiKey = '***:' + masked.ai.apiKey.length;
+    delete masked.verification;
     res.json(masked);
 });
 // GET /api/settings/status — readiness check, NEVER returns secret values
 router.get('/status', (req, res) => {
     const settings = loadSettings();
 
-    const status = {
-        proxy: {
-            configured: Boolean(settings.proxy?.webshareApiKey),
-            settingsTab: 'proxy'
-        },
-        smtp: {
-            configured: Boolean(settings.smtp?.host && settings.smtp?.user && settings.smtp?.pass),
-            settingsTab: 'smtp'
-        },
-        twilio: {
-            configured: Boolean(settings.twilio?.accountSid && settings.twilio?.authToken && settings.twilio?.fromNumber),
-            settingsTab: 'twilio'
-        },
-        zerobounce: {
-            configured: Boolean(settings.apiKeys?.zerobounce),
-            settingsTab: 'apikeys'
-        },
-        ai: {
-            configured: Boolean(settings.ai?.apiKey),
-            settingsTab: 'ai'
-        }
-    };
-
-    res.json(status);
-});
-
-// GET raw settings (for internal use)
-router.get('/raw', (req, res) => {
-    res.json(loadSettings());
+    res.json(buildIntegrationStatus(settings));
 });
 
 // POST update settings
 router.post('/', (req, res) => {
     try {
         const current = loadSettings();
-        const updates = req.body;
+        const updates = req.body || {};
+        const text = (value, fallback, max = 500) => typeof value === 'string' ? value.trim().slice(0, max) : fallback;
+        const bool = (value, fallback) => typeof value === 'boolean' ? value : fallback;
+        const number = (value, fallback, min, max) => {
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? Math.min(max, Math.max(min, parsed)) : fallback;
+        };
 
-        // Merge updates
+        // Copy only known fields so request bodies cannot inject settings keys.
         const merged = {
-            proxy: { ...current.proxy, ...updates.proxy },
-            smtp: { ...current.smtp, ...updates.smtp },
-            twilio: { ...current.twilio, ...updates.twilio },
-            apiKeys: { ...current.apiKeys, ...updates.apiKeys },
-            ai: { ...current.ai, ...updates.ai }
+            proxy: {
+                enabled: bool(updates.proxy?.enabled, current.proxy.enabled),
+                rotateOnError: bool(updates.proxy?.rotateOnError, current.proxy.rotateOnError),
+                webshareApiKey: text(updates.proxy?.webshareApiKey, current.proxy.webshareApiKey)
+            },
+            smtp: {
+                host: text(updates.smtp?.host, current.smtp.host, 253),
+                port: number(updates.smtp?.port, current.smtp.port, 1, 65535),
+                secure: bool(updates.smtp?.secure, current.smtp.secure),
+                user: text(updates.smtp?.user, current.smtp.user, 320),
+                pass: text(updates.smtp?.pass, current.smtp.pass, 1000),
+                enabled: bool(updates.smtp?.enabled, current.smtp.enabled)
+            },
+            twilio: {
+                accountSid: text(updates.twilio?.accountSid, current.twilio.accountSid, 128),
+                authToken: text(updates.twilio?.authToken, current.twilio.authToken, 256),
+                fromNumber: text(updates.twilio?.fromNumber, current.twilio.fromNumber, 32),
+                enabled: bool(updates.twilio?.enabled, current.twilio.enabled)
+            },
+            apiKeys: { zerobounce: text(updates.apiKeys?.zerobounce, current.apiKeys.zerobounce, 256) },
+            ai: {
+                provider: ['gemini', 'openai'].includes(updates.ai?.provider) ? updates.ai.provider : current.ai.provider,
+                apiKey: text(updates.ai?.apiKey, current.ai.apiKey, 512)
+            },
+            verification: current.verification || {}
         };
 
         // Don't overwrite password if it's masked (*** or dots pattern)
@@ -127,12 +138,18 @@ router.post('/', (req, res) => {
         if (isMasked(updates.twilio?.authToken)) {
             merged.twilio.authToken = current.twilio.authToken;
         }
-        if (updates.ai?.apiKey?.includes('...')) {
+        if (isMasked(updates.proxy?.webshareApiKey)) {
+            merged.proxy.webshareApiKey = current.proxy.webshareApiKey;
+        }
+        if (isMasked(updates.apiKeys?.zerobounce)) {
+            merged.apiKeys.zerobounce = current.apiKeys.zerobounce;
+        }
+        if (isMasked(updates.ai?.apiKey)) {
             merged.ai.apiKey = current.ai.apiKey;
         }
 
         saveSettings(merged);
-        res.json({ success: true, settings: merged });
+        res.json({ success: true });
     } catch (error) {
         console.error('Error saving settings:', error);
         res.status(500).json({ error: error.message });
@@ -162,12 +179,12 @@ router.post('/test-smtp', async (req, res) => {
                 user: settings.smtp.user,
                 pass: settings.smtp.pass
             },
-            tls: {
-                rejectUnauthorized: false // Allow self-signed certs
-            }
+            tls: { minVersion: 'TLSv1.2' }
         });
 
         await transporter.verify();
+        markVerified('smtp', settings);
+        saveSettings(settings);
         res.json({ success: true, message: `SMTP connection successful! (Port ${port}, ${isSecure ? 'SSL' : 'STARTTLS'})` });
     } catch (error) {
         res.json({ success: false, message: error.message });
@@ -188,6 +205,8 @@ router.post('/test-twilio', async (req, res) => {
 
         // Fetch account to verify credentials
         const account = await client.api.accounts(settings.twilio.accountSid).fetch();
+        markVerified('twilio', settings);
+        saveSettings(settings);
 
         res.json({
             success: true,
@@ -219,11 +238,13 @@ router.post('/test-webshare', async (req, res) => {
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            return res.json({ success: false, message: `API Error: ${response.status} - ${errorText}` });
+            return res.json({ success: false, message: `Webshare returned HTTP ${response.status}` });
         }
 
         const data = await response.json();
+        settings.proxy.webshareApiKey = apiKey;
+        markVerified('proxy', settings);
+        saveSettings(settings);
         res.json({
             success: true,
             message: `Connected! Found ${data.count || 0} proxies available`,
@@ -231,6 +252,32 @@ router.post('/test-webshare', async (req, res) => {
         });
     } catch (error) {
         res.json({ success: false, message: error.message });
+    }
+});
+
+router.post('/test-integration/:name', async (req, res) => {
+    const name = req.params.name;
+    try {
+        const settings = loadSettings();
+        if (name === 'zerobounce') {
+            const key = settings.apiKeys?.zerobounce;
+            if (!key) return res.status(400).json({ success: false, message: 'ZeroBounce API key is not configured' });
+            const response = await fetch(`https://api.zerobounce.net/v2/getcredits?api_key=${encodeURIComponent(key)}`);
+            const data = await response.json();
+            if (!response.ok || data.error) throw new Error(data.error || `ZeroBounce returned HTTP ${response.status}`);
+        } else if (name === 'ai') {
+            const key = settings.ai?.apiKey;
+            if (!key) return res.status(400).json({ success: false, message: 'AI API key is not configured' });
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`);
+            if (!response.ok) throw new Error(`AI provider returned HTTP ${response.status}`);
+        } else {
+            return res.status(400).json({ success: false, message: 'Unknown integration' });
+        }
+        markVerified(name, settings);
+        saveSettings(settings);
+        res.json({ success: true, message: `${name} connection verified` });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
     }
 });
 
@@ -255,8 +302,7 @@ router.post('/fetch-webshare-proxies', async (req, res) => {
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            return res.json({ success: false, message: `API Error: ${response.status} - ${errorText}` });
+            return res.json({ success: false, message: `Webshare returned HTTP ${response.status}` });
         }
 
         const data = await response.json();
