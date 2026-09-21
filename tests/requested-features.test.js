@@ -3,6 +3,19 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
+// Cheerio's current Undici dependency expects the Web File class, which is
+// available natively in newer Node releases but not every supported Node 18 build.
+if (typeof global.File === 'undefined') {
+    const { Blob } = require('node:buffer');
+    global.File = class File extends Blob {
+        constructor(fileBits, fileName, options = {}) {
+            super(fileBits, options);
+            this.name = fileName;
+            this.lastModified = options.lastModified || Date.now();
+        }
+    };
+}
+
 const ROOT = path.join(__dirname, '..');
 
 test('direct campaign input normalizes and deduplicates domains', () => {
