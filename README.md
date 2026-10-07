@@ -11,6 +11,12 @@
   <img src="https://img.shields.io/badge/self--hosted-local-635bff" alt="Self-hosted and local">
 </p>
 
+<p align="center">
+  <a href="https://99proteam.github.io/DataXtract-Mini/"><img src="https://img.shields.io/badge/%E2%96%B6%20Live%20Demo-Try%20it%20in%20your%20browser-22c55e?style=for-the-badge" alt="Open the live demo" height="48"></a>
+  &nbsp;
+  <a href="https://buymeacoffee.com/99proteam"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" height="60"></a>
+</p>
+
 **DataXtract Mini** is a self-hosted Node.js toolkit for turning public web and map data into structured, exportable leads. It combines Google Maps and domain extraction, lead verification, bulk screenshots, code download, authorized traffic testing, and authenticated outreach integrations in one local dashboard.
 
 - Runs locally on Windows, macOS, and Linux
@@ -20,6 +26,20 @@
 - Requires no login, user account, or authentication setup; it binds to your own computer by default
 
 > If DataXtract Mini saves you time, consider [starring the repository](https://github.com/99proteam/DataXtract-Mini) so more developers can discover it.
+
+## Live demo
+
+Try the dashboard without installing anything: **[99proteam.github.io/DataXtract-Mini](https://99proteam.github.io/DataXtract-Mini/)**
+
+The demo runs entirely in your browser with sample data. Create a campaign and press **Start** to watch a simulated run, then export the results as CSV or JSON. Real extraction, verification, and outreach need the self-hosted server below.
+
+## Support the project
+
+If DataXtract Mini is useful to you, you can support its development:
+
+<p>
+  <a href="https://buymeacoffee.com/99proteam"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" height="60"></a>
+</p>
 
 ## Feature highlights
 

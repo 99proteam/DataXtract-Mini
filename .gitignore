@@ -46,3 +46,6 @@ dist/
 
 # Vercel
 .vercel
+
+# GitHub Pages demo build
+_site/
