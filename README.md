@@ -29,7 +29,7 @@
 
 ## Live demo
 
-Try the dashboard without installing anything: **[99proteam.github.io/DataXtract-Mini](https://99proteam.github.io/DataXtract-Mini/)**
+Try the dashboard without installing anything: **[open the live demo](https://99proteam.github.io/DataXtract-Mini/app/)**. A step-by-step install guide for beginners is on the [project website](https://99proteam.github.io/DataXtract-Mini/#install).
 
 The demo runs entirely in your browser with sample data. Create a campaign and press **Start** to watch a simulated run, then export the results as CSV or JSON. Real extraction, verification, and outreach need the self-hosted server below.
 

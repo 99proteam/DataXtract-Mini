@@ -9,7 +9,7 @@
     'use strict';
 
     const BASE = (window.__DEMO_BASE__ || '/').replace(/\/+$/, '');
-    const REPO_URL = 'https://github.com/99proteam/DataXtract-Mini';
+    const HOME = window.__DEMO_HOME__ || '../';
     const SPONSOR_URL = 'https://buymeacoffee.com/99proteam';
     const SELF_HOSTED_ONLY = 'This action needs the self-hosted server. Install DataXtract Mini locally to run it for real.';
     const SECONDS_PER_ITEM = 1.5;
@@ -427,10 +427,10 @@
         banner.innerHTML = `
             <div class="demo-banner-text">
                 <strong>Live demo</strong>
-                <span>Sample data only. Create a campaign and press Start to watch a simulated run. Install DataXtract Mini to extract real data.</span>
+                <span>Sample data only. Press Start on a campaign to watch a simulated run. Install it free on your computer to extract real data.</span>
             </div>
             <div class="demo-banner-actions">
-                <a class="demo-banner-github" href="${REPO_URL}" target="_blank" rel="noopener noreferrer">Get it on GitHub</a>
+                <a class="demo-banner-github" href="${HOME}#install">How to install (free)</a>
                 <a class="sponsor-button" href="${SPONSOR_URL}" target="_blank" rel="noopener noreferrer"><span class="sponsor-cup" aria-hidden="true">&#9749;</span><span>Buy me a coffee</span></a>
             </div>`;
         document.body.appendChild(banner);

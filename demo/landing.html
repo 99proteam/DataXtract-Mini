@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataXtract Mini - Free Lead Extractor</title>
+    <meta name="description" content="DataXtract Mini is a free, self-hosted tool for Google Maps and website lead extraction. Try the live demo, then install it on your own computer in a few minutes.">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --bg-raised: #12121a;
+            --bg-card: #171722;
+            --border: rgba(255, 255, 255, 0.09);
+            --text: #ffffff;
+            --text-2: #b4b4c0;
+            --text-3: #80808f;
+            --accent: #6366f1;
+            --accent-2: #8b5cf6;
+            --green: #22c55e;
+            --coffee: #ffdd00;
+            --coffee-ink: #0d0c22;
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { color: inherit; }
+
+        .wrap {
+            width: 100%;
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Top bar */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(10, 10, 15, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar .wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            height: 68px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.15rem;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        }
+
+        .brand-icon svg { width: 20px; height: 20px; }
+
+        .topnav {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .topnav a:not(.btn) {
+            color: var(--text-2);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .topnav a:not(.btn):hover { color: var(--text); }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 24px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .btn:hover { transform: translateY(-2px); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            box-shadow: 0 8px 26px rgba(99, 102, 241, 0.35);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-ghost:hover { background: rgba(255, 255, 255, 0.06); }
+
+        .btn-coffee {
+            background: var(--coffee);
+            color: var(--coffee-ink);
+            border: 2px solid var(--coffee-ink);
+            font-weight: 800;
+            box-shadow: 0 8px 26px rgba(255, 221, 0, 0.3);
+        }
+
+        .btn-coffee:hover { box-shadow: 0 12px 32px rgba(255, 221, 0, 0.45); }
+
+        .btn-coffee .cup { font-size: 1.35em; line-height: 1; }
+
+        .btn-lg { padding: 18px 32px; font-size: 1.15rem; }
+
+        .btn-xl { padding: 22px 40px; font-size: 1.35rem; }
+
+        /* Hero */
+        .hero {
+            padding: 72px 0 56px;
+            text-align: center;
+            background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(99, 102, 241, 0.22), transparent 70%);
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            color: #86efac;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        h1 {
+            margin: 18px auto 14px;
+            max-width: 760px;
+            font-size: clamp(2rem, 5.5vw, 3.4rem);
+            line-height: 1.12;
+            letter-spacing: -0.02em;
+        }
+
+        .hero p.lead {
+            margin: 0 auto 32px;
+            max-width: 620px;
+            color: var(--text-2);
+            font-size: 1.15rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 14px;
+        }
+
+        .hero-shot {
+            margin: 48px auto 0;
+            max-width: 960px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+        }
+
+        .hero-shot img { display: block; width: 100%; height: auto; }
+
+        /* Sections */
+        section { padding: 64px 0; }
+
+        section[id] { scroll-margin-top: 68px; }
+
+        section + section { border-top: 1px solid var(--border); }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+            letter-spacing: -0.01em;
+        }
+
+        .section-intro {
+            margin: 0 0 32px;
+            color: var(--text-2);
+            max-width: 680px;
+        }
+
+        /* Facts */
+        .facts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .fact {
+            padding: 22px;
+            border-radius: var(--radius);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+        }
+
+        .fact .icon { font-size: 1.6rem; }
+
+        .fact h3 { margin: 8px 0 6px; font-size: 1.05rem; }
+
+        .fact p { margin: 0; color: var(--text-2); font-size: 0.95rem; }
+
+        /* Compare */
+        .compare {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .compare-card {
+            padding: 26px;
+            border-radius: var(--radius);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+        }
+
+        .compare-card.highlight {
+            border-color: rgba(99, 102, 241, 0.6);
+            box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3) inset;
+        }
+
+        .compare-card h3 { margin: 0 0 4px; font-size: 1.2rem; }
+
+        .compare-card .tag { color: var(--text-3); font-size: 0.9rem; margin: 0 0 14px; }
+
+        .compare-card ul { margin: 0 0 20px; padding: 0; list-style: none; }
+
+        .compare-card li { padding: 6px 0 6px 28px; position: relative; color: var(--text-2); }
+
+        .compare-card li::before { position: absolute; left: 0; top: 6px; }
+
+        .compare-card li.yes::before { content: '✅'; }
+
+        .compare-card li.no::before { content: '❌'; }
+
+        /* Steps */
+        .steps { counter-reset: step; display: grid; gap: 16px; }
+
+        .step {
+            display: grid;
+            grid-template-columns: 52px 1fr;
+            gap: 18px;
+            padding: 24px;
+            border-radius: var(--radius);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+        }
+
+        .step-num {
+            display: grid;
+            place-items: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            font-weight: 800;
+            font-size: 1.3rem;
+        }
+
+        .step h3 { margin: 4px 0 6px; font-size: 1.15rem; }
+
+        .step p { margin: 0 0 12px; color: var(--text-2); }
+
+        .step p:last-child { margin-bottom: 0; }
+
+        .step-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+
+        .step-links .btn { padding: 10px 18px; font-size: 0.95rem; }
+
+        /* OS tabs */
+        .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
+
+        .tab {
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-2);
+            font: inherit;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .tab[aria-selected="true"] {
+            background: rgba(99, 102, 241, 0.18);
+            border-color: rgba(99, 102, 241, 0.6);
+            color: var(--text);
+        }
+
+        .tab-panel { color: var(--text-2); }
+
+        .tab-panel[hidden] { display: none; }
+
+        .tab-panel ol { margin: 0; padding-left: 20px; }
+
+        .tab-panel li { margin: 4px 0; }
+
+        kbd {
+            padding: 2px 7px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            font-family: inherit;
+            font-size: 0.85em;
+            color: var(--text);
+        }
+
+        /* Code */
+        .code {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 10px 0 0;
+            padding: 12px 12px 12px 18px;
+            border-radius: 12px;
+            background: #05050a;
+            border: 1px solid var(--border);
+            font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+            font-size: 1rem;
+            overflow-x: auto;
+        }
+
+        .code code { white-space: pre; color: #c7d2fe; }
+
+        .copy {
+            flex: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text);
+            font: inherit;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .copy:hover { background: rgba(255, 255, 255, 0.12); }
+
+        .note {
+            margin-top: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            color: #bbf7d0;
+            font-size: 0.95rem;
+        }
+
+        /* FAQ */
+        .faq { display: grid; gap: 12px; }
+
+        details {
+            border-radius: var(--radius);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0 22px;
+        }
+
+        summary {
+            padding: 18px 0;
+            font-weight: 700;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        summary::-webkit-details-marker { display: none; }
+
+        summary::after { content: '+'; color: var(--text-3); font-size: 1.3rem; line-height: 1; }
+
+        details[open] summary::after { content: '−'; }
+
+        details p { margin: 0 0 18px; color: var(--text-2); }
+
+        details code {
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            font-size: 0.9em;
+        }
+
+        /* Sponsor */
+        .sponsor {
+            text-align: center;
+            background: radial-gradient(ellipse 60% 70% at 50% 100%, rgba(255, 221, 0, 0.12), transparent 70%);
+        }
+
+        .sponsor p { margin: 0 auto 28px; max-width: 560px; color: var(--text-2); font-size: 1.1rem; }
+
+        footer {
+            padding: 28px 0 40px;
+            border-top: 1px solid var(--border);
+            color: var(--text-3);
+            font-size: 0.9rem;
+        }
+
+        footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+
+        footer a { color: var(--text-2); }
+
+        :focus-visible { outline: 2px solid #a5b4fc; outline-offset: 3px; }
+
+        @media (max-width: 720px) {
+            .topnav a:not(.btn) { display: none; }
+            .topnav .btn-coffee { padding: 10px 16px; font-size: 0.95rem; }
+            .hero { padding: 48px 0 40px; }
+            .hero-actions .btn { width: 100%; }
+            section { padding: 48px 0; }
+            .step { grid-template-columns: 1fr; gap: 12px; padding: 20px; }
+            .step-num { width: 44px; height: 44px; font-size: 1.1rem; }
+            .btn-xl { width: 100%; padding: 20px 24px; font-size: 1.2rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="wrap">
+            <a class="brand" href="./">
+                <span class="brand-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>
+                </span>
+                DataXtract Mini
+            </a>
+            <nav class="topnav" aria-label="Main">
+                <a href="app/">Live demo</a>
+                <a href="#install">How to install</a>
+                <a href="#faq">FAQ</a>
+                <a href="https://github.com/99proteam/DataXtract-Mini" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a class="btn btn-coffee" href="https://buymeacoffee.com/99proteam" target="_blank" rel="noopener noreferrer"><span class="cup" aria-hidden="true">☕</span>Buy me a coffee</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="hero">
+            <div class="wrap">
+                <span class="pill">100% free · Runs on your own computer</span>
+                <h1>Find business leads from Google Maps and websites</h1>
+                <p class="lead">DataXtract Mini collects names, phone numbers, emails and social links into a spreadsheet you can export. Try the demo below, then install it free in about 5 minutes.</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary btn-lg" href="app/">▶ Open live demo</a>
+                    <a class="btn btn-ghost btn-lg" href="#install">How to install</a>
+                    <a class="btn btn-coffee btn-lg" href="https://buymeacoffee.com/99proteam" target="_blank" rel="noopener noreferrer"><span class="cup" aria-hidden="true">☕</span>Buy me a coffee</a>
+                </div>
+                <div class="hero-shot">
+                    <img src="dashboard.png" alt="DataXtract Mini dashboard showing campaigns and integration status" width="1440" height="520">
+                </div>
+            </div>
+        </div>
+
+        <section>
+            <div class="wrap">
+                <h2>Why people use it</h2>
+                <p class="section-intro">Everything runs on your own PC. No account, no monthly fee, no hosting bill.</p>
+                <div class="facts">
+                    <div class="fact"><div class="icon" aria-hidden="true">📍</div><h3>Google Maps leads</h3><p>Search “dentist in Austin” and get business names, phones, websites and ratings.</p></div>
+                    <div class="fact"><div class="icon" aria-hidden="true">🌐</div><h3>Website contacts</h3><p>Paste a list of websites and pull emails, phones, social links and technology.</p></div>
+                    <div class="fact"><div class="icon" aria-hidden="true">📊</div><h3>Export anywhere</h3><p>Download results as Excel, CSV or JSON and use them in any CRM.</p></div>
+                    <div class="fact"><div class="icon" aria-hidden="true">💸</div><h3>Free forever</h3><p>Your computer is the server, so there is nothing to pay for hosting.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="wrap">
+                <h2>Demo vs. installed app</h2>
+                <p class="section-intro">The live demo is for looking around. To collect real data, install it on your computer.</p>
+                <div class="compare">
+                    <div class="compare-card">
+                        <h3>Live demo</h3>
+                        <p class="tag">In your browser, nothing to install</p>
+                        <ul>
+                            <li class="yes">See every screen and button</li>
+                            <li class="yes">Run a pretend campaign with sample data</li>
+                            <li class="no">Cannot extract real data</li>
+                        </ul>
+                        <a class="btn btn-ghost" href="app/">Open live demo</a>
+                    </div>
+                    <div class="compare-card highlight">
+                        <h3>Installed app</h3>
+                        <p class="tag">On your Windows, Mac or Linux computer</p>
+                        <ul>
+                            <li class="yes">Extract real leads from Maps and websites</li>
+                            <li class="yes">Export to Excel, CSV and JSON</li>
+                            <li class="yes">Free, with no hosting charges</li>
+                        </ul>
+                        <a class="btn btn-primary" href="#install">Install it free</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="install">
+            <div class="wrap">
+                <h2>How to install (5 minutes)</h2>
+                <p class="section-intro">No coding knowledge needed. Follow these steps once. After that, starting the app takes one command.</p>
+
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-num" aria-hidden="true">1</div>
+                        <div>
+                            <h3>Install Node.js and Chrome</h3>
+                            <p>Node.js is the free program that runs DataXtract. Download the <strong>LTS</strong> version and click Next through the installer. You also need Google Chrome or Microsoft Edge (you probably have one already).</p>
+                            <div class="step-links">
+                                <a class="btn btn-ghost" href="https://nodejs.org/en/download" target="_blank" rel="noopener noreferrer">Download Node.js ↗</a>
+                                <a class="btn btn-ghost" href="https://www.google.com/chrome/" target="_blank" rel="noopener noreferrer">Download Chrome ↗</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-num" aria-hidden="true">2</div>
+                        <div>
+                            <h3>Download DataXtract Mini</h3>
+                            <p>Download the ZIP file, then right-click it and choose <strong>Extract All</strong> (on Mac, just double-click it). You will get a folder named <strong>DataXtract-Mini-main</strong>.</p>
+                            <div class="step-links">
+                                <a class="btn btn-primary" href="https://github.com/99proteam/DataXtract-Mini/archive/refs/heads/main.zip">⬇ Download ZIP</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-num" aria-hidden="true">3</div>
+                        <div>
+                            <h3>Open a terminal in that folder</h3>
+                            <p>A terminal is a window where you type commands. Pick your computer:</p>
+                            <div class="tabs" role="tablist" aria-label="Operating system">
+                                <button class="tab" role="tab" id="tab-win" aria-controls="panel-win" aria-selected="true">Windows</button>
+                                <button class="tab" role="tab" id="tab-mac" aria-controls="panel-mac" aria-selected="false" tabindex="-1">Mac</button>
+                                <button class="tab" role="tab" id="tab-linux" aria-controls="panel-linux" aria-selected="false" tabindex="-1">Linux</button>
+                            </div>
+                            <div class="tab-panel" role="tabpanel" id="panel-win" aria-labelledby="tab-win">
+                                <ol>
+                                    <li>Open the <strong>DataXtract-Mini-main</strong> folder in File Explorer.</li>
+                                    <li>Click the address bar at the top, type <kbd>cmd</kbd> and press <kbd>Enter</kbd>.</li>
+                                    <li>A black window opens, already inside the folder.</li>
+                                </ol>
+                            </div>
+                            <div class="tab-panel" role="tabpanel" id="panel-mac" aria-labelledby="tab-mac" hidden>
+                                <ol>
+                                    <li>Open Finder and find the <strong>DataXtract-Mini-main</strong> folder.</li>
+                                    <li>Right-click the folder and choose <strong>New Terminal at Folder</strong>.</li>
+                                    <li>If you don't see it: open Terminal, type <kbd>cd</kbd> and a space, drag the folder into the window, then press <kbd>Return</kbd>.</li>
+                                </ol>
+                            </div>
+                            <div class="tab-panel" role="tabpanel" id="panel-linux" aria-labelledby="tab-linux" hidden>
+                                <ol>
+                                    <li>Open the <strong>DataXtract-Mini-main</strong> folder in your file manager.</li>
+                                    <li>Right-click inside it and choose <strong>Open in Terminal</strong>.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-num" aria-hidden="true">4</div>
+                        <div>
+                            <h3>Install and start (one command)</h3>
+                            <p>Copy this, paste it into the terminal and press Enter. The first time takes a few minutes while it downloads what it needs.</p>
+                            <div class="code"><code>npm run deploy</code><button class="copy" type="button" data-copy="npm run deploy">Copy</button></div>
+                            <p class="note">Leave this window open while you use the app. Closing it stops DataXtract.</p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-num" aria-hidden="true">5</div>
+                        <div>
+                            <h3>Open the app in your browser</h3>
+                            <p>When the terminal says <strong>Server running</strong>, open this address:</p>
+                            <div class="code"><code>http://127.0.0.1:3007</code><button class="copy" type="button" data-copy="http://127.0.0.1:3007">Copy</button></div>
+                            <p>Click <strong>New Campaign</strong>, enter a search like <em>“cafe in London”</em>, press <strong>Start</strong> and watch the leads come in.</p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-num" aria-hidden="true">↻</div>
+                        <div>
+                            <h3>Next time</h3>
+                            <p>Open a terminal in the same folder (step 3) and run:</p>
+                            <div class="code"><code>npm start</code><button class="copy" type="button" data-copy="npm start">Copy</button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="faq">
+            <div class="wrap">
+                <h2>Common questions</h2>
+                <p class="section-intro">Stuck? These fix most problems.</p>
+                <div class="faq">
+                    <details>
+                        <summary>Do I have to pay for hosting?</summary>
+                        <p>No. DataXtract runs on your own computer, so there is no hosting bill. You only pay if you choose to put it on an online server (around $5–10/month) so it runs 24/7 for other people.</p>
+                    </details>
+                    <details>
+                        <summary>Can I extract real data on this website?</summary>
+                        <p>No. The live demo only shows sample data. Real extraction needs the app installed on your computer (steps above).</p>
+                    </details>
+                    <details>
+                        <summary>“npm is not recognized” or “command not found”</summary>
+                        <p>Node.js is not installed yet, or the terminal was open before you installed it. Install Node.js (step 1), close the terminal, then open a new one (step 3).</p>
+                    </details>
+                    <details>
+                        <summary>“Port 3007 already in use”</summary>
+                        <p>DataXtract is probably already running in another terminal window. Use that one, or close it and run <code>npm start</code> again.</p>
+                    </details>
+                    <details>
+                        <summary>“Could not find Chrome” or the browser does not start</summary>
+                        <p>Install Google Chrome or Microsoft Edge, then run <code>npm start</code> again. If your antivirus blocks Chrome, allow Chrome and Node.js in its settings.</p>
+                    </details>
+                    <details>
+                        <summary>Do I need API keys or accounts?</summary>
+                        <p>Not for basic extraction. Email sending (SMTP), SMS (Twilio), email checking (ZeroBounce), AI and proxies are optional extras you can add later in <strong>Settings</strong>.</p>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <section class="sponsor">
+            <div class="wrap">
+                <h2>Like it? Buy me a coffee ☕</h2>
+                <p>DataXtract Mini is free and built in spare time. A coffee helps keep it updated and adds new features.</p>
+                <a class="btn btn-coffee btn-xl" href="https://buymeacoffee.com/99proteam" target="_blank" rel="noopener noreferrer"><span class="cup" aria-hidden="true">☕</span>Buy me a coffee</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="wrap">
+            <span>DataXtract Mini by 99proteam. Use it responsibly and follow each website's terms.</span>
+            <span><a href="https://github.com/99proteam/DataXtract-Mini" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="app/">Live demo</a> · <a href="https://buymeacoffee.com/99proteam" target="_blank" rel="noopener noreferrer">Buy me a coffee</a></span>
+        </div>
+    </footer>
+
+    <script>
+        document.querySelectorAll('.copy').forEach(button => {
+            button.addEventListener('click', async () => {
+                const text = button.dataset.copy;
+                try {
+                    await navigator.clipboard.writeText(text);
+                } catch (_) {
+                    const field = document.createElement('textarea');
+                    field.value = text;
+                    document.body.appendChild(field);
+                    field.select();
+                    document.execCommand('copy');
+                    field.remove();
+                }
+                button.textContent = 'Copied!';
+                setTimeout(() => { button.textContent = 'Copy'; }, 1600);
+            });
+        });
+
+        const tabs = Array.from(document.querySelectorAll('.tab'));
+        function selectTab(tab) {
+            tabs.forEach(t => {
+                const active = t === tab;
+                t.setAttribute('aria-selected', String(active));
+                t.tabIndex = active ? 0 : -1;
+                document.getElementById(t.getAttribute('aria-controls')).hidden = !active;
+            });
+        }
+        tabs.forEach((tab, i) => {
+            tab.addEventListener('click', () => selectTab(tab));
+            tab.addEventListener('keydown', event => {
+                const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+                if (!step) return;
+                const next = tabs[(i + step + tabs.length) % tabs.length];
+                selectTab(next);
+                next.focus();
+            });
+        });
+        const platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
+        if (/mac/i.test(platform)) selectTab(document.getElementById('tab-mac'));
+        else if (/linux/i.test(platform) && !/android/i.test(navigator.userAgent)) selectTab(document.getElementById('tab-linux'));
+    </script>
+</body>
+
+</html>
