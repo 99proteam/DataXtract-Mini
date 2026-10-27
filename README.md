@@ -35,6 +35,8 @@ The demo runs entirely in your browser with sample data. Create a campaign and p
 
 ## Support the project
 
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/99proteam?label=sponsors&logo=githubsponsors&logoColor=white&color=db61a2)](https://github.com/sponsors/99proteam) **Goal: $5,000/month** · [see live progress](https://github.com/sponsors/99proteam)
+
 If DataXtract Mini is useful to you, please become a sponsor on **[GitHub Sponsors](https://github.com/sponsors/99proteam)**. Our goal is **$5,000 a month** so the project can be maintained full time.
 
 <p>
