@@ -10,7 +10,7 @@
 
     const BASE = (window.__DEMO_BASE__ || '/').replace(/\/+$/, '');
     const HOME = window.__DEMO_HOME__ || '../';
-    const SPONSOR_URL = 'https://buymeacoffee.com/99proteam';
+    const SPONSOR_URL = 'https://github.com/sponsors/99proteam';
     const SELF_HOSTED_ONLY = 'This action needs the self-hosted server. Install DataXtract Mini locally to run it for real.';
     const SECONDS_PER_ITEM = 1.5;
 
@@ -431,7 +431,7 @@
             </div>
             <div class="demo-banner-actions">
                 <a class="demo-banner-github" href="${HOME}#install">How to install (free)</a>
-                <a class="sponsor-button" href="${SPONSOR_URL}" target="_blank" rel="noopener noreferrer"><span class="sponsor-cup" aria-hidden="true">&#9749;</span><span>Buy me a coffee</span></a>
+                <a class="sponsor-button" href="${SPONSOR_URL}" target="_blank" rel="noopener noreferrer"><span class="sponsor-cup" aria-hidden="true">&#128150;</span><span>Sponsor on GitHub</span></a>
             </div>`;
         document.body.appendChild(banner);
     }

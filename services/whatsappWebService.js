@@ -8,6 +8,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
 const { withBrowserExecutable } = require('./browserExecutable');
+const suppression = require('./suppressionService');
 
 // Local session storage directory
 const baseDir = path.join(__dirname, '..');
@@ -466,6 +467,9 @@ async function sendMessage(sessionName, phone, message) {
  * Send bulk messages with session rotation
  */
 async function sendBulkMessages(recipients, messageTemplate, options = {}) {
+    // Never message anyone on the do-not-contact list.
+    const { allowed, suppressed } = suppression.filterRecipients(recipients, 'phone', r => r.phone || r);
+    recipients = allowed;
     const {
         sessionRotation = true,
         delayBetweenMessages = 5000, // 5 seconds default
@@ -549,7 +553,8 @@ async function sendBulkMessages(recipients, messageTemplate, options = {}) {
     const sent = results.filter(r => r.success).length;
     const failed = results.filter(r => !r.success).length;
 
-    return { success: true, sent, failed, results };
+    results.push(...suppressed.map(r => ({ phone: r.phone || r, success: false, skipped: true, reason: 'do-not-contact' })));
+    return { success: true, sent, failed, skipped: suppressed.length, results };
 }
 
 /**

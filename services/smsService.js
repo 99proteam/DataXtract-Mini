@@ -6,6 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const { marketingOps } = require('../config/database');
+const suppression = require('./suppressionService');
 
 const SETTINGS_FILE = path.join(__dirname, '..', 'data', 'settings.json');
 
@@ -70,6 +71,10 @@ async function sendBulkSMS(recipients, messageTemplate, options = {}, onProgress
         onProgress = options;
         options = {};
     }
+
+    // Never text anyone on the do-not-contact list.
+    const { allowed, suppressed } = suppression.filterRecipients(recipients, 'phone', r => r.phone);
+    recipients = allowed;
 
     // Initialize Campaign Log
     let campaignId = null;
@@ -156,7 +161,8 @@ async function sendBulkSMS(recipients, messageTemplate, options = {}, onProgress
         }
     }
 
-    return { sent, failed, results, campaignId };
+    results.push(...suppressed.map(r => ({ ...r, status: 'skipped', reason: 'do-not-contact' })));
+    return { sent, failed, skipped: suppressed.length, results, campaignId };
 }
 
 /**

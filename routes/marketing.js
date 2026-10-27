@@ -51,6 +51,7 @@ router.post('/send-sms', async (req, res) => {
             success: true,
             sent: result.sent,
             failed: result.failed,
+            skipped: result.skipped || 0,
             total: recipients.length,
             results: result.results,
             scheduled: !!scheduleTime
@@ -126,7 +127,9 @@ router.post('/send-email', async (req, res) => {
             trackClicks: trackClicks !== false,
             includeUnsubscribe: includeUnsubscribe !== false,
             priority: priority || 'normal',
-            attachments
+            attachments,
+            // Where recipients can reach the unsubscribe page. Set PUBLIC_URL when this app runs behind a domain.
+            baseUrl: process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`
         };
 
         const result = await emailMarketingService.sendBulkEmail(formattedRecipients, template, options);
@@ -135,6 +138,7 @@ router.post('/send-email', async (req, res) => {
             success: true,
             sent: result.sent,
             failed: result.failed,
+            skipped: result.skipped || 0,
             total: recipients.length,
             results: result.results,
             scheduled: !!scheduleTime

@@ -12,6 +12,41 @@ const { toolsOps } = require('../config/database');
 const { proxyOps } = require('../config/database');
 const { withBrowserExecutable } = require('../services/browserExecutable');
 const { normalizeUrls, parseUploadedList } = require('../services/inputList');
+const { cleanList } = require('../services/listCleaner');
+
+/**
+ * POST /api/tools/clean-list
+ * Body: { text: "CSV or one contact per line" } or { rows: [...] },
+ *       plus { removeInvalid, removeDuplicates, removeSuppressed } (all default true).
+ * Returns stats, a preview of the cleaned rows and the cleaned CSV.
+ */
+router.post('/clean-list', (req, res) => {
+    try {
+        const { text, rows, removeInvalid, removeDuplicates, removeSuppressed } = req.body || {};
+        if (!(typeof text === 'string' && text.trim()) && !Array.isArray(rows)) {
+            return res.status(400).json({ error: 'Paste a CSV or a list of contacts in "text", or send "rows"' });
+        }
+        const result = cleanList(
+            { text, rows },
+            {
+                removeInvalid: removeInvalid !== false,
+                removeDuplicates: removeDuplicates !== false,
+                removeSuppressed: removeSuppressed !== false
+            }
+        );
+        res.json({
+            success: true,
+            columns: result.columns,
+            detected: result.detected,
+            stats: result.stats,
+            preview: result.rows.slice(0, 50),
+            removed: result.removed.slice(0, 50),
+            csv: result.csv
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // Project data directory
 const baseDir = path.join(__dirname, '..');

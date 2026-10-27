@@ -9,6 +9,7 @@ node_modules/
 data/settings.json
 data/ai_settings.json
 data/webshare-proxies.json
+data/unsubscribe.secret
 
 # OS generated files
 .DS_Store

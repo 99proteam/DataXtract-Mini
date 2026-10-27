@@ -124,6 +124,9 @@ app.use('/api/marketing', require('./routes/marketing'));
 app.use('/api/linkedin', require('./routes/linkedin'));
 app.use('/api/tools', require('./routes/tools'));
 app.use('/api/metrics', require('./routes/metrics'));
+app.use('/api/suppression', require('./routes/suppression'));
+// Public unsubscribe page for the links in campaign emails.
+require('./routes/suppression').mountUnsubscribe(app);
 
 app.get('/api/health', (req, res) => {
     res.json({

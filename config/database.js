@@ -208,6 +208,17 @@ db.exec(`
         visitor_id TEXT PRIMARY KEY,
         first_seen DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    -- Do-not-contact list: emails and phone numbers that campaigns must skip.
+    CREATE TABLE IF NOT EXISTS suppression_list (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        channel TEXT NOT NULL, -- 'email' or 'phone'
+        value TEXT NOT NULL, -- normalized: lowercase email, digits-only phone
+        reason TEXT,
+        source TEXT DEFAULT 'manual', -- manual, import, unsubscribe
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(channel, value)
+    );
 `);
 
 // Proxy operations
@@ -611,8 +622,32 @@ SELECT * FROM tools_logs ORDER BY created_at DESC LIMIT 100
     `)
 };
 
+// Do-not-contact (suppression) list operations
+const suppressionOps = {
+    add: db.prepare(`
+        INSERT OR IGNORE INTO suppression_list(channel, value, reason, source)
+        VALUES(?, ?, ?, ?)
+    `),
+    has: db.prepare('SELECT 1 FROM suppression_list WHERE channel = ? AND value = ?'),
+    remove: db.prepare('DELETE FROM suppression_list WHERE id = ?'),
+    list: db.prepare(`
+        SELECT * FROM suppression_list
+        WHERE (@channel IS NULL OR channel = @channel)
+          AND (@search IS NULL OR value LIKE '%' || @search || '%' OR reason LIKE '%' || @search || '%')
+        ORDER BY created_at DESC, id DESC
+        LIMIT @limit OFFSET @offset
+    `),
+    count: db.prepare(`
+        SELECT COUNT(*) AS total FROM suppression_list
+        WHERE (@channel IS NULL OR channel = @channel)
+          AND (@search IS NULL OR value LIKE '%' || @search || '%' OR reason LIKE '%' || @search || '%')
+    `)
+};
+
 module.exports = {
     db,
+    dataDir,
+    suppressionOps,
     campaignOps,
     domainOps,
     resultOps,

@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "node server.js",
     "deploy": "npm install && npm start",
-    "test": "node --test tests/frontend-integrity.test.js tests/browser-executable.test.js tests/integration-status.test.js tests/settings-status-functional.test.js tests/configure-buttons.test.js tests/requested-features.test.js tests/api-smoke.test.js",
+    "test": "node --test tests/compliance.test.js tests/frontend-integrity.test.js tests/browser-executable.test.js tests/integration-status.test.js tests/settings-status-functional.test.js tests/configure-buttons.test.js tests/requested-features.test.js tests/api-smoke.test.js",
     "capture:readme": "node scripts/capture-readme-screenshot.js",
     "build:pages": "node scripts/build-pages.js"
   },
@@ -30,6 +30,16 @@
   "bugs": {
     "url": "https://github.com/99proteam/DataXtract-Mini/issues"
   },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/99proteam"
+    },
+    {
+      "type": "buymeacoffee",
+      "url": "https://buymeacoffee.com/99proteam"
+    }
+  ],
   "engines": {
     "node": ">=18.0.0"
   },

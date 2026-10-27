@@ -83,9 +83,9 @@
                 </nav>
 
                 <!-- Sponsor Button -->
-                <a href="https://buymeacoffee.com/99proteam" class="sponsor-button" target="_blank" rel="noopener noreferrer" title="Support DataXtract on Buy Me a Coffee">
-                    <span class="sponsor-cup" aria-hidden="true">&#9749;</span>
-                    <span class="sponsor-label">Buy me a coffee</span>
+                <a href="https://github.com/sponsors/99proteam" class="sponsor-button" target="_blank" rel="noopener noreferrer" title="Sponsor DataXtract on GitHub Sponsors">
+                    <span class="sponsor-cup" aria-hidden="true">&#128150;</span>
+                    <span class="sponsor-label">Sponsor</span>
                 </a>
 
                 <!-- Action Button (Desktop) -->
@@ -133,9 +133,9 @@
                 </nav>
 
                 <div class="mobile-menu-footer">
-                    <a href="https://buymeacoffee.com/99proteam" class="sponsor-button sponsor-button-block" target="_blank" rel="noopener noreferrer">
-                        <span class="sponsor-cup" aria-hidden="true">&#9749;</span>
-                        <span>Buy me a coffee</span>
+                    <a href="https://github.com/sponsors/99proteam" class="sponsor-button sponsor-button-block" target="_blank" rel="noopener noreferrer">
+                        <span class="sponsor-cup" aria-hidden="true">&#128150;</span>
+                        <span>Sponsor on GitHub</span>
                     </a>
                     <button class="btn-primary w-full btn-new-campaign">
                         Start New Campaign
@@ -842,6 +842,10 @@
                             Leads</button>
                         <button class="tab-btn" onclick="switchMarketingTab('linkedin', this)" style="flex:1;">💼
                             LinkedIn</button>
+                        <button class="tab-btn" onclick="switchMarketingTab('dnc', this)" style="flex:1;">🚫
+                            Do-Not-Contact</button>
+                        <button class="tab-btn" onclick="switchMarketingTab('cleaner', this)" style="flex:1;">🧹
+                            List Cleaner</button>
                     </div>
 
                     <!-- SMS Campaign Tab -->
@@ -1543,6 +1547,71 @@
                                 <span style="color: #22c55e;">✅ Has WhatsApp: <span
                                         id="hasWhatsAppCount">0</span></span> |
                                 <span style="color: #ef4444;">❌ No WhatsApp: <span id="noWhatsAppCount">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Do-Not-Contact Tab -->
+                    <div id="marketingTabDnc" class="marketing-tab-content hidden" style="background: var(--bg-card); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                        <h3 style="margin: 0 0 6px 0;">🚫 Do-Not-Contact List</h3>
+                        <p style="color: var(--text-muted); margin: 0 0 20px 0;">Emails and phone numbers on this list are skipped by every SMS, email and WhatsApp campaign. People who click the unsubscribe link in your emails are added automatically.</p>
+
+                        <div style="padding: 20px; background: var(--bg-tertiary); border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 12px 0;">Add contacts</h4>
+                            <label for="dncInput" style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Emails or phone numbers, one per line (or comma separated)</label>
+                            <textarea id="dncInput" rows="4" placeholder="jane@example.com&#10;+1 555 010 9999" style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; color: inherit; font: inherit;"></textarea>
+                            <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; align-items: center;">
+                                <input id="dncReason" type="text" placeholder="Reason (optional), e.g. Asked by phone" style="flex: 1; min-width: 200px; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; color: inherit; font: inherit;">
+                                <input type="file" id="dncFile" accept=".txt,.csv" aria-label="Import a .txt or .csv file" style="max-width: 220px;">
+                                <button class="btn btn-primary" type="button" onclick="addDoNotContact()">Add to list</button>
+                            </div>
+                            <div id="dncAddResult" style="margin-top: 10px; font-size: 0.85rem; color: var(--text-muted);"></div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+                            <input id="dncSearch" type="search" placeholder="Search…" oninput="loadDoNotContact()" style="flex: 1; min-width: 200px; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; color: inherit; font: inherit;">
+                            <select id="dncChannel" onchange="loadDoNotContact()" style="width: 160px; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; color: inherit; font: inherit;">
+                                <option value="">All</option>
+                                <option value="email">Emails</option>
+                                <option value="phone">Phones</option>
+                            </select>
+                        </div>
+                        <div id="dncSummary" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;"></div>
+                        <div style="overflow-x: auto;">
+                            <table class="results-table" style="width: 100%;">
+                                <thead><tr><th>Contact</th><th>Type</th><th>Reason</th><th>Source</th><th>Added</th><th></th></tr></thead>
+                                <tbody id="dncTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- List Cleaner Tab -->
+                    <div id="marketingTabCleaner" class="marketing-tab-content hidden" style="background: var(--bg-card); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                        <h3 style="margin: 0 0 6px 0;">🧹 List Cleaner</h3>
+                        <p style="color: var(--text-muted); margin: 0 0 20px 0;">Paste or upload a lead list (CSV with an email and/or phone column, or one contact per line). It normalizes emails and phone numbers, removes invalid and duplicate rows, and drops anyone on your Do-Not-Contact list.</p>
+
+                        <div style="padding: 20px; background: var(--bg-tertiary); border-radius: 10px; margin-bottom: 20px;">
+                            <label for="cleanerInput" style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">CSV or list</label>
+                            <textarea id="cleanerInput" rows="8" placeholder="name,email,phone&#10;Jane Doe,Jane@Example.com,+1 555 010 9999" style="width: 100%; padding: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; color: inherit; font: 0.85rem/1.5 monospace;"></textarea>
+                            <div style="display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; align-items: center;">
+                                <input type="file" id="cleanerFile" accept=".csv,.txt" aria-label="Load a .csv or .txt file">
+                                <label><input type="checkbox" id="cleanerInvalid" checked> Remove invalid</label>
+                                <label><input type="checkbox" id="cleanerDuplicates" checked> Remove duplicates</label>
+                                <label><input type="checkbox" id="cleanerSuppressed" checked> Remove do-not-contact</label>
+                                <button class="btn btn-primary" type="button" onclick="runListCleaner()">Clean list</button>
+                            </div>
+                        </div>
+                        <div id="cleanerResult" class="hidden">
+                            <div id="cleanerStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 16px;"></div>
+                            <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+                                <button class="btn btn-primary" type="button" onclick="downloadCleanedList()">⬇ Download clean CSV</button>
+                                <span id="cleanerDetected" style="font-size: 0.85rem; color: var(--text-muted); align-self: center;"></span>
+                            </div>
+                            <div style="overflow-x: auto;">
+                                <table class="results-table" style="width: 100%;">
+                                    <thead id="cleanerPreviewHead"></thead>
+                                    <tbody id="cleanerPreviewBody"></tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -2724,6 +2793,7 @@ host:port"></textarea>
 
 
         <script src="/js/app.js"></script>
+        <script src="/js/compliance.js"></script>
 </body>
 
 </html>

@@ -14,7 +14,7 @@
 <p align="center">
   <a href="https://99proteam.github.io/DataXtract-Mini/"><img src="https://img.shields.io/badge/%E2%96%B6%20Live%20Demo-Try%20it%20in%20your%20browser-22c55e?style=for-the-badge" alt="Open the live demo" height="48"></a>
   &nbsp;
-  <a href="https://buymeacoffee.com/99proteam"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" height="60"></a>
+  <a href="https://github.com/sponsors/99proteam"><img src="https://img.shields.io/badge/%F0%9F%92%96%20Sponsor%20on%20GitHub-Goal%20%245k%2Fmonth-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor on GitHub" height="48"></a>
 </p>
 
 **DataXtract Mini** is a self-hosted Node.js toolkit for turning public web and map data into structured, exportable leads. It combines Google Maps and domain extraction, lead verification, bulk screenshots, code download, authorized traffic testing, and authenticated outreach integrations in one local dashboard.
@@ -35,11 +35,13 @@ The demo runs entirely in your browser with sample data. Create a campaign and p
 
 ## Support the project
 
-If DataXtract Mini is useful to you, you can support its development:
+If DataXtract Mini is useful to you, please become a sponsor on **[GitHub Sponsors](https://github.com/sponsors/99proteam)**. Our goal is **$5,000 a month** so the project can be maintained full time.
 
 <p>
-  <a href="https://buymeacoffee.com/99proteam"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" height="60"></a>
+  <a href="https://github.com/sponsors/99proteam"><img src="https://img.shields.io/badge/%F0%9F%92%96%20Sponsor%20on%20GitHub-Goal%20%245k%2Fmonth-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor on GitHub" height="48"></a>
 </p>
+
+One-off support is welcome too on [Buy Me a Coffee](https://buymeacoffee.com/99proteam).
 
 ## Feature highlights
 
@@ -168,6 +170,16 @@ MX email verification works without an API key. ZeroBounce requires its API key.
 3. Add the subject, HTML/text content, sender details, and attachments.
 4. Send a test email first.
 5. Start the campaign and review the results.
+
+### Do-Not-Contact list
+
+Open **Marketing → Do-Not-Contact** to keep a list of emails and phone numbers that must never be messaged. Every SMS, email and WhatsApp campaign skips them automatically and reports them as *skipped*. Add contacts one per line, paste a list, or import a `.txt`/`.csv` file.
+
+Email campaigns include a signed **Unsubscribe** link (and `List-Unsubscribe` headers for one-click unsubscribe in Gmail, Outlook and Apple Mail). When a reader confirms, their address is added to the list. The link points at this app, so when you run it on a server, set `PUBLIC_URL` (for example `https://leads.example.com`) in `.env` so the link works outside your machine.
+
+### List Cleaner
+
+Open **Marketing → List Cleaner** and paste or upload a lead list: a CSV with an email and/or phone column, or one contact per line. It lowercases emails, normalizes phone numbers, removes invalid and duplicate rows, drops anyone on the Do-Not-Contact list, and gives you a clean CSV to download. Each step can be switched off.
 
 ### WhatsApp Web
 

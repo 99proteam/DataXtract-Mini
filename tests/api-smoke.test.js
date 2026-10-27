@@ -84,3 +84,74 @@ test('representative validation and missing-resource failures are stable', async
     });
     assert.equal(invalidVisitor.status, 400);
 });
+
+const postJson = (route, body) => fetch(`${baseUrl}${route}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body)
+});
+
+test('do-not-contact list can be added to, searched and cleared', async () => {
+    const added = await postJson('/api/suppression', { text: 'one@example.com\n+1 555 010 4444\nnope', reason: 'asked us' });
+    assert.equal(added.status, 200);
+    const result = await added.json();
+    assert.equal(result.added, 2);
+    assert.equal(result.invalidCount, 1);
+
+    const list = await (await fetch(`${baseUrl}/api/suppression?channel=phone`)).json();
+    assert.equal(list.total, 1);
+    assert.equal(list.items[0].value, '15550104444');
+    assert.equal(list.items[0].reason, 'asked us');
+
+    const check = await (await postJson('/api/suppression/check', { values: ['ONE@example.com', 'two@example.com'] })).json();
+    assert.deepEqual(check.suppressed, ['ONE@example.com']);
+
+    const removed = await fetch(`${baseUrl}/api/suppression/${list.items[0].id}`, { method: 'DELETE' });
+    assert.equal(removed.status, 200);
+    assert.equal((await fetch(`${baseUrl}/api/suppression/${list.items[0].id}`, { method: 'DELETE' })).status, 404);
+    assert.equal((await postJson('/api/suppression', { text: '' })).status, 400);
+});
+
+test('unsubscribe links only act on POST and only with a valid token', async () => {
+    // A bad token is rejected (this also makes the server create its signing secret).
+    const invalid = await fetch(`${baseUrl}/unsubscribe?e=reader%40example.com&t=forged`);
+    assert.equal(invalid.status, 400);
+
+    // The server signs links with the secret it keeps in its data folder.
+    const secret = fs.readFileSync(path.join(tempDir, 'unsubscribe.secret'), 'utf8').trim();
+    const token = require('node:crypto')
+        .createHmac('sha256', secret)
+        .update('unsubscribe:reader@example.com')
+        .digest('base64url')
+        .slice(0, 32);
+    const query = `e=${encodeURIComponent('reader@example.com')}&t=${token}`;
+
+    const confirm = await fetch(`${baseUrl}/unsubscribe?${query}`);
+    assert.equal(confirm.status, 200);
+    assert.match(await confirm.text(), /<form method="post"/);
+    let list = await (await fetch(`${baseUrl}/api/suppression?q=reader`)).json();
+    assert.equal(list.total, 0, 'opening the link must not unsubscribe');
+
+    const tampered = await fetch(`${baseUrl}/unsubscribe?e=other%40example.com&t=${token}`, { method: 'POST' });
+    assert.equal(tampered.status, 400);
+
+    // RFC 8058 one-click: mail clients POST to the List-Unsubscribe URL.
+    const oneClick = await fetch(`${baseUrl}/unsubscribe?${query}`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: 'List-Unsubscribe=One-Click'
+    });
+    assert.equal(oneClick.status, 200);
+    list = await (await fetch(`${baseUrl}/api/suppression?q=reader`)).json();
+    assert.equal(list.total, 1);
+    assert.equal(list.items[0].source, 'unsubscribe');
+});
+
+test('list cleaner returns stats, a preview and a clean CSV', async () => {
+    const response = await postJson('/api/tools/clean-list', { text: 'email\nA@x.io\na@x.io\nbad' });
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.deepEqual(body.stats, { input: 3, invalid: 1, duplicates: 1, suppressed: 0, output: 1 });
+    assert.equal(body.csv, 'email\r\na@x.io\r\n');
+    assert.equal((await postJson('/api/tools/clean-list', {})).status, 400);
+});

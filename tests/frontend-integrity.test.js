@@ -6,6 +6,10 @@ const assert = require('node:assert/strict');
 const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'public', 'index.html'), 'utf8');
 const app = fs.readFileSync(path.join(root, 'public', 'js', 'app.js'), 'utf8');
+// Every script the page loads, so handlers defined outside app.js count too.
+const pageScripts = [...html.matchAll(/<script src="\/(js\/[\w.-]+\.js)"><\/script>/g)]
+    .map(match => fs.readFileSync(path.join(root, 'public', match[1]), 'utf8'))
+    .join('\n');
 
 function count(pattern, source = app) {
     return [...source.matchAll(pattern)].length;
@@ -17,7 +21,7 @@ test('every inline click handler has a JavaScript implementation', () => {
     const missing = [...new Set(handlers)].filter(name => {
         const declaration = new RegExp(`(?:async\\s+)?function\\s+${name}\\s*\\(`);
         const assignment = new RegExp(`window\\.${name}\\s*=`);
-        return !declaration.test(app) && !assignment.test(app);
+        return !declaration.test(pageScripts) && !assignment.test(pageScripts);
     });
 
     assert.deepEqual(missing, []);

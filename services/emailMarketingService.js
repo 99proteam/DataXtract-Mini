@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const { marketingOps } = require('../config/database');
+const suppression = require('./suppressionService');
 
 const SETTINGS_FILE = path.join(__dirname, '..', 'data', 'settings.json');
 
@@ -65,7 +66,7 @@ function createTransporter() {
  * @param {string} options.text - Plain text content (optional)
  * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
  */
-async function sendEmail({ to, subject, html, text }) {
+async function sendEmail({ to, subject, html, text, headers }) {
     const configurationError = getConfigurationError();
     if (configurationError) return { success: false, error: configurationError };
     const settings = loadSettings();
@@ -78,7 +79,8 @@ async function sendEmail({ to, subject, html, text }) {
             to,
             subject,
             html,
-            text: text || html.replace(/<[^>]*>/g, '')
+            text: text || html.replace(/<[^>]*>/g, ''),
+            ...(headers ? { headers } : {})
         });
 
         return { success: true, messageId: result.messageId };
@@ -103,6 +105,10 @@ async function sendBulkEmail(recipients, template, options = {}, onProgress = nu
         onProgress = options;
         options = {};
     }
+
+    // Never email anyone on the do-not-contact list.
+    const { allowed, suppressed } = suppression.filterRecipients(recipients, 'email', r => r.email);
+    recipients = allowed;
 
     // Initialize Campaign Log
     let campaignId = null;
@@ -141,10 +147,25 @@ async function sendBulkEmail(recipients, template, options = {}, onProgress = nu
             html = html.replace(new RegExp(key, 'gi'), value);
         });
 
+        // Signed one-click unsubscribe link (needs to know where this app is reachable).
+        let headers;
+        if (options.includeUnsubscribe !== false && options.baseUrl) {
+            const url = suppression.unsubscribeUrl(options.baseUrl, recipient.email);
+            if (/\{\{unsubscribe_url\}\}/i.test(html)) {
+                html = html.replace(/\{\{unsubscribe_url\}\}/gi, url);
+            } else {
+                html += `<p style="font-size:12px;color:#6b7280;margin-top:24px;">Don't want these emails? <a href="${url}">Unsubscribe</a></p>`;
+            }
+            headers = { 'List-Unsubscribe': `<${url}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' };
+        } else {
+            html = html.replace(/<a[^>]*href="\{\{unsubscribe_url\}\}"[^>]*>.*?<\/a>/gi, '');
+        }
+
         const result = await sendEmail({
             to: recipient.email,
             subject,
-            html
+            html,
+            headers
         });
 
         // Log individual result
@@ -202,7 +223,8 @@ async function sendBulkEmail(recipients, template, options = {}, onProgress = nu
         }
     }
 
-    return { sent, failed, results, campaignId };
+    results.push(...suppressed.map(r => ({ ...r, status: 'skipped', reason: 'do-not-contact' })));
+    return { sent, failed, skipped: suppressed.length, results, campaignId };
 }
 
 /**
